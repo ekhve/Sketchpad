@@ -1,0 +1,22 @@
+{
+  "name": "sketchpad",
+  "private": true,
+  "description": "A phone-first piano sketchpad: keys, chords, scales, loops and short lessons played on the piano.",
+  "type": "module",
+  "scripts": {
+    "test": "node tools/extract-theory.mjs sketchpad.jsx tests/theory.mjs && node --test tests/*.test.mjs",
+    "mutate": "node tools/mutate.mjs",
+    "check": "node tools/check-done.mjs",
+    "build": "node tools/build-app.mjs",
+    "site": "node tools/build-app.mjs && node tools/package-site.mjs build/sketchpad-app.html site/ dist/"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^3.4.19"
+  }
+}
