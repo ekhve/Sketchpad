@@ -94,7 +94,7 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 | 5 | Looks at the key | The likely key, how many chords fit it, and the runner-up |
 | 6 | Plays the progression back | Undo, Clear and Play, through the piano or a pad sound |
 
-**Status:** engine and prototype screens (`proto/j6/explore.svg`) built and tested. The page itself is next.
+**Status:** built (`D-087`), at `j6/` on the site, with a KEY control and the J-6's 4 transcribed sets. Not yet: the other 96 sets (`D-082`), and reading the hardware over MIDI.
 
 ### UC-65 — J-6 Find: how do I play this on the J-6?
 
@@ -106,7 +106,7 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 | 4 | Follows the steps on the hardware | Select the set, set KEY, play the keys |
 | 5 | Compares other sets | Each with its score and the reason it ranks lower |
 
-**Status:** engine and prototype screens (`proto/j6/find.svg`) built and tested. The page itself is next.
+**Status:** built (`D-087`), at `j6/` on the site. It ranks over the 3 transcribed sets that pass validation; set 59 is left out and the page says why.
 
 ---
 

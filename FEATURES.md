@@ -1,6 +1,6 @@
 # Sketchpad — Feature Status
 
-**Updated:** 2026-10-01 · **Version:** working build, packaged as an installable site
+**Updated:** 2026-10-06 · **Version:** working build, packaged as an installable site
 
 Tracked against the original development order. Status is one of:
 
@@ -199,6 +199,18 @@ Not in the original plan. Each earned its place.
 
 ---
 
+## J-6 Explorer — a second app (`D-079`–`D-087`)
+
+| Feature | Status | Notes |
+|---|---|---|
+| Explore: what the J-6 is playing | **Done** | Virtual J-6 with every pad's chord, played order, chord, numeral, notes, voicing, piano, likely key, progression (`UC-64`) |
+| Find: how to play a progression on the J-6 | **Done** | Exact or musical matching, KEY transpose, keys to press, other sets with reasons (`UC-65`) |
+| Data validated before use | **Done** | A set whose printed voicings contradict their labels is flagged and never recommended (`D-082`) |
+| Key-aware spelling | **Done** | Sketchpad's theory: F#m7 in D major, B♭maj7 in F (`D-086`) |
+| Installable at `j6/` | **Done** | Its own icon, name and offline cache (`D-087`) |
+| All 100 chord sets | **Partial** | 4 transcribed (29, 47, 54, 59). The rest need the manual's chord list or a MIDI capture (`D-082`) |
+| KEY range, direction and high C checked on a J-6 | **Open** | Manual scenarios; assumptions shown on the page until then |
+
 ## Known gaps and rough edges
 
 | Gap | Impact | Plan |
@@ -220,6 +232,6 @@ Anything marked **Done** should be findable in `sketchpad.feature` and, unless i
 node tools/check-done.mjs
 ```
 
-Current: 414 automated checks, 166/166 mutants killed, 15/15 gates, 504 scenarios.
+Current: 429 automated checks, 175/175 mutants killed, 15/15 gates.
 
 If a feature is listed **Done** here but has no scenario, this document is wrong — trust the feature file.

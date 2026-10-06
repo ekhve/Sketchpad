@@ -8,7 +8,7 @@
     "mutate": "node tools/mutate.mjs",
     "check": "node tools/check-done.mjs",
     "build": "node tools/build-app.mjs",
-    "site": "node tools/build-app.mjs && node tools/package-site.mjs build/sketchpad-app.html site/ dist/"
+    "site": "node tools/build-app.mjs && node tools/package-site.mjs build/sketchpad-app.html site/ dist/ && node tools/package-site.mjs build/j6-app.html site/j6/ dist/j6/ j6"
   },
   "dependencies": {
     "react": "^18.3.1",

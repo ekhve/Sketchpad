@@ -181,6 +181,21 @@ New. The lessons listen to what you play, so play them for real rather than read
 
 ---
 
+## Part 8 — J-6 Explorer, next to the J-6 (6 min)
+
+Open the site's **j6/** link (or "J-6 Explorer" from the home screen). Put the phone on the desk beside the J-6.
+
+| # | Do | Expect |
+|---|---|---|
+| 8.1 | Add **j6/** to the home screen and open it; then flight mode, close, open again | Its own icon (a black J-6 with one amber pad), full screen, works offline. Sketchpad's icon still works offline too |
+| 8.2 | Without picking the phone up, read the chord names on the pads | Every pad's chord is readable at arm's length (*The pad labels are readable at arm's length beside the hardware*) |
+| 8.3 | On set 54, tap C, C♯, G, D♯ | Numbers 1–4 on the pads; the latest has a white outline as well as the brightest colour, so you can tell it apart without colour. Now: Fmaj7, IVmaj7 in C major |
+| 8.4 | On the J-6: set 47, KEY −3, press A | It plays **G7** (G B D F). If not, the KEY direction is backwards: report it (*The KEY direction and range match the hardware*) |
+| 8.5 | Turn KEY as far as it goes both ways | Write down the lowest and highest values. The app assumes −6 and +5 |
+| 8.6 | On the J-6, press the 8th lower pad (high C) | Same chord as C? (*The high C pad plays the C chord*) |
+| 8.7 | In **Find**, type your own progression | Each chord gets a ✓ or a reason; the best set and KEY; ▶ Hear it plays it |
+| 8.8 | Switch Sound between Piano and Pad; tap **← Sketchpad** | Both sounds work; Sketchpad opens (*The J-6 Explorer installs from its link and works beside the J-6*) |
+
 ## What to report back
 
 Ranked by how much it helps me:

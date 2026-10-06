@@ -5022,3 +5022,9 @@ export default function App() {
     </div>
   );
 }
+
+/* For the J-6 Explorer page (j6/app.jsx): it reuses the piano, the sound, the
+   colour tokens and the theory from here, imported rather than copied, so
+   there is one of each. Its engine's theory import is pointed at this file
+   when the page is bundled. (D-086) */
+export { T, Piano, useInstrument, pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, spelling, scalePcs, romanFor };

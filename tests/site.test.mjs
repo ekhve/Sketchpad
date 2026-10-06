@@ -11,7 +11,9 @@ import * as site from "../tools/package-site.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const iconDir = join(here, "..", "site");
-const icons = Object.fromEntries(readdirSync(iconDir).filter((f) => f.endsWith(".png")).map((f) => [f, readFileSync(join(iconDir, f))]));
+const iconsIn = (dir) => Object.fromEntries(readdirSync(dir).filter((f) => f.endsWith(".png")).map((f) => [f, readFileSync(join(dir, f))]));
+const icons = iconsIn(iconDir);
+const j6Icons = iconsIn(join(iconDir, "j6"));
 const APP = `<!doctype html><html><head><meta charset=utf8></head><body><div id="root"></div><script>app()</script></body></html>`;
 
 /* A browser, as far as a service worker can see one. */
@@ -151,5 +153,48 @@ describe("Feature: Sketchpad installs as an app and works offline", () => {
     assert.ok(!b.caches.has(versionOf(v1.files["sw.js"])), "the old version's cache is deleted");
     assert.ok(b.caches.has(versionOf(v2.files["sw.js"])), "the new one stays");
     assert.ok(b.caches.has("someone-elses-cache"), "caches that are not Sketchpad's are left alone");
+  });
+});
+
+describe("Feature: The J-6 Explorer installs as its own app", () => {
+  const j6 = (html = APP) => site.packageSite(html, j6Icons, site.SITES.j6);
+
+  test("The J-6 Explorer installs as its own app next to Sketchpad", () => {
+    const m = JSON.parse(site.manifest(site.SITES.j6));
+    assert.equal(m.name, "J-6 Explorer");
+    assert.equal(m.display, "standalone");
+    assert.equal(m.start_url, "./", "opens at its own folder, j6/");
+    assert.equal(m.scope, "./", "and stays in it, so it is a separate app from Sketchpad");
+    const { files } = j6();
+    const head = files["index.html"].slice(0, files["index.html"].indexOf("</head>"));
+    assert.ok(head.includes('name="apple-mobile-web-app-title" content="J-6 Explorer"'), "its own name on the home screen");
+    for (const size of [180, 192, 512]) {
+      const png = files[site.iconName(size)];
+      assert.equal(png.readUInt32BE(16), size, `its own ${site.iconName(size)} is ${size} pixels wide`);
+      assert.notDeepEqual(png, icons[site.iconName(size)], "and is not Sketchpad's icon");
+    }
+    assert.ok(versionOf(files["sw.js"]).startsWith("j6-explorer-"));
+    assert.ok(!site.SITES.j6.cachePrefix.startsWith(site.SITES.sketchpad.cachePrefix)
+           && !site.SITES.sketchpad.cachePrefix.startsWith(site.SITES.j6.cachePrefix), "neither prefix contains the other");
+  });
+
+  test("Updating one app never clears the other's offline copy", async () => {
+    const sp1 = deploy(), sp2 = deploy(APP.replace("app()", "app(2)"));
+    const j1 = j6(), j2 = j6(APP.replace("app()", "j6(2)"));
+    const b = browser({ server: sp1.files });
+    b.load(sp1.files["sw.js"]); await b.install(); await b.activate();
+    b.net.server = j1.files;
+    b.load(j1.files["sw.js"]); await b.install(); await b.activate();
+    assert.ok(b.caches.has(versionOf(sp1.files["sw.js"])), "installing the J-6 Explorer keeps Sketchpad's cache");
+
+    b.net.server = sp2.files;
+    b.load(sp2.files["sw.js"]); await b.install(); await b.activate();
+    assert.ok(b.caches.has(versionOf(j1.files["sw.js"])), "a new Sketchpad keeps the J-6 Explorer's cache");
+    assert.ok(!b.caches.has(versionOf(sp1.files["sw.js"])), "and clears its own old one");
+
+    b.net.server = j2.files;
+    b.load(j2.files["sw.js"]); await b.install(); await b.activate();
+    assert.ok(b.caches.has(versionOf(sp2.files["sw.js"])), "a new J-6 Explorer keeps Sketchpad's cache");
+    assert.ok(!b.caches.has(versionOf(j1.files["sw.js"])), "and clears its own old one");
   });
 });

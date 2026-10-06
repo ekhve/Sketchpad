@@ -3177,3 +3177,30 @@ Feature: J-6 Find — how do I play this on the J-6?
     Given any chord set
     When the 8th lower pad is pressed
     Then it plays the same chord as C
+
+Feature: The J-6 Explorer installs as its own app
+  The J-6 Explorer is published with Sketchpad, at j6/, as a second
+  installable app: its own name, icon and offline copy, linked back to
+  Sketchpad. (D-087, UC-64, UC-65)
+
+  @D-087 @auto
+  Scenario: The J-6 Explorer installs as its own app next to Sketchpad
+    Given the packaged J-6 Explorer site
+    Then its manifest names it J-6 Explorer and keeps it to its own folder
+    And it has its own home-screen title and icons, at the sizes they claim
+    And its offline cache has its own name
+
+  @D-087 @auto
+  Scenario: Updating one app never clears the other's offline copy
+    Given both apps installed on one device
+    When a new version of either is opened
+    Then its own old cache is cleared
+    And the other app's cache is left alone
+
+  @D-087 @manual
+  Scenario: The J-6 Explorer installs from its link and works beside the J-6
+    Given the site's j6/ link opened in Safari on an iPhone
+    When I add it to the home screen and open it once with a network
+    Then it opens full screen as J-6 Explorer with its own icon, and works in flight mode
+    And Explore, Find, the piano and both sounds work with the phone on the desk next to the J-6
+    And "← Sketchpad" opens Sketchpad

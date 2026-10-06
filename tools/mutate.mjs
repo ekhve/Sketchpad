@@ -183,6 +183,9 @@ const OTHER_MUTANTS = [
   ["old versions are never deleted",        '.filter((k) => k.startsWith(${JSON.stringify(CACHE_PREFIX)}) && k !== VERSION)', '.filter((k) => false)'],
   ["updates delete other sites' caches",    '.filter((k) => k.startsWith(${JSON.stringify(CACHE_PREFIX)}) && k !== VERSION)', '.filter((k) => k !== VERSION)'],
   ["offline requests go to the network",    '.then((hit) => hit || fetch(event.request)));', '.then(() => fetch(event.request)));'],
+  // D-087: two apps on one site
+  ["the J-6 app shares Sketchpad's cache",  'cachePrefix: "j6-explorer-",', 'cachePrefix: "sketchpad-",'],
+  ["the J-6 app installs as Sketchpad",     'j6: { name: "J-6 Explorer",', 'j6: { name: "Sketchpad",'],
 ].map(([name, from, to]) => [name, from, to, "tools/package-site.mjs"]);
 
 /* The J-6 Explorer's engine (D-079–D-086). */

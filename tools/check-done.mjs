@@ -123,9 +123,14 @@ const literals = [...componentCode.matchAll(/#[0-9A-Fa-f]{6}\b/g)].map((m) => m[
    the allow-list exists only for values that are structural rather than
    palette choices. When this list grows, that is the smell, not the fix. */
 const allowed = new Set([]);
-const strays = [...new Set(literals)].filter((c) => !allowed.has(c));
+/* The J-6 Explorer page keeps its extra roles in its own token block, J,
+   which spreads Sketchpad's T; below that block the same rule holds. (D-087) */
+const j6Page = read("j6/app.jsx") ?? "";
+const j6Components = j6Page.includes("const J = {") ? j6Page.slice(j6Page.indexOf("const J = {")).split("\n};").slice(1).join("\n};") : j6Page;
+const j6Literals = [...j6Components.matchAll(/#[0-9A-Fa-f]{6}\b/g)].map((m) => m[0]);
+const strays = [...new Set([...literals, ...j6Literals])].filter((c) => !allowed.has(c));
 gate("G8", "No stray colour literals in components", strays.length === 0,
-  strays.length ? strays.join(", ") : `${literals.length} literals, all on the allow-list`);
+  strays.length ? strays.join(", ") : `${literals.length + j6Literals.length} literals, all on the allow-list`);
 
 /* ---------- G9: the change log was updated today ---------- */
 const today = new Date().toISOString().slice(0, 10);

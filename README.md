@@ -13,6 +13,7 @@ built into one self-contained HTML page, installable to the home screen.
 | `FEATURES.md`, `PLAYTEST.md`, `DONE.md` | Status, the manual test script, the definition of done |
 | `tests/`, `tools/` | Tests, mutation testing, the DoD gates, the build |
 | `site/`, `proto/` | App icons; prototypes agreed before building |
+| `j6/` | The **J-6 Explorer**, a second app for the Roland J-6: `j6.mjs` (engine, set data, search), `app.jsx` (the page). It shares Sketchpad's theory, piano and sound (`D-086`, `D-087`) |
 
 # Running the tests
 
@@ -36,7 +37,8 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 | Suite | Checks | What it protects |
 |---|---|---|
 | `theory.test.mjs` | 402 | Scales, chords, analysis, figures, key roles, naming, lessons, typed chord names |
-| `site.test.mjs` | 6 | The installable site: manifest, iOS tags, offline cache, updates (`D-076`) |
+| `j6.test.mjs` | 13 | J-6 Explorer: data validation, spelling, numerals, key, transpose, search |
+| `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
 
 Scenarios tagged `@manual` in `sketchpad.feature` cover sound, timing and
@@ -46,13 +48,13 @@ legibility. Those cannot be asserted here and are checked by hand on a phone.
 
 Passing tests prove nothing until you've seen them fail. `tools/mutate.mjs`
 breaks the theory on purpose — one change at a time — and reports whether the
-suite noticed. **85 mutants, 14 killed.** Two of those mutants only die because
+suite noticed. **175 mutants, all killed.** Two of those mutants only die because
 of tests written specifically after an earlier run found them surviving.
 
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 414 automated checks, all passing.
+Current state: 429 automated checks, all passing.
 
 ## Before calling anything done
 
@@ -75,13 +77,14 @@ a website, because iOS will not run a downloaded HTML file.
 ```bash
 npm install
 npm run build     # build/sketchpad-app.html, the whole app in one file
-npm run site      # dist/, the installable site: index.html, sw.js, manifest, icons
+npm run site      # dist/, the installable site: index.html, sw.js, manifest, icons; J-6 Explorer in dist/j6/
 ```
 
 **Publish it with GitHub Pages.** `.github/workflows/pages.yml` runs the tests,
 builds the site and publishes it on every push to `main`. Once, in the
 repository on github.com: Settings → Pages → Source: **GitHub Actions**. The
-site is then at `https://<user>.github.io/sketchpad/`.
+site is then at `https://<user>.github.io/<repo>/`, and the J-6 Explorer at
+`https://<user>.github.io/<repo>/j6/`.
 
 On a free GitHub plan, Pages needs the repository to be **public**.
 

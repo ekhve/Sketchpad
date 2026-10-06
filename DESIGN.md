@@ -532,6 +532,14 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **Decision.** Every set runs through `validateSet` before search, and a set that fails is never recommended. Errors in the manual are recorded, not silently corrected. This is also the strongest argument for capturing the voicings from the device over MIDI rather than trusting the PDF.
 
+**Known errors in the manual's chord list.** Recorded here rather than corrected in the data:
+
+| Set | Key | Printed | Problem | Status |
+|---|---|---|---|---|
+| 59 (EDM) | all 12 | e.g. C♯: "C6" as F♯ B E D♯ | Voicings contradict their labels on every key; they look like set 60's | In the data; flagged by `validateSet`, and a test pins it |
+| 19 | — | `F#FM7` | A typo in a label | Reported by the prototype session; set 19 is not transcribed yet |
+| 43 | F | F3 twice in one chord | A duplicated note | Reported by the prototype session; set 43 is not transcribed yet |
+
 **On `D-014`.** Sketchpad's own chord sets stay its own content. The J-6 Explorer exists to explain one instrument the owner has, so it has to carry that instrument's chord table. It is reference data about the hardware, kept in `j6/` and never mixed into Sketchpad's sets.
 
 ### D-083 — J-6: the 8th lower pad is the high C (formerly D-J05)
@@ -561,6 +569,20 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 3. **Not chosen: moving the theory to its own module** that `sketchpad.jsx` imports. It would have been the tidier end state, but it would move 2,800 lines out of the app and change the extraction, every gate that reads the block (G6, G7), and the mutator's target, all in a step meant to add a page. It is worth doing on its own, as a refactor whose only test is that nothing else changes.
 
 What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole chord dictionary and its aliases, and numerals for chords outside the key (♭VII7 rather than nothing). Without a key, black keys are still spelled as flats, as `D-079` says.
+
+### D-087 — The J-6 Explorer is a second app on the same site
+
+**Context.** The owner decided the J-6 Explorer lives in this repository as its own page, not inside `sketchpad.jsx`. It has to reach the same phones the same way Sketchpad does (`D-076`): from a link, installed to the home screen, working offline beside the hardware.
+
+**Decision.**
+
+1. **Built like Sketchpad.** `tools/build-app.mjs` builds both pages into single HTML files, `build/sketchpad-app.html` and `build/j6-app.html`. The J-6 page reuses Sketchpad's piano, its sound (the recorded grand piano and the warm pad) and its colour tokens, imported from `sketchpad.jsx` rather than copied (`D-086`).
+2. **Published at `j6/`, as its own app.** `tools/package-site.mjs` packages each page with its own manifest, home-screen title and icon (`site/j6/`), and its own offline cache. The J-6 cache is named `j6-explorer-…`, Sketchpad's `sketchpad-…`, and each app's update only deletes its own old caches, so updating one never empties the other's offline copy. The J-6 service worker's scope is `j6/`, which takes precedence over Sketchpad's for that folder.
+3. **Its own tokens extend Sketchpad's.** The J-6's black panel, LED and pads are new roles in a token block `J`, which spreads `T`. Below that block the colour gate applies as it does in `sketchpad.jsx` (G8 now reads both files).
+4. **Linked one way for now.** The J-6 page links back to Sketchpad. Sketchpad has no link to the J-6 yet, because the handover's first rule was not to touch Sketchpad's UI. One line in its How to use tab would do it, once the owner agrees.
+5. **The assumptions stay on screen.** Until they are checked on a J-6, the page says that the KEY range (−6 to +5), its direction, and the high C pad are assumptions (`D-081`, `D-083`), and how many of the 100 sets it carries.
+
+**What it does not do.** It carries 4 of the J-6's 100 sets. The rest wait on a transcription of the manual's chord list (`D-082`). It does not talk to the J-6 over MIDI, so it can't know which set or KEY the hardware is on, or hear what was played.
 
 ## 5. What this project has taught, so far
 
@@ -654,6 +676,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-05 | The build moved into the repository: `npm run build` and `npm run site` make the app and the installable site from the code alone, and a GitHub Actions workflow tests and publishes to Pages on every push (`D-076`) |
 | 2026-10-06 | J-6 Explorer moved into the repository as a second app: its engine in `j6/`, its 12 tests in the suite, its prototype in `proto/j6/`, and its 15 scenarios in `sketchpad.feature` (`D-085`). The prototype's decisions are numbered `D-079`–`D-084`, and its two workflows are `UC-64` (Explore) and `UC-65` (Find). 426 checks |
 | 2026-10-06 | J-6 shares Sketchpad's theory (`D-086`): its chord names, numerals and key detection now come from the theory layer, so chords are spelled the way their key writes them (F#m7 in D major, not G♭m7). Seven J-6 mutants added to the mutator |
+| 2026-10-06 | The J-6 Explorer page (`D-087`, `UC-64`, `UC-65`): Explore and Find screens built from the agreed prototype, reusing Sketchpad's piano, sound and colour tokens, and published at `j6/` as a second installable app with its own icon and offline cache. G8 now also reads the J-6 page. 429 checks |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

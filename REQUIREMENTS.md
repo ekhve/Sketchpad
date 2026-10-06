@@ -536,6 +536,16 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-359 | The J-6 prototype screens are generated from the engine and never edited by hand. | D-084 | I | `proto/j6/build-prototype.mjs` |
 | R-360 | The J-6 scenarios live in `sketchpad.feature`, and the traceability test covers the J-6 tests. | D-085 | A | *(traceability.test.mjs)* |
 
+## 10z. J-6 Explorer on the site
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-363 | The J-6 Explorer is published at `j6/` with its own manifest, name, home-screen title and icons, kept to its own folder. | D-087 | A | The J-6 Explorer installs as its own app next to Sketchpad |
+| R-364 | Each app's offline cache has its own name, and updating either app deletes only its own old caches. | D-087 | A | Updating one app never clears the other's offline copy |
+| R-365 | The J-6 Explorer installs on an iPhone from its link, opens full screen, works offline, and links back to Sketchpad. | D-087, UC-64, UC-65 | M | The J-6 Explorer installs from its link and works beside the J-6 |
+| R-366 | The J-6 page reuses Sketchpad's piano, sound and colour tokens rather than defining its own; its extra colour roles are tokens, and no literal colour appears below its token block. | D-087, D-018 | I | `j6/app.jsx`, and G8 in `check-done` |
+| R-367 | Until checked on a J-6, the page states the KEY range and direction and the high C behaviour as assumptions, and says how many sets it carries. | D-081, D-083, D-087 | I | `j6/app.jsx` footer |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |
