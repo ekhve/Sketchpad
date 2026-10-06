@@ -510,6 +510,30 @@
 | R-341 | With *Show suggested fingering* ticked (off by default), each bar on the sheet shows right-hand numbers on the chord and the left-hand finger on the bass. | D-078, D-057 | A | The sheet can show suggested fingering |
 | R-342 | The two hands can be told apart without colour: solid discs for the right hand, outlined for the left, on screen and in a black-and-white printout. | D-078 | M | The two hands can be told apart without colour |
 
+## 10y. J-6 Explorer
+
+The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-344 | Every voicing in a validated J-6 set sounds its label's root and no note outside its label's chord. | D-080 | A | Every chord in sets 29, 47 and 54 is spelled by its J-6 voicing |
+| R-345 | A 4-voice voicing missing a chord tone still counts as its chord; one with a stray note does not. | D-080 | A | A 4-voice voicing with a missing tone still counts as its chord |
+| R-346 | A set that fails validation is flagged key by key, with a reason, and is never recommended by search. | D-082 | A | A set whose published voicings contradict their labels is flagged and never recommended |
+| R-347 | A J-6 key's chord is shown in musician spelling, with the manual's label and the device's voicing beside it. | D-079, UC-64 | A | Pressing D# on set 54 shows Fmaj7 with the J-6 voicing F3 A3 C4 E4 |
+| R-348 | Chord symbols are read the way musicians type them (maj7, M7, -7, sharps and flats, slash chords), and unknown symbols are refused. | D-079 | A | Chord symbols are read the way musicians type them |
+| R-349 | Keys played in Explore give the likely key, how many chords fit it, and each chord's numeral. | UC-64 | A | Keys C, C#, G, D# on set 54 read as Imaj7 iii7 vi7 IVmaj7 in C major |
+| R-350 | Numerals are relative to the likely key, not to C. | UC-64 | A | Roman numerals follow the key, not the letter C |
+| R-351 | The pad labels can be read at arm's length beside the hardware, and the latest key is told apart without colour. | UC-64 | M | The pad labels are readable at arm's length beside the hardware |
+| R-352 | KEY transpose moves every chord root and every voicing note by the same number of semitones. | D-081 | A | KEY transpose moves every chord and its voicing by the same amount |
+| R-353 | Search tries every KEY value, names the KEY to set, and breaks ties in favour of the smaller transposition. | D-081, UC-65 | A | Dm7 G7 Cmaj7 Am7 finds set 47 at KEY −3 with four exact matches |
+| R-354 | Musical search scores an inversion and a chord with a missing or extra tone as near matches, below exact ones. | UC-65 | A | Musical search counts an inversion and a missing seventh as near matches |
+| R-355 | A chord with a different third is never a musical match. | UC-65 | A | A chord with the wrong third is never a musical match |
+| R-356 | Exact search accepts only the same root, quality and bass. | UC-65 | A | Exact search without transpose ranks set 54 first at 75% |
+| R-357 | The KEY direction and range the engine assumes are the device's, checked on a J-6. | D-081 | M | The KEY direction and range match the hardware |
+| R-358 | The 8th lower pad is drawn as playing the C chord, as the device does. | D-083 | M | The high C pad plays the C chord |
+| R-359 | The J-6 prototype screens are generated from the engine and never edited by hand. | D-084 | I | `proto/j6/build-prototype.mjs` |
+| R-360 | The J-6 scenarios live in `sketchpad.feature`, and the traceability test covers the J-6 tests. | D-085 | A | *(traceability.test.mjs)* |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

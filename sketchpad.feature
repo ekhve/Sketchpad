@@ -3052,3 +3052,119 @@ Feature: Finger numbers
   Scenario: The suggested fingering feels natural to play
     Given I play the first five lessons following the numbers
     Then nothing asks for a stretch I can't make, and the thumb crossings feel right
+
+# ============================================================================
+# J-6 Explorer — a second page in the same repository, for the Roland J-6
+# chord synthesizer. Its engine is j6/j6.mjs; its tests are tests/j6.test.mjs.
+# The scenarios live here, in the one feature file, so the same traceability
+# test and the same gates cover both apps. (D-085)
+# ============================================================================
+
+Feature: J-6 chord data
+  The J-6's chord sets, as printed in the owner's manual, are checked before
+  anything is built on them: every voicing must sound its label's root and no
+  note outside its label's chord. (D-080, D-082)
+
+  @D-080 @auto
+  Scenario: Every chord in sets 29, 47 and 54 is spelled by its J-6 voicing
+    Given the voicings printed in the J-6 Chord Set List
+    When each voicing is checked against its label
+    Then no set reports a problem
+
+  @D-082 @auto
+  Scenario: A set whose published voicings contradict their labels is flagged and never recommended
+    Given set 59 as printed in the manual
+    When the set is validated
+    Then all 12 keys are flagged
+    And key C♯ ("C6") is flagged because its root is not sounded
+    And a search over set 59 returns no results
+
+  @D-080 @auto
+  Scenario: A 4-voice voicing with a missing tone still counts as its chord
+    Given the voicing G4 B3 F3 G2 labelled G7
+    Then it is valid
+    But G4 B3 F3 G♯2 labelled G7 is not
+
+Feature: J-6 Explore — what am I playing?
+  Tap the J-6 keys in the order they were played on the hardware, and see each
+  chord's name, numeral, notes and real voicing, and the key they suggest.
+  (UC-64)
+
+  @D-079 @UC-64 @auto
+  Scenario: Pressing D# on set 54 shows Fmaj7 with the J-6 voicing F3 A3 C4 E4
+    Given chord set 54 at KEY 0
+    When the user presses D♯
+    Then the chord reads "Fmaj7"
+    And the manual label reads "FM7"
+    And the voicing is F3 A3 C4 E4
+
+  @UC-64 @auto
+  Scenario: Keys C, C#, G, D# on set 54 read as Imaj7 iii7 vi7 IVmaj7 in C major
+    Given chord set 54 at KEY 0
+    When the user presses C, C♯, G, D♯
+    Then the likely key is C major with 4 of 4 chords fitting
+    And the numerals read Imaj7 iii7 vi7 IVmaj7
+
+  @UC-64 @auto
+  Scenario: Roman numerals follow the key, not the letter C
+    Given the progression Fmaj7 Am7 Dm7 B♭maj7 C7
+    Then the likely key is F major
+    And the numerals read Imaj7 iii7 vi7 IVmaj7 V7
+
+  @UC-64 @manual
+  Scenario: The pad labels are readable at arm's length beside the hardware
+    Given the phone is next to the J-6 on a desk
+    Then every pad's chord name can be read without picking the phone up
+    And the latest key is distinguishable from earlier ones without colour vision
+
+Feature: J-6 Find — how do I play this on the J-6?
+  Type a progression and find the chord set, and the KEY transpose, that plays
+  it, with the keys to press. (UC-65)
+
+  @D-081 @auto
+  Scenario: KEY transpose moves every chord and its voicing by the same amount
+    Given chord set 47
+    When KEY is −6, −3, +2 or +5
+    Then every key's chord root and every voicing note move by that amount
+
+  @D-081 @UC-65 @auto
+  Scenario: Dm7 G7 Cmaj7 Am7 finds set 47 at KEY −3 with four exact matches
+    Given sets 29, 47 and 54, musical mode, transpose allowed
+    When the user searches "Dm7 G7 Cmaj7 Am7"
+    Then the best match is set 47 at KEY −3 scoring 100%
+    And Dm7 is on D♯ or F♯, G7 on A, Cmaj7 on C♯ or E, Am7 on C
+
+  @UC-65 @auto
+  Scenario: Musical search counts an inversion and a missing seventh as near matches
+    Given set 29 without transpose
+    When the user searches "Dm7 G7 Cmaj7 Am7"
+    Then Dm7 and G7 are exact, Cmaj7 is an inversion on F, Am7 is close on A
+    And the score is 87.5%
+
+  @UC-65 @auto
+  Scenario: A chord with the wrong third is never a musical match
+    Then Gm7 is not a match for G7
+    And A is not a match for Am7
+
+  @UC-65 @auto
+  Scenario: Exact search without transpose ranks set 54 first at 75%
+    Given sets 29, 47 and 54, exact mode, no transpose
+    Then the ranking is set 54 (75%), set 29 (50%), set 47 (25%)
+
+  @D-079 @UC-65 @auto
+  Scenario: Chord symbols are read the way musicians type them
+    Then "Cmaj7", "CM7", "Bbmaj7", "A#M7", "CM7/E" and "C-7" are all understood
+    And "H7" and "Cfoo" are rejected
+
+  @D-081 @manual
+  Scenario: The KEY direction and range match the hardware
+    Given the J-6 on set 47
+    When KEY is set to −3 and A is pressed
+    Then the J-6 plays G7 (G B D F)
+    And the KEY range on the device is recorded in D-081
+
+  @D-083 @manual
+  Scenario: The high C pad plays the C chord
+    Given any chord set
+    When the 8th lower pad is pressed
+    Then it plays the same chord as C

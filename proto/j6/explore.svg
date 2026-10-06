@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 970" width="390" height="970">
+<defs><filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="390" height="970" fill="#F3EFE6"/>
+<text x="16" y="38" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="19" font-weight="700" fill="#1D1B18">J-6 Explorer</text><rect x="206" y="18" width="168" height="30" rx="15" fill="#E4DFD3"/><rect x="208" y="20" width="82" height="26" rx="13" fill="#FFFFFF"/><text x="249" y="37" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#1D1B18">Explore</text><text x="331" y="37" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12.5" font-weight="500" text-anchor="middle" fill="#6F6A60">Find</text>
+<rect x="12" y="64" width="366" height="240" rx="16" fill="#18191C"/>
+<rect x="26" y="80" width="84" height="44" rx="6" fill="#0B0B0C"/>
+<text x="68" y="113" font-family="ui-monospace,SF Mono,Menlo,monospace" font-size="30" font-weight="700" text-anchor="middle" fill="#FF3B2F">54</text>
+<text x="122" y="92" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" letter-spacing="1.5" fill="#8B857A">CHORD SET</text>
+<text x="122" y="111" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="600" fill="#F2F2F2">House</text>
+<text x="122" y="125" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" fill="#8A8A8A">KEY 0  ·  chord mode</text>
+<circle cx="314" cy="102" r="15" fill="#2A2B2F" stroke="#3A3B40"/>
+<text x="314" y="108" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="19" text-anchor="middle" fill="#EDEDED">‹</text>
+<circle cx="352" cy="102" r="15" fill="#2A2B2F" stroke="#3A3B40"/>
+<text x="352" y="108" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="19" text-anchor="middle" fill="#EDEDED">›</text>
+<circle cx="44" cy="148" r="8" fill="#232428" stroke="#34353A"/>
+<text x="44" y="168" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="7" text-anchor="middle" fill="#55565C">FILTER</text>
+<circle cx="90" cy="148" r="8" fill="#232428" stroke="#34353A"/>
+<text x="90" y="168" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="7" text-anchor="middle" fill="#55565C">ENV</text>
+<circle cx="136" cy="148" r="8" fill="#232428" stroke="#34353A"/>
+<text x="136" y="168" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="7" text-anchor="middle" fill="#55565C">DELAY</text>
+<circle cx="182" cy="148" r="8" fill="#232428" stroke="#34353A"/>
+<text x="182" y="168" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="7" text-anchor="middle" fill="#55565C">REVERB</text>
+<text x="362" y="152" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8" text-anchor="end" fill="#55565C">sound controls: display only</text>
+<rect x="25" y="232" width="37" height="62" rx="5" fill="#FDE7C8"/>
+<text x="43.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">C</text>
+<text x="43.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Cmaj7</text>
+<circle cx="59" cy="235" r="7.5" fill="#1D1B18" stroke="#FF9D2E" stroke-width="1.2"/>
+<text x="59" y="238.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#FF9D2E">1</text>
+<rect x="68" y="232" width="37" height="62" rx="5" fill="#ECE9E2"/>
+<text x="86.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">D</text>
+<text x="86.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Dm7</text>
+<rect x="111" y="232" width="37" height="62" rx="5" fill="#ECE9E2"/>
+<text x="129.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">E</text>
+<text x="129.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.6" font-weight="600" text-anchor="middle" fill="#2A2824">E♭maj7</text>
+<rect x="154" y="232" width="37" height="62" rx="5" fill="#ECE9E2"/>
+<text x="172.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">F</text>
+<text x="172.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Gm7</text>
+<rect x="197" y="232" width="37" height="62" rx="5" fill="#FDE7C8"/>
+<text x="215.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">G</text>
+<text x="215.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Am7</text>
+<circle cx="231" cy="235" r="7.5" fill="#1D1B18" stroke="#FF9D2E" stroke-width="1.2"/>
+<text x="231" y="238.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#FF9D2E">3</text>
+<rect x="240" y="232" width="37" height="62" rx="5" fill="#ECE9E2"/>
+<text x="258.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">A</text>
+<text x="258.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.6" font-weight="600" text-anchor="middle" fill="#2A2824">B♭maj7</text>
+<rect x="283" y="232" width="37" height="62" rx="5" fill="#ECE9E2"/>
+<text x="301.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">B</text>
+<text x="301.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Bm7</text>
+<rect x="326" y="232" width="37" height="62" rx="5" fill="#FDE7C8"/>
+<text x="344.5" y="245" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#2A2824" opacity="0.7">C′</text>
+<text x="344.5" y="285" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#2A2824">Cmaj7</text>
+<rect x="49" y="178" width="32" height="46" rx="5" fill="#6B4A1F"/>
+<text x="65" y="191" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#FFE3BF" opacity="0.7">C♯</text>
+<text x="65" y="215" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#FFE3BF">Em7</text>
+<circle cx="78" cy="181" r="7.5" fill="#1D1B18" stroke="#FF9D2E" stroke-width="1.2"/>
+<text x="78" y="184.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#FF9D2E">2</text>
+<rect x="92" y="178" width="32" height="46" rx="5" fill="#FF9D2E" filter="url(#glow)"/>
+<text x="108" y="191" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#1A1206" opacity="0.7">D♯</text>
+<text x="108" y="215" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.7" font-weight="600" text-anchor="middle" fill="#1A1206">Fmaj7</text>
+<circle cx="121" cy="181" r="7.5" fill="#1D1B18" stroke="#FF9D2E" stroke-width="1.2"/>
+<text x="121" y="184.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#FF9D2E">4</text>
+<rect x="178" y="178" width="32" height="46" rx="5" fill="#2A2B2F"/>
+<text x="194" y="191" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#C9C9CC" opacity="0.7">F♯</text>
+<text x="194" y="215" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.7" font-weight="600" text-anchor="middle" fill="#C9C9CC">Fmaj7</text>
+<rect x="221" y="178" width="32" height="46" rx="5" fill="#2A2B2F"/>
+<text x="237" y="191" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#C9C9CC" opacity="0.7">G♯</text>
+<text x="237" y="215" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#C9C9CC">Gm7</text>
+<rect x="264" y="178" width="32" height="46" rx="5" fill="#2A2B2F"/>
+<text x="280" y="191" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" text-anchor="middle" fill="#C9C9CC" opacity="0.7">A♯</text>
+<text x="280" y="215" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9.0" font-weight="600" text-anchor="middle" fill="#C9C9CC">Am7</text>
+<text x="16" y="322" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" fill="#6F6A60">Tap the keys in the order you played them on your J-6.</text>
+<rect x="12" y="334" width="366" height="176" rx="16" fill="#FFFFFF" stroke="#E6E1D6"/>
+<text x="28" y="358" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" letter-spacing="1.5" fill="#8B857A">NOW</text>
+<text x="28" y="400" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="40" font-weight="700" fill="#1D1B18">Fmaj7</text>
+<rect x="262" y="366" width="100" height="30" rx="15" fill="#FF9D2E"/>
+<text x="312" y="386" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#1A1206">IVmaj7</text>
+<text x="312" y="413" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" text-anchor="middle" fill="#6F6A60">in C major</text>
+<text x="28" y="424" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" fill="#8B857A">J-6 key D♯  ·  manual says FM7</text>
+<rect x="28" y="438" width="50" height="34" rx="8" fill="#FF9D2E"/>
+<text x="53" y="461" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1A1206">F</text>
+<text x="53" y="488" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">root</text>
+<rect x="84" y="438" width="50" height="34" rx="8" fill="#FDE7C8"/>
+<text x="109" y="461" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1A1206">A</text>
+<text x="109" y="488" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">3rd</text>
+<rect x="140" y="438" width="50" height="34" rx="8" fill="#FDE7C8"/>
+<text x="165" y="461" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1A1206">C</text>
+<text x="165" y="488" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">5th</text>
+<rect x="196" y="438" width="50" height="34" rx="8" fill="#FDE7C8"/>
+<text x="221" y="461" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1A1206">E</text>
+<text x="221" y="488" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">7th</text>
+<text x="262" y="452" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8.5" letter-spacing="1" fill="#8B857A">J-6 VOICING</text>
+<text x="262" y="470" font-family="ui-monospace,SF Mono,Menlo,monospace" font-size="11.5" fill="#1D1B18">F3  A3  C4  E4</text>
+<text x="262" y="488" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" fill="#8B857A">low → high</text>
+<rect x="12" y="522" width="366" height="134" rx="16" fill="#FFFFFF" stroke="#E6E1D6"/>
+<text x="28" y="546" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" letter-spacing="1.5" fill="#8B857A">PIANO</text>
+<text x="310" y="549" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" text-anchor="end" fill="#6F6A60">Show</text>
+<rect x="318" y="532" width="44" height="24" rx="12" fill="#2F7D4F"/><circle cx="350" cy="544" r="9" fill="#fff"/>
+<rect x="28.0" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<text x="39.2" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8" text-anchor="middle" fill="#8B857A">C3</text>
+<rect x="51.9" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="75.7" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="99.6" y="558" width="22.4" height="86" rx="3" fill="#FF9D2E" stroke="#D8D2C5"/>
+<text x="110.8" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#1A1206">F</text>
+<rect x="123.4" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="147.3" y="558" width="22.4" height="86" rx="3" fill="#FDE7C8" stroke="#D8D2C5"/>
+<text x="158.5" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#1A1206">A</text>
+<rect x="171.1" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="195.0" y="558" width="22.4" height="86" rx="3" fill="#FDE7C8" stroke="#D8D2C5"/>
+<text x="206.2" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#1A1206">C</text>
+<text x="206.2" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="8" text-anchor="middle" fill="#8B857A"></text>
+<rect x="218.9" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="242.7" y="558" width="22.4" height="86" rx="3" fill="#FDE7C8" stroke="#D8D2C5"/>
+<text x="253.9" y="636" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#1A1206">E</text>
+<rect x="266.6" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="290.4" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="314.3" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="338.1" y="558" width="22.4" height="86" rx="3" fill="#FBFAF7" stroke="#D8D2C5"/>
+<rect x="44.9" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="68.7" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="116.4" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="140.3" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="164.1" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="211.9" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="235.7" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="283.4" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="307.3" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="331.1" y="558" width="14" height="52" rx="2" fill="#3A3835"/>
+<rect x="12" y="668" width="366" height="98" rx="16" fill="#FFFFFF" stroke="#E6E1D6"/>
+<text x="28" y="692" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" letter-spacing="1.5" fill="#8B857A">KEY</text>
+<text x="28" y="722" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="22" font-weight="700" fill="#1D1B18">C major</text>
+<text x="362" y="712" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" text-anchor="end" fill="#1D1B18">all 4 chords fit</text>
+<text x="362" y="728" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10.5" text-anchor="end" fill="#8B857A">next: G major, 3 of 4</text>
+<circle cx="40" cy="746" r="12" fill="#FDE7C8" stroke="none"/>
+<text x="40" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">C</text>
+<circle cx="72" cy="746" r="12" fill="none" stroke="#D8D2C5"/>
+<text x="72" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">D</text>
+<circle cx="104" cy="746" r="12" fill="#FDE7C8" stroke="none"/>
+<text x="104" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">E</text>
+<circle cx="136" cy="746" r="12" fill="#FF9D2E" stroke="none"/>
+<text x="136" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">F</text>
+<circle cx="168" cy="746" r="12" fill="none" stroke="#D8D2C5"/>
+<text x="168" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">G</text>
+<circle cx="200" cy="746" r="12" fill="#FDE7C8" stroke="none"/>
+<text x="200" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">A</text>
+<circle cx="232" cy="746" r="12" fill="none" stroke="#D8D2C5"/>
+<text x="232" y="750.5" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">B</text>
+<rect x="12" y="778" width="366" height="132" rx="16" fill="#FFFFFF" stroke="#E6E1D6"/>
+<text x="28" y="802" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" letter-spacing="1.5" fill="#8B857A">PROGRESSION</text>
+<rect x="206" y="788" width="46" height="24" rx="12" fill="#E4DFD3"/>
+<text x="229" y="804" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">↶ Undo</text>
+<rect x="258" y="788" width="44" height="24" rx="12" fill="#E4DFD3"/>
+<text x="280" y="804" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#1D1B18">Clear</text>
+<rect x="308" y="788" width="54" height="24" rx="12" fill="#1D1B18"/>
+<text x="335" y="804" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#fff">▶ Play</text>
+<rect x="20" y="822" width="80" height="74" rx="10" fill="#F7F4EE" stroke="#E6E1D6" stroke-width="1"/>
+<text x="60" y="848" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#1D1B18">Cmaj7</text>
+<text x="60" y="868" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#6F6A60">Imaj7</text>
+<text x="60" y="886" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">J-6 key C</text>
+<text x="104" y="863" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#B9B2A5">›</text>
+<rect x="108" y="822" width="80" height="74" rx="10" fill="#F7F4EE" stroke="#E6E1D6" stroke-width="1"/>
+<text x="148" y="848" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#1D1B18">Em7</text>
+<text x="148" y="868" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#6F6A60">iii7</text>
+<text x="148" y="886" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">J-6 key C♯</text>
+<text x="192" y="863" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#B9B2A5">›</text>
+<rect x="196" y="822" width="80" height="74" rx="10" fill="#F7F4EE" stroke="#E6E1D6" stroke-width="1"/>
+<text x="236" y="848" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#1D1B18">Am7</text>
+<text x="236" y="868" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#6F6A60">vi7</text>
+<text x="236" y="886" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">J-6 key G</text>
+<text x="280" y="863" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#B9B2A5">›</text>
+<rect x="284" y="822" width="80" height="74" rx="10" fill="#FFF3E2" stroke="#FF9D2E" stroke-width="2"/>
+<text x="324" y="848" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#1D1B18">Fmaj7</text>
+<text x="324" y="868" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#6F6A60">IVmaj7</text>
+<text x="324" y="886" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="9" text-anchor="middle" fill="#8B857A">J-6 key D♯</text>
+<text x="16" y="945" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600" fill="#1D1B18">Sound</text>
+<rect x="64" y="926" width="150" height="30" rx="15" fill="#E4DFD3"/><rect x="66" y="928" width="73" height="26" rx="13" fill="#FFFFFF"/>
+<text x="102.5" y="945" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#1D1B18">Piano</text>
+<text x="177" y="945" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="12" text-anchor="middle" fill="#6F6A60">Pad</text>
+<text x="374" y="945" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="10" text-anchor="end" fill="#8B857A">Set 54 · KEY 0</text>
+</svg>

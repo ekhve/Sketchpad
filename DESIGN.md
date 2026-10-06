@@ -508,6 +508,48 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **What it does not do.** It doesn't check fingers, finger riffs or melodies, or cover two-octave scales, harmonic and melodic minor, or the modes. "Which hand plays what" across a whole loop, with the bass moving and the chord holding, is the natural next step.
 
+### D-079 — J-6: show musician spelling, keep the manual's label underneath (formerly D-J01)
+
+**Context.** The J-6 Explorer is a second page in this repository for the Roland J-6, a chord synthesizer whose 100 chord sets each put a 4-voice chord on each of its 12 keys. The owner's manual prints those chords as `A#M7`, `D#M7`, and once as `F#FM7`, a typo in set 19. Nobody writes B♭maj7 that way, but the user has to match the screen to the printed chart.
+
+**Decision.** The app shows `B♭maj7`, and "manual says A#M7" appears under it. The prototype spelled every black key as a flat, so F♯m7 came out as G♭m7. Sketchpad's key-aware spelling replaces that (`D-086`).
+
+### D-080 — J-6: match on the notes the device plays, not on chord names (formerly D-J02)
+
+**Context.** The J-6 has 4 voices. Its "G7" in set 29 is G B F G, with no 5th.
+
+**Decision.** A voicing counts as its chord if the root sounds and every note belongs to the chord. Missing tones are allowed. The piano lights the real voicing in its real octave, not an idealised chord.
+
+### D-081 — J-6: transposition is part of the search (formerly D-J03)
+
+**Context.** None of the sampled sets contains Dm7 G7 Cmaj7 Am7 at KEY 0, but set 47 at KEY −3 contains it exactly. A search that ignores KEY misses the best answer.
+
+**Decision.** Search tries every KEY value by default, and the result always says which KEY to set. Ties go to the smaller transposition. **Assumption:** KEY runs from −6 to +5 and transposes up for positive values. Both stay visible in the UI until checked on the device (a manual scenario).
+
+### D-082 — J-6: the manual's data is validated before use (formerly D-J04)
+
+**Context.** Set 59 (EDM) fails validation on all 12 keys. Its printed voicings are near-copies of set 60's: "C6" is printed as F♯ B E D♯, which has no C. Set 19 has a typo in a label, and set 43 lists F3 twice in one chord.
+
+**Decision.** Every set runs through `validateSet` before search, and a set that fails is never recommended. Errors in the manual are recorded, not silently corrected. This is also the strongest argument for capturing the voicings from the device over MIDI rather than trusting the PDF.
+
+**On `D-014`.** Sketchpad's own chord sets stay its own content. The J-6 Explorer exists to explain one instrument the owner has, so it has to carry that instrument's chord table. It is reference data about the hardware, kept in `j6/` and never mixed into Sketchpad's sets.
+
+### D-083 — J-6: the 8th lower pad is the high C (formerly D-J05)
+
+**Context.** The J-6 has 8 lower and 5 upper pads, but the chord list has 12 columns.
+
+**Decision (assumption).** The high C plays the same chord as C. It is drawn that way, and dashed when C is in the answer. To be checked on the device.
+
+### D-084 — J-6: prototype screens are drawn by code from the engine (formerly D-J06)
+
+**Decision.** `proto/j6/build-prototype.mjs` generates `explore.svg` and `find.svg` from `j6/j6.mjs`, and they are never edited by hand. A wrong chord on a screen is then a wrong engine result, which the tests can catch.
+
+### D-085 — One feature file for both apps
+
+**Context.** The J-6 prototype kept its 15 scenarios in its own `PROTOTYPE.md`, outside every gate here. The traceability test reads one feature file, and the gates (G4, G10, G11) read the same one.
+
+**Decision.** The J-6 scenarios move into `sketchpad.feature` under `Feature: J-6 …` headings, and `traceability.test.mjs` reads `tests/j6.test.mjs` as well. Teaching the gates a second feature file would have meant changing four checks for no gain. The scenarios keep their names, so `proto/j6/PROTOTYPE.md` still reads as the record of what was agreed.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -598,6 +640,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-09-26 | Chord names typed in the Progression tab, read against the dictionary, refused with a reason when unknown, with the keys they fit (`D-077`, `UC-62`); 7sus4 and 9sus4 added; maj7 numerals no longer lowercase; the How to use guide explains the chord box |
 | 2026-10-01 | Finger numbers (`D-078`, `UC-63`): suggested fingers on lit keys for the right hand, left hand or both, chords by rule and the 24 major and natural minor scales from a checked table, hand reach as a setting, two hands told apart by fill as well as colour, on by itself in Learn and optional on the printed sheet. Prototype and spec agreed first |
 | 2026-10-05 | The build moved into the repository: `npm run build` and `npm run site` make the app and the installable site from the code alone, and a GitHub Actions workflow tests and publishes to Pages on every push (`D-076`) |
+| 2026-10-06 | J-6 Explorer moved into the repository as a second app: its engine in `j6/`, its 12 tests in the suite, its prototype in `proto/j6/`, and its 15 scenarios in `sketchpad.feature` (`D-085`). The prototype's decisions are numbered `D-079`–`D-084`, and its two workflows are `UC-64` (Explore) and `UC-65` (Find). 426 checks |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

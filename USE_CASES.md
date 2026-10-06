@@ -79,6 +79,37 @@ In the user's framing:
 
 ---
 
+## J-6 Explorer — a second app (`D-079`–`D-085`)
+
+A separate page for the Roland J-6 chord synthesizer, in the same repository and sharing Sketchpad's theory. It answers two questions the hardware can't: *what am I playing?* and *how do I play this on the J-6?*
+
+### UC-64 — J-6 Explore: what am I playing?
+
+| Step | The player | The app |
+|---|---|---|
+| 1 | Picks the chord set they have on the J-6 | A virtual J-6 shows what every key plays, printed on the pad |
+| 2 | Taps the keys in the order they played them on the hardware | Each pad is numbered in order; the latest one is brightest |
+| 3 | Reads the latest chord | Name in musician spelling, the manual's label, notes and degrees, the J-6's actual voicing, and its numeral |
+| 4 | Looks at the piano | The real voicing, lit in its real octave |
+| 5 | Looks at the key | The likely key, how many chords fit it, and the runner-up |
+| 6 | Plays the progression back | Undo, Clear and Play, through the piano or a pad sound |
+
+**Status:** engine and prototype screens (`proto/j6/explore.svg`) built and tested. The page itself is next.
+
+### UC-65 — J-6 Find: how do I play this on the J-6?
+
+| Step | The player | The app |
+|---|---|---|
+| 1 | Types a progression, e.g. Dm7 G7 Cmaj7 Am7 | Each chord is read and confirmed, or refused with a reason |
+| 2 | Chooses exact or musical matching, and whether KEY may transpose | The sets are ranked, never including one whose data fails validation (`D-082`) |
+| 3 | Reads the best match | Set, KEY value, score, and the keys to press, numbered in order; keys that play the same chord are dashed |
+| 4 | Follows the steps on the hardware | Select the set, set KEY, play the keys |
+| 5 | Compares other sets | Each with its score and the reason it ranks lower |
+
+**Status:** engine and prototype screens (`proto/j6/find.svg`) built and tested. The page itself is next.
+
+---
+
 ## Built
 
 Each has scenarios in `sketchpad.feature`.

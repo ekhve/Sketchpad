@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const feature = readFileSync(join(here, "..", "sketchpad.feature"), "utf8").split("\n");
-const testSrc = ["theory.test.mjs", "site.test.mjs"].map((f) => readFileSync(join(here, f), "utf8")).join("\n");
+const testSrc = ["theory.test.mjs", "site.test.mjs", "j6.test.mjs"].map((f) => readFileSync(join(here, f), "utf8")).join("\n");
 
 const scenarios = [];
 let tags = [];
