@@ -265,3 +265,49 @@ test("A search result can be added to the progression in one tap", () => {
   assert.deepEqual(s.items.map((k) => [k.set, j.KEYS[k.key], k.t]), [[47, "D#", -3], [47, "A", -3], [47, "C#", -3], [47, "C", -3]]);
   assert.deepEqual(chordsOf(s.items), ["Dm7", "G7", "Cmaj7", "Am7"]);
 });
+
+/* ---------- playing the progression back (D-090) ---------- */
+import * as pb from "../j6/playback.mjs";
+const starts = (count, opts, beats) => Array.from({ length: beats }, (_, n) => pb.beatAt(n, count, opts))
+  .map((b, n) => (b.chord !== null ? `${n}:${b.chord}` : null)).filter(Boolean);
+
+test("Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5", () => {
+  assert.deepEqual(pb.OPTIONS, { bpm: 90, bars: 1, loop: true, click: false });
+  assert.equal(pb.TEMPO.step, 5);
+  assert.equal(pb.setTempo(40), 60);
+  assert.equal(pb.setTempo(200), 160);
+  assert.equal(pb.setTempo(95), 95);
+  assert.equal(pb.beatSeconds(120), 0.5);
+});
+
+test("Each chord lasts half a bar, one bar or two bars", () => {
+  assert.deepEqual(pb.LENGTHS, [0.5, 1, 2]);
+  const opts = { loop: false, click: false };
+  assert.deepEqual(starts(3, { ...opts, bars: 1 }, 12), ["0:0", "4:1", "8:2"]);
+  assert.deepEqual(starts(3, { ...opts, bars: 0.5 }, 6), ["0:0", "2:1", "4:2"]);
+  assert.deepEqual(starts(3, { ...opts, bars: 2 }, 24), ["0:0", "8:1", "16:2"]);
+  const secs = pb.chordSeconds({ bpm: 120, bars: 1 });
+  assert.ok(secs < 2 && secs > 1.7, `a one-bar chord at 120 BPM sounds ${secs} s of its 2 s`);
+});
+
+test("With Loop on the progression repeats, and with it off it plays once and stops", () => {
+  const loop = pb.beatAt(8, 2, { bars: 1, loop: true, click: false });
+  assert.equal(loop.chord, 0);
+  assert.equal(loop.end, false);
+  assert.equal(pb.beatAt(8, 2, { bars: 1, loop: false, click: false }).end, true);
+  assert.equal(pb.beatAt(7, 2, { bars: 1, loop: false, click: false }).end, false);
+  assert.equal(pb.beatAt(0, 0, { bars: 1, loop: true, click: false }).end, true, "an empty progression plays nothing");
+});
+
+test("The click counts in one bar, then marks every beat with the first of each bar stronger", () => {
+  const on = { bars: 1, loop: true, click: true };
+  assert.deepEqual([0, 1, 2, 3].map((n) => pb.beatAt(n, 2, on)), [
+    { chord: null, click: "accent", end: false }, { chord: null, click: "beat", end: false },
+    { chord: null, click: "beat", end: false }, { chord: null, click: "beat", end: false }]);
+  assert.deepEqual(pb.beatAt(4, 2, on), { chord: 0, click: "accent", end: false });
+  assert.equal(pb.beatAt(5, 2, on).click, "beat");
+  const half = { bars: 0.5, loop: true, click: true };
+  assert.deepEqual([4, 5, 6, 7, 8].map((n) => [pb.beatAt(n, 4, half).chord, pb.beatAt(n, 4, half).click]),
+    [[0, "accent"], [null, "beat"], [1, "beat"], [null, "beat"], [2, "accent"]]);
+  assert.deepEqual(pb.beatAt(0, 2, { bars: 1, loop: true, click: false }), { chord: 0, click: null, end: false });
+});

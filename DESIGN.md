@@ -666,6 +666,23 @@ The logic is a pure reducer in `j6/progression.mjs`, so it is tested without a b
 
 **What building it found.** The set picker added with all 100 sets (`D-088`) pushed the panel wider than a phone, and long chord names (a 13th with "(no3)") did the same in Now. 87 of the 1,200 keys overflowed a 375 px screen. Both are fixed, and a headless sweep of every key at 375 px now finds none. That sweep is not yet a gate (see the headless exception in `DONE.md`).
 
+### D-090 — J-6: the progression plays at a tempo, and that is all
+
+**Context.** Play stepped through the progression at one chord a second, with no way to change it. To hear a progression as music, or play along on the J-6, it needs a tempo. The owner asked for tempo "and a couple of small options", and drew the line at a sequencer, for now. Tap tempo was offered and declined.
+
+**Decision.** One row above the progression, four controls:
+
+1. **Tempo**, 60–160 BPM in steps of 5, starting at 90.
+2. **Each chord** lasts ½ bar, 1 bar or 2 bars, the same for every chord. Each sounds a little less than its length (92%), so chords breathe rather than smear.
+3. **Loop**, on by default. Off, the progression plays once and stops by itself.
+4. **Click**, off by default. On, it counts in one bar and then ticks every beat, the first of each bar stronger, so the J-6 can be played along with. The tick is a short triangle-wave blip, a second sound source beside the instrument (`D-009`); it is one note at a time and releases in 60 ms, so it cannot pile up (`D-017`).
+
+Play becomes Play/Stop. While it plays, the chord sounding is highlighted in the progression, and its pad is outlined on the virtual J-6.
+
+**Built on Sketchpad's scheduler.** The beats are found by `barsToSchedule` (`D-043`), the look-ahead scheduler Sketchpad's loop uses, with a beat as its unit. `j6/playback.mjs` says what each beat holds: a chord starting, a click, or the end. That is pure, so the count-in, the lengths, the loop and the accents are tested without audio. Options and the progression are read afresh on every beat, so a change while playing takes effect from the next beat.
+
+**Not a sequencer.** No per-chord lengths, rests, steps, swing, rhythm patterns or saving. If a progression needs any of those, it is a job for Sketchpad's Create mode or a DAW.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -763,6 +780,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6 Explore: a tap plays, "+ Add" keeps, Rec keeps every tap and starts off; kept chords remember their set and KEY, can be played or removed; the key follows the progression; Find adds a result in one tap (`D-089`). Fixed: the set picker and long chord names made the page wider than a phone on 87 keys |
 | 2026-10-06 | J-6: turning Rec off no longer hides what was recorded; the numbers stay on the pads until Clear (`D-089`, amended). The "!" message now says plainly that it marks a misprint in the manual |
 | 2026-10-06 | J-6: the progression's × is no longer cut off, and pad names no longer are either: root above type, the type in lines of at most 7 characters, checked for every key, KEY and spelling (`D-089`) |
+| 2026-10-06 | J-6 progression playback: tempo 60–160 BPM, ½, 1 or 2 bars a chord, Loop, and a click with a one-bar count-in; Play/Stop, with the sounding chord highlighted in the progression and on its pad. Scheduled by Sketchpad's look-ahead scheduler; what each beat holds is a pure function. Not a sequencer (`D-090`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

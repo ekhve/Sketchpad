@@ -203,6 +203,7 @@ Not in the original plan. Each earned its place.
 
 | Feature | Status | Notes |
 |---|---|---|
+| Explore: play the progression at a tempo | **Done** | 60–160 BPM, ½/1/2 bars a chord, Loop, click with count-in; not a sequencer (`D-090`) |
 | Explore: try chords, keep the ones you want | **Done** | A tap plays; + Add keeps; Rec keeps every tap; kept chords remember their set and KEY (`D-089`) |
 | Explore: what the J-6 is playing | **Done** | Virtual J-6 with every pad's chord, played order, chord, numeral, notes, voicing, piano, likely key, progression (`UC-64`) |
 | Find: how to play a progression on the J-6 | **Done** | Exact or musical matching, KEY transpose, keys to press, other sets with reasons (`UC-65`) |
@@ -233,6 +234,6 @@ Anything marked **Done** should be findable in `sketchpad.feature` and, unless i
 node tools/check-done.mjs
 ```
 
-Current: 443 automated checks, 191/191 mutants killed, 15/15 gates.
+Current: 447 automated checks, 197/197 mutants killed, 15/15 gates.
 
 If a feature is listed **Done** here but has no scenario, this document is wrong — trust the feature file.

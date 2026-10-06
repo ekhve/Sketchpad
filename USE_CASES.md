@@ -93,7 +93,7 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 | 3 | Reads the latest chord | Name in musician spelling, the manual's label, notes and degrees, the J-6's actual voicing, and its numeral |
 | 4 | Looks at the piano | The real voicing, lit in its real octave |
 | 5 | Looks at the key | The likely key, how many chords fit it, and the runner-up |
-| 6 | Plays the progression back, or edits it | Play, tap a chord to hear it, × to take one out, Undo, Clear; through the piano or a pad sound. The key follows the progression |
+| 6 | Plays the progression back, or edits it | Play/Stop at a tempo, ½, 1 or 2 bars a chord, looped or once, with a click and count-in to play along (`D-090`); the chord sounding is highlighted. Tap a chord to hear it, × to take one out, Undo, Clear; through the piano or a pad sound. The key follows the progression |
 
 **Status:** built (`D-087`), at `j6/` on the site, with a KEY control and all 100 sets (`D-088`); a key where the manual's notes and name disagree is marked. Not yet: reading the hardware over MIDI.
 

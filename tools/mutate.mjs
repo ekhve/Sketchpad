@@ -223,7 +223,17 @@ const J6_PROGRESSION_MUTANTS = [
   ["a kept chord forgets its own set",       "const resolve = (k) => chordAt(k.set, k.key, k.t);", "const resolve = (k) => chordAt(54, k.key, k.t);"],
 ].map(([name, from, to]) => [name, from, to, "j6/progression.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS];
+/* Playing the progression back (D-090). */
+const J6_PLAYBACK_MUTANTS = [
+  ["the tempo has no ceiling",               "Math.max(TEMPO.min, Math.min(TEMPO.max, Math.round(bpm)))", "Math.max(TEMPO.min, Math.round(bpm))"],
+  ["the click counts nothing in",            "const countIn = click ? BEATS_PER_BAR : 0;", "const countIn = 0;"],
+  ["Loop off still loops",                   "if (!count || (!loop && m >= pass))", "if (!count)"],
+  ["the strong click follows the chord, not the bar", "click: click ? (k % BEATS_PER_BAR === 0 ? \"accent\" : \"beat\") : null,", "click: click ? (k % perChord === 0 ? \"accent\" : \"beat\") : null,"],
+  ["every length is one bar",                "const perChord = bars * BEATS_PER_BAR;", "const perChord = BEATS_PER_BAR;"],
+  ["chords ring into the next",              "bars * BEATS_PER_BAR * beatSeconds(bpm) * 0.92", "bars * BEATS_PER_BAR * beatSeconds(bpm) * 1.2"],
+].map(([name, from, to]) => [name, from, to, "j6/playback.mjs"]);
+
+const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

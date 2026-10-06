@@ -97,17 +97,17 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
 | Generated module current | always | rebuilt before every run | G0 |
-| Automated checks passing | 100% | 443/443 | G1 |
+| Automated checks passing | 100% | 447/447 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
-| Mutation score | ≥ 90% | 191/191 (100%) | G2 |
+| Mutation score | ≥ 90% | 197/197 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
-| Requirements with a real scenario | 100% | 382/382 | G4 |
-| Requirements traced to a decision or use case | 100% | 382/382 | G5 |
+| Requirements with a real scenario | 100% | 387/387 | G4 |
+| Requirements traced to a decision or use case | 100% | 387/387 | G5 |
 | Every requirement row readable by the gates | 100% | enforced | G14 |
 | Manual share of scenarios | < 40% | about 20% | traceability |
 | Impure references in the theory layer | 0 | 0 | G7 |
 | Stray colour literals | 0 | 0, allow-list empty | G8 |
-| Decisions never cited downstream | 0 | 0 (65 headed, 87 in all) | G10 |
+| Decisions never cited downstream | 0 | 0 (66 headed, 88 in all) | G10 |
 | Decisions cited but never written | 0 | 0, enforced by G13 |
 | Hooks naming later definitions | 0 | 0 (16 callbacks) | G12 |
 

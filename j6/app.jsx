@@ -6,10 +6,12 @@
    in j6.mjs, which takes its theory from Sketchpad's (D-086). The piano, the
    sound and the colour tokens are Sketchpad's own, imported rather than copied.
    The layout follows the agreed screens, proto/j6/explore.svg and find.svg. */
-import React, { useState, useMemo, useCallback, useEffect, useReducer } from "react";
-import { T, Piano, useInstrument, spelling, scalePcs, pc } from "../sketchpad.jsx";
+import React, { useState, useMemo, useCallback, useEffect, useReducer, useRef } from "react";
+import * as Tone from "tone";
+import { T, Piano, useInstrument, spelling, scalePcs, pc, barsToSchedule } from "../sketchpad.jsx";
 import * as j from "./j6.mjs";
 import * as pr from "./progression.mjs";
+import * as pb from "./playback.mjs";
 
 /* ============================================================================
    DESIGN TOKENS — Sketchpad's Bone palette plus the roles the J-6 needs.
@@ -78,8 +80,8 @@ const Toggle = ({ on, onChange, label }) => (
     <span style={{ position: "absolute", top: 3, left: on ? 23 : 3, width: 20, height: 20, borderRadius: 10, background: J.card, transition: "left 120ms" }} />
   </button>
 );
-const Button = ({ children, onClick, dark = false, disabled = false }) => (
-  <button onClick={onClick} disabled={disabled}
+const Button = ({ children, onClick, dark = false, disabled = false, label }) => (
+  <button onClick={onClick} disabled={disabled} aria-label={label}
     style={{ border: 0, borderRadius: 999, padding: "6px 12px", fontSize: 12.5, fontWeight: 700,
       background: dark ? J.ink : J.surface, color: dark ? J.panelInk : J.ink, opacity: disabled ? 0.45 : 1 }}>{children}</button>
 );
@@ -197,9 +199,60 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
    ========================================================================== */
 /* A tap plays and shows; "+ Add" keeps; Rec keeps every tap. The progression
    lives in J6App, so Find can add to it too. (D-089) */
-function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
+function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }) {
   const [showPiano, setShowPiano] = useState(true);
   const [held, setHeld] = useState([]);
+
+  /* Playback (D-090): Sketchpad's look-ahead scheduler (D-043) asks which beats fall in the
+     next half second; playback.mjs says what each beat holds. Options and the progression
+     are read through refs, so a change while playing takes effect from the next beat. */
+  const [sounding, setSounding] = useState(null);      // index of the chord sounding, while playing
+  const [running, setRunning] = useState(false);
+  const clock = useRef(null), cursor = useRef(null), timers = useRef([]), clickSynth = useRef(null);
+  const optsRef = useRef(opts); optsRef.current = opts;
+  const itemsRef = useRef(state.items); itemsRef.current = state.items;
+  const at = (time, fn) => {
+    const id = setTimeout(() => { timers.current = timers.current.filter((x) => x !== id); fn(); }, Math.max(0, (time - Tone.now()) * 1000));
+    timers.current.push(id);
+  };
+  const halt = () => {
+    if (clock.current) clearInterval(clock.current);
+    clock.current = null;
+    timers.current.forEach(clearTimeout); timers.current = [];
+    setSounding(null); setRunning(false);
+  };
+  const stop = () => { halt(); audio.panic(); };
+  const click = (time, accent) => {
+    try {
+      if (!clickSynth.current) clickSynth.current = new Tone.Synth({ oscillator: { type: "triangle" },
+        envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.02 }, volume: -12 }).toDestination();
+      clickSynth.current.triggerAttackRelease(accent ? "C6" : "G5", 0.03, time);
+    } catch (e) {}
+  };
+  const play = async () => {
+    if (running || !state.items.length) return;
+    await audio.init(); await audio.resume();
+    cursor.current = { nextBarAt: Tone.now() + 0.15, barIndex: 0 };
+    const tick = () => {
+      const o = optsRef.current, items = itemsRef.current;
+      const { bars: beats, state: next } = barsToSchedule(cursor.current, Tone.now(), 0.5, pb.beatSeconds(o.bpm));
+      cursor.current = next;
+      for (const b of beats) {
+        const e = pb.beatAt(b.index, items.length, o);
+        if (e.end) { clearInterval(clock.current); clock.current = null; at(b.at, halt); return; }
+        if (e.click) click(b.at, e.click === "accent");
+        if (e.chord !== null) {
+          const idx = e.chord;
+          audio.play(pr.resolve(items[idx]).midi, pb.chordSeconds(o), b.at, 0.75);
+          at(b.at, () => setSounding(idx));
+        }
+      }
+    };
+    tick();
+    clock.current = setInterval(tick, 100);
+    setRunning(true);
+  };
+  useEffect(() => () => { if (clock.current) clearInterval(clock.current); timers.current.forEach(clearTimeout); }, []);
 
   const chords = state.items.map(pr.resolve);
   const keys = j.likelyKeys(pr.keyFocus(state).map(pr.resolve).map((c) => c.chord).filter(Boolean));
@@ -219,13 +272,14 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
     setSet(SET_NUMBERS[(i + d + SET_NUMBERS.length) % SET_NUMBERS.length]);
   };
   const changeKey = (d) => setT((x) => Math.max(KEY_LO, Math.min(KEY_HI, x + d)));
-  const playAll = async () => {
-    await audio.init(); await audio.resume();
-    chords.forEach((c, i) => setTimeout(() => audio.play(c.midi, 0.95, undefined, 0.75), i * 1000));
-  };
 
   /* Numbers on the pads show what has been kept, Rec on or off; the latest tap is outlined. */
-  const marks = (k) => pr.padMarks(state, set, t, k);
+  const marks = (k) => {
+    const m = pr.padMarks(state, set, t, k);
+    const now = sounding !== null && state.items[sounding];
+    /* while playing, the outline follows the chord sounding */
+    return now ? { ...m, latest: now.set === set && now.t === t && now.key === k } : m;
+  };
   const where = (x) => `${x.set === set && x.t === t ? "" : `set ${x.set}${x.t ? ` · KEY ${signed(x.t)}` : ""} · `}key ${KEY_NAMES[x.key]}`;
 
   const lo = latest ? Math.min(...latest.midi) : 48;
@@ -336,8 +390,26 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
           <span style={{ display: "flex", gap: 6 }}>
             <Button onClick={() => dispatch({ type: "undo" })} disabled={!chords.length}>↶ Undo</Button>
             <Button onClick={() => dispatch({ type: "clear" })} disabled={!chords.length}>Clear</Button>
-            <Button dark onClick={playAll} disabled={!chords.length}>▶ Play</Button>
+            {running ? <Button dark onClick={stop}>■ Stop</Button>
+              : <Button dark onClick={play} disabled={!chords.length}>▶ Play</Button>}
           </span>
+        </div>
+        {/* tempo, length, loop and click: one row, wrapping on a narrow phone (D-090) */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 14px", marginTop: 10, fontSize: 12.5, color: J.inkSoft }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            Tempo
+            <Button label="slower" onClick={() => setOpts((o) => ({ ...o, bpm: pb.setTempo(o.bpm - pb.TEMPO.step) }))} disabled={opts.bpm <= pb.TEMPO.min}>−</Button>
+            <strong style={{ color: J.ink, minWidth: 26, textAlign: "center" }} aria-label="tempo in BPM">{opts.bpm}</strong>
+            <Button label="faster" onClick={() => setOpts((o) => ({ ...o, bpm: pb.setTempo(o.bpm + pb.TEMPO.step) }))} disabled={opts.bpm >= pb.TEMPO.max}>+</Button>
+            BPM
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            Each chord
+            <Segmented label="bars per chord" value={opts.bars} onChange={(bars) => setOpts((o) => ({ ...o, bars }))}
+              options={pb.LENGTHS.map((l) => [l, l === 0.5 ? "½ bar" : l === 1 ? "1 bar" : "2 bars"])} />
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>Loop <Toggle on={opts.loop} onChange={(loop) => setOpts((o) => ({ ...o, loop }))} label="loop the progression" /></span>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>Click <Toggle on={opts.click} onChange={(click) => setOpts((o) => ({ ...o, click }))} label="metronome click with a one-bar count-in" /></span>
         </div>
         {/* the strip scrolls sideways, and scrolling clips at its padding: room for each chord's × */}
         <div style={{ display: "flex", gap: 10, overflowX: "auto", marginTop: 4, padding: "10px 10px 4px 2px" }}>
@@ -345,7 +417,8 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
             <div key={i} style={{ position: "relative", minWidth: 86 }}>
               <button onClick={() => sound(c.midi, 1.2)} aria-label={`play ${chordName(c, tonic)}`}
                 style={{ width: "100%", border: 0, borderRadius: 12, padding: "8px 6px", textAlign: "center", color: J.ink,
-                  background: J.surface, boxShadow: i === chords.length - 1 ? `0 0 0 2px ${J.padLatest}` : `0 0 0 1px ${J.edge}` }}>
+                  background: i === sounding ? J.chip : J.surface,
+                  boxShadow: i === sounding ? `0 0 0 3px ${J.padLatest}` : sounding === null && i === chords.length - 1 ? `0 0 0 2px ${J.padLatest}` : `0 0 0 1px ${J.edge}` }}>
                 <div style={{ fontSize: 16, fontWeight: 800 }}>{chordName(c, tonic)}</div>
                 <div style={{ fontSize: 13 }}>{best && c.chord ? j.romanOf(c.chord, tonic) : ""}</div>
                 <div style={{ fontSize: 10.5, color: J.inkSoft }}>{where(state.items[i])}</div>
@@ -515,6 +588,7 @@ export default function J6App() {
   const [state, dispatch] = useReducer(pr.explore, pr.START);
   const [set, setSet] = useState(54);
   const [t, setT] = useState(0);
+  const [opts, setOpts] = useState(pb.OPTIONS);
   useEffect(() => { audio.setInstrument(sound); }, [sound]); // eslint-disable-line
   const stopAll = useCallback(() => audio.panic(), [audio]);
 
@@ -529,7 +603,7 @@ export default function J6App() {
       </header>
 
       {tab === "explore"
-        ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} />
+        ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} opts={opts} setOpts={setOpts} />
         : <Find audio={audio} dispatch={dispatch} />}
 
       <footer style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>

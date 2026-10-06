@@ -555,6 +555,11 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-375 | With Rec on, every tap joins the progression in order; with it off, none does. | D-089 | A | With Rec on, every key tapped joins the progression in order |
 | R-381 | Turning Rec off keeps the progression and its numbers on the pads; only Clear, Undo or × remove chords. | D-089 | A | Turning Rec off keeps what was recorded, numbered on the pads, until it is cleared |
 | R-382 | Every chord name fits on its pad: the root, then the type in lines of at most 7 characters, broken only before a bracket, slash, add or sus. | D-089, D-079 | A | Every chord name fits on its pad |
+| R-383 | The progression plays at a tempo of 60–160 BPM in steps of 5, starting at 90. | D-090 | A | Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5 |
+| R-384 | Every chord lasts ½, 1 or 2 bars (1 to start), sounding a little less than its length. | D-090 | A | Each chord lasts half a bar, one bar or two bars |
+| R-385 | With Loop on (to start) the progression repeats until stopped; with it off it plays once and stops. | D-090 | A | With Loop on the progression repeats, and with it off it plays once and stops |
+| R-386 | With the click on (off to start), one bar is counted in, then every beat clicks, the first of each bar stronger. | D-090 | A | The click counts in one bar, then marks every beat with the first of each bar stronger |
+| R-387 | While playing, the chord sounding is highlighted in the progression and on its pad; a tempo change takes effect from the next beat; Stop silences everything at once. | D-090 | M | Playing along with the J-6 at the app's tempo |
 | R-376 | Any kept chord can be taken out; undo takes off the last and clear empties the progression. | D-089 | A | A chord can be taken out of the progression, and undo and clear still work |
 | R-377 | The key is judged from the progression once it has chords, and from the chord on screen before that. | D-089 | A | The key follows the progression once it has chords, and the last key tapped before that |
 | R-378 | A kept chord keeps its own set and KEY, and plays from them. | D-089 | A | A progression can mix chord sets and KEY settings |

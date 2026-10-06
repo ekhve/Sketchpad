@@ -3214,6 +3214,41 @@ Feature: J-6 Explore — what am I playing?
     Then the progression gains D♯, A, C♯ and C on set 47 at KEY −3, in that order
     And they play Dm7 G7 Cmaj7 Am7
 
+  @D-090 @UC-64 @auto
+  Scenario: Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5
+    Given the progression's playback options as the page opens
+    Then the tempo is 90 BPM, a chord lasts one bar, Loop is on and the click is off
+    And the tempo stops at 60 and at 160
+    And at 120 BPM a beat lasts half a second
+
+  @D-090 @UC-64 @auto
+  Scenario: Each chord lasts half a bar, one bar or two bars
+    Given a progression of three chords
+    Then at one bar a chord starts every 4 beats
+    And at half a bar every 2 beats, and at two bars every 8
+    And each chord sounds a little less than its length, leaving a breath before the next
+
+  @D-090 @UC-64 @auto
+  Scenario: With Loop on the progression repeats, and with it off it plays once and stops
+    Given a progression of two chords, one bar each
+    Then with Loop on, beat 8 starts the first chord again
+    And with Loop off, the play-through ends at beat 8
+
+  @D-090 @UC-64 @auto
+  Scenario: The click counts in one bar, then marks every beat with the first of each bar stronger
+    Given the click on
+    Then beats 0 to 3 are a count-in, the first one stronger, with no chord
+    And the first chord starts on beat 4
+    And at half a bar per chord, the stronger click still falls on the first beat of each bar
+    And with the click off, nothing is counted in and the first chord starts at once
+
+  @D-090 @UC-64 @manual
+  Scenario: Playing along with the J-6 at the app's tempo
+    Given a four-chord progression, the click on, Loop on
+    When I press Play and play along on the J-6
+    Then the count-in gives me the tempo, the chord sounding is highlighted in the progression and on its pad
+    And changing the tempo while it plays takes effect from the next beat, and Stop silences everything at once
+
   @D-089 @UC-64 @manual
   Scenario: Trying chords out never fills the progression by accident
     Given the phone next to the J-6, Rec off
