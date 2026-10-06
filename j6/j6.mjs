@@ -118,6 +118,20 @@ export function chordAt(n, k, t = 0) {
   };
 }
 
+/* ---------- display ---------- */
+/** A chord type cut into lines for a pad about 33 px wide: at most 6 characters a line, and
+ *  only ever before a bracket, a slash, "add" or "sus", so "maj9(no3)/G" is maj9 / (no3) / /G.
+ *  (D-089: pads were cutting long names off) */
+export function typeLines(rest) {
+  const parts = rest.split(/(?=[(/]|add|sus)/).filter(Boolean);
+  const lines = [];
+  for (const p of parts) {
+    if (lines.length && (lines[lines.length - 1] + p).length <= 6) lines[lines.length - 1] += p;
+    else lines.push(p);
+  }
+  return lines;
+}
+
 /* ---------- analysis ---------- */
 const MAJOR_REF = [0, 2, 4, 5, 7, 9, 11];
 

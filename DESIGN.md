@@ -662,6 +662,8 @@ What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole c
 
 The logic is a pure reducer in `j6/progression.mjs`, so it is tested without a browser. The page holds it in `useReducer` and does the sound.
 
+**From the first try on a phone.** The × to remove a chord was cut off by the scrolling strip, and the pads cut long names off ("Cmaj7" showed as "Cmaj"). The strip now has room for each ×. A pad now sets the root on one line and the type below, in lines of at most 7 characters, broken only before a bracket, a slash, "add" or "sus" ("maj9(no3)/G" as maj9 / (no3) / /G). A test checks every key of every set, at every KEY and in every key's spelling. A headless measurement of every pad at 375 and 390 px finds none cut off.
+
 **What building it found.** The set picker added with all 100 sets (`D-088`) pushed the panel wider than a phone, and long chord names (a 13th with "(no3)") did the same in Now. 87 of the 1,200 keys overflowed a 375 px screen. Both are fixed, and a headless sweep of every key at 375 px now finds none. That sweep is not yet a gate (see the headless exception in `DONE.md`).
 
 ## 5. What this project has taught, so far
@@ -760,6 +762,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | All 100 J-6 chord sets imported from the manual's page (`D-088`), with a reader for its 558 label spellings. Validation found 56 failing keys in 34 sets, now listed under `D-082` and pinned by a test; rootless voicings now count (`D-080`, amended); a failing key, not its whole set, is kept out of search (`D-082`, amended). Explore has a set picker and marks failing keys |
 | 2026-10-06 | J-6 Explore: a tap plays, "+ Add" keeps, Rec keeps every tap and starts off; kept chords remember their set and KEY, can be played or removed; the key follows the progression; Find adds a result in one tap (`D-089`). Fixed: the set picker and long chord names made the page wider than a phone on 87 keys |
 | 2026-10-06 | J-6: turning Rec off no longer hides what was recorded; the numbers stay on the pads until Clear (`D-089`, amended). The "!" message now says plainly that it marks a misprint in the manual |
+| 2026-10-06 | J-6: the progression's × is no longer cut off, and pad names no longer are either: root above type, the type in lines of at most 7 characters, checked for every key, KEY and spelling (`D-089`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

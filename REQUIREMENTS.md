@@ -554,6 +554,7 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-374 | "+ Add to progression" keeps the chord on screen, and does nothing when no chord is on screen. | D-089 | A | Add keeps the chord on screen |
 | R-375 | With Rec on, every tap joins the progression in order; with it off, none does. | D-089 | A | With Rec on, every key tapped joins the progression in order |
 | R-381 | Turning Rec off keeps the progression and its numbers on the pads; only Clear, Undo or × remove chords. | D-089 | A | Turning Rec off keeps what was recorded, numbered on the pads, until it is cleared |
+| R-382 | Every chord name fits on its pad: the root, then the type in lines of at most 7 characters, broken only before a bracket, slash, add or sus. | D-089, D-079 | A | Every chord name fits on its pad |
 | R-376 | Any kept chord can be taken out; undo takes off the last and clear empties the progression. | D-089 | A | A chord can be taken out of the progression, and undo and clear still work |
 | R-377 | The key is judged from the progression once it has chords, and from the chord on screen before that. | D-089 | A | The key follows the progression once it has chords, and the last key tapped before that |
 | R-378 | A kept chord keeps its own set and KEY, and plays from them. | D-089 | A | A progression can mix chord sets and KEY settings |

@@ -200,6 +200,7 @@ const J6_MUTANTS = [
   ["a stray note passes validation",         "if (strays.length) problems.push(", "if (false) problems.push("],
   ["ties go to the larger transposition",    "Math.abs(a.transpose) - Math.abs(b.transpose)", "Math.abs(b.transpose) - Math.abs(a.transpose)"],
   ["J-6 spelling ignores the key",           "nameOf(chord, keyNames(tonic, mode));", "nameOf(chord);"],
+  ["long pad names are never broken",       "if (lines.length && (lines[lines.length - 1] + p).length <= 6) lines[lines.length - 1] += p;", "if (lines.length) lines[lines.length - 1] += p;"],
 ].map(([name, from, to]) => [name, from, to, "j6/j6.mjs"]);
 
 /* The reader for the manual's chord labels (D-088). */

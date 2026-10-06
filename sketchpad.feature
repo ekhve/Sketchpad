@@ -3221,6 +3221,13 @@ Feature: J-6 Explore — what am I playing?
     Then the progression holds only that chord
     And when Rec is on, I can tell at a glance, without colour, that every tap is being kept
 
+  @D-089 @UC-64 @auto
+  Scenario: Every chord name fits on its pad
+    Given every key of every set, at every KEY, spelled in every key
+    Then each name is set as its root, then its type in lines of at most 7 characters
+    And a type is only ever broken before a bracket, a slash, "add" or "sus"
+    And "maj9(no3)/G" is set as maj9, (no3), /G
+
   @UC-64 @manual
   Scenario: The pad labels are readable at arm's length beside the hardware
     Given the phone is next to the J-6 on a desk

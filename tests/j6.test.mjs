@@ -217,6 +217,25 @@ test("Turning Rec off keeps what was recorded, numbered on the pads, until it is
   assert.deepEqual(j.KEYS.map((k) => number(cleared, k)).filter(Boolean), []);
 });
 
+test("Every chord name fits on its pad", async () => {
+  const { keyNames } = await import("./theory.mjs");
+  assert.deepEqual(j.typeLines("maj9(no3)/G"), ["maj9", "(no3)", "/G"]);
+  assert.deepEqual(j.typeLines("m7"), ["m7"]);
+  let longest = 0;
+  for (const n of Object.keys(j.SETS)) for (let k = 0; k < 12; k++) for (let t = -6; t <= 5; t++) {
+    const c = j.chordAt(n, k, t).chord;
+    if (!c) continue;
+    for (let tonic = 0; tonic < 12; tonic++) {
+      const name = j.nameInKey(c, tonic), rest = name.slice(keyNames(tonic)[c.root].length);
+      const lines = j.typeLines(rest);
+      assert.equal(lines.join(""), rest, "nothing is lost in the cut");
+      for (const l of lines.slice(1)) assert.match(l, /^([(/]|add|sus)/, `${name}: broken only before a bracket, slash, add or sus`);
+      longest = Math.max(longest, ...lines.map((l) => l.length));
+    }
+  }
+  assert.ok(longest <= 7, `the longest line is ${longest} characters`);
+});
+
 test("A chord can be taken out of the progression, and undo and clear still work", () => {
   const s = run([{ type: "rec", on: true }, tap("C"), tap("C#"), tap("G"), tap("D#")]);
   const removed = run([{ type: "remove", index: 1 }], s);

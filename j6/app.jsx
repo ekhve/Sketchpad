@@ -44,6 +44,7 @@ const degreeOf = (i, iv) => (i === 8 && iv.includes(7) ? "♭13" : i === 6 && iv
   : i === 9 && (iv.includes(10) || iv.includes(11)) ? "13th" : i === 3 && iv.includes(4) ? "♯9" : DEGREE[i]);
 /* An unlabelled key (the interval stacks, sets 14–16) or one whose label can't be read has no chord. */
 const chordName = (c, tonic) => (c.chord ? j.nameInKey(c.chord, tonic) : c.label ? "?" : "—");
+const padFont = (rest) => (rest.length <= 4 ? 10 : rest.length <= 5 ? 8.5 : rest.length <= 6 ? 7.5 : 6.8);
 const flagged = (set, k) => j.validateSet(set).find((r) => r.key === j.KEYS[k]);
 const pitchName = (m, names) => names[pc(m)] + (Math.floor(m / 12) - 1);
 const majorKey = (tonic) => `${spelling("letters", tonic).names[tonic]} major`;
@@ -97,13 +98,26 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
     const bad = flagged(set, k % 12);
     return (
       <button key={slot} onClick={() => onPress?.(k % 12)} aria-label={`J-6 key ${KEY_NAMES[k % 12]}${k === 12 ? " (high C)" : ""}: ${chordName(c, tonic)}${bad ? " (the manual's notes don't match)" : ""}`}
-        style={{ position: "relative", width: "100%", height: black ? 46 : 62, borderRadius: 6, background: fill, color: ink,
+        style={{ position: "relative", width: "100%", minHeight: black ? 46 : 62, borderRadius: 6, background: fill, color: ink,
           border: m.dashed ? `1.5px dashed ${J.padLatest}` : 0,
           /* the latest key is told apart by a thick outline as well as by colour (R-351) */
           boxShadow: m.latest ? `0 0 0 3px ${J.panelInk}` : "none",
-          display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center", padding: "4px 2px" }}>
+          display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center", padding: "4px 1px" }}>
         <span style={{ fontSize: 10, opacity: 0.8 }}>{k === 12 ? "C′" : KEY_NAMES[k]}{bad ? " !" : ""}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.1, textAlign: "center", letterSpacing: "-.02em", whiteSpace: "nowrap", maxWidth: "100%", overflow: "hidden" }}>{chordName(c, tonic)}</span>
+        {/* the root on one line and the rest below it, each sized to fit the pad, so no name is cut off */}
+        {(() => {
+          const name = chordName(c, tonic);
+          const root = c.chord ? spelling("letters", tonic).names[c.chord.root] : name;
+          const rest = name.slice(root.length);
+          /* a long type breaks before its bracket, slash, add or sus: maj9 / (no3) / /G */
+          const lines = j.typeLines(rest);
+          return (
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.05, fontWeight: 700, maxWidth: "100%" }}>
+              <span style={{ fontSize: 12 }}>{root}</span>
+              {lines.map((l) => <span key={l} style={{ fontSize: padFont(l), letterSpacing: "-.03em", whiteSpace: "nowrap" }}>{l}</span>)}
+            </span>
+          );
+        })()}
         {m.order && (
           <span style={{ position: "absolute", top: -7, right: -5, minWidth: 18, height: 18, borderRadius: 9, fontSize: 11, fontWeight: 800,
             background: J.badge, color: J.badgeInk, boxShadow: `0 0 0 2px ${J.panel}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{m.order}</span>
@@ -325,7 +339,8 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
             <Button dark onClick={playAll} disabled={!chords.length}>▶ Play</Button>
           </span>
         </div>
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", marginTop: 8 }}>
+        {/* the strip scrolls sideways, and scrolling clips at its padding: room for each chord's × */}
+        <div style={{ display: "flex", gap: 10, overflowX: "auto", marginTop: 4, padding: "10px 10px 4px 2px" }}>
           {chords.map((c, i) => (
             <div key={i} style={{ position: "relative", minWidth: 86 }}>
               <button onClick={() => sound(c.midi, 1.2)} aria-label={`play ${chordName(c, tonic)}`}
