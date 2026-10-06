@@ -2,7 +2,7 @@
 // Pure functions only. Data transcribed from the Roland J-6 Chord Set List (manual v1.02):
 // https://static.roland.com/manuals/J-6_manual_v102/eng/28645807.html
 // Only the sets the prototype screens use are transcribed here (29, 47, 54) plus set 59,
-// kept because its published voicings do not match its labels (see PROTOTYPE.md, D-J04).
+// kept because its published voicings do not match its labels (D-082).
 
 export const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -26,6 +26,13 @@ export const SETS = {
     ["G6", "C#4 F#4 B3 A#3"], ["Am9", "G#5 F#4 B3 A3"], ["Am6", "D#5 G#4 C#4 C4"], ["Bm9", "A#5 G#4 C#4 B3"]] },
 };
 
+/* ---------- shared theory (D-086) ----------
+   Spelling, chord qualities, scales and numerals come from Sketchpad's theory
+   layer, the block between THEORY:START and THEORY:END in sketchpad.jsx. Node
+   reads it from the module extracted for the tests; the page build points this
+   same import at sketchpad.jsx itself, so there is one copy of the theory. */
+import { pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, scalePcs, romanFor } from "../tests/theory.mjs";
+
 /* ---------- notes ---------- */
 const LETTER = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const ACC = { "": 0, "#": 1, "♯": 1, b: -1, "♭": -1 };
@@ -33,7 +40,7 @@ const ACC = { "": 0, "#": 1, "♯": 1, b: -1, "♭": -1 };
 export function pcOf(name) {
   const m = /^([A-G])(#|♯|b|♭)?$/.exec(name);
   if (!m) throw new Error(`not a note: ${name}`);
-  return (LETTER[m[1]] + ACC[m[2] ?? ""] + 12) % 12;
+  return pc(LETTER[m[1]] + ACC[m[2] ?? ""]);
 }
 
 export function midiOf(note) {
@@ -46,37 +53,29 @@ export function midiOf(note) {
 export const voicing = (s) => s.split(/\s+/).map(midiOf).sort((a, b) => a - b);
 
 /* ---------- chord symbols ---------- */
-// canonical quality → intervals above the root
-export const QUALITIES = {
-  "": [0, 4, 7], m: [0, 3, 7], "7": [0, 4, 7, 10], maj7: [0, 4, 7, 11], m7: [0, 3, 7, 10],
-  maj9: [0, 4, 7, 11, 2], m9: [0, 3, 7, 10, 2], "6": [0, 4, 7, 9], m6: [0, 3, 7, 9],
-};
-const ALIAS = { M7: "maj7", M9: "maj9", Maj7: "maj7", "Δ7": "maj7", min: "m", "-": "m", min7: "m7", "-7": "m7" };
+/** quality → intervals above the root, folded into one octave, from Sketchpad's dictionary. */
+export const QUALITIES = Object.fromEntries(DICTIONARY.map((d) => [d.q, [...new Set(d.iv.map(pc))]]));
 
-/** "Cmaj7", "CM7/E", "A#7", "B♭maj7" → { root, quality, bass } (pitch classes). */
+/** "Cmaj7", "CM7/E", "A#7", "B♭maj7" → { root, quality, bass } (pitch classes).
+ *  Read by Sketchpad's chord-name reader, so both apps accept the same spellings (D-077). */
 export function parseChord(symbol) {
-  const m = /^([A-G](?:#|♯|b|♭)?)([^/]*)(?:\/([A-G](?:#|♯|b|♭)?))?$/.exec(symbol.trim());
-  if (!m) throw new Error(`cannot read chord: ${symbol}`);
-  const quality = ALIAS[m[2]] ?? m[2];
-  if (!(quality in QUALITIES)) throw new Error(`unknown quality "${m[2]}" in ${symbol}`);
-  const root = pcOf(m[1]);
-  const bass = m[3] ? pcOf(m[3]) : root;
-  return { root, quality, bass };
+  const r = parseChordName(symbol);
+  if (!r.ok) throw new Error(`cannot read chord: ${r.reason}`);
+  return { root: r.rootPc, quality: r.sym, bass: r.bassPc ?? r.rootPc };
 }
 
 export const pcsOf = ({ root, quality, bass }) =>
-  new Set([...QUALITIES[quality].map((i) => (root + i) % 12), bass]);
+  new Set([...QUALITIES[quality].map((i) => pc(root + i)), bass]);
 
-const FLAT_NAMES = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
-const SHARP_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
-
-/** Display name (D-J01): musician spelling, flats for the black keys by default. */
+/** Display name (D-079): musician spelling. Without a key, flats for the black keys;
+ *  with one, the key's own spelling (D-086), so F#m7 in D major is never G♭m7. */
 export function nameOf({ root, quality, bass }, names = FLAT_NAMES) {
   return names[root] + quality + (bass !== root ? "/" + names[bass] : "");
 }
-export { FLAT_NAMES, SHARP_NAMES };
+export const nameInKey = (chord, tonic, mode = "major") => nameOf(chord, keyNames(tonic, mode));
+export { FLAT_NAMES };
 
-/* ---------- data validation (D-J04) ---------- */
+/* ---------- data validation (D-082) ---------- */
 /** A J-6 voicing is valid for its label if the label's root is sounded and every sounded
  *  pitch class belongs to the labelled chord. Missing tones are allowed: the J-6 has 4 voices. */
 export function validateKey(label, notes) {
@@ -87,7 +86,7 @@ export function validateKey(label, notes) {
   const problems = [];
   if (!got.has(chord.root)) problems.push("root not sounded");
   const strays = [...got].filter((pc) => !want.has(pc));
-  if (strays.length) problems.push(`notes outside the chord: ${strays.map((p) => SHARP_NAMES[p]).join(" ")}`);
+  if (strays.length) problems.push(`notes outside the chord: ${strays.map((p) => NAMES[p]).join(" ")}`);
   if (chord.bass !== chord.root && midi[0] % 12 !== chord.bass) problems.push("slash bass is not the lowest note");
   return problems;
 }
@@ -105,21 +104,20 @@ export function chordAt(n, k, t = 0) {
   const c = parseChord(label);
   return {
     key: KEYS[k], label,
-    chord: { root: (c.root + t + 12) % 12, quality: c.quality, bass: (c.bass + t + 12) % 12 },
+    chord: { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t) },
     midi: voicing(notes).map((m) => m + t),
   };
 }
 
 /* ---------- analysis ---------- */
-const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-const NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII"];
+const MAJOR_REF = [0, 2, 4, 5, 7, 9, 11];
 
 /** Major keys in which every chord is diatonic, best first (tie-break: first chord's root). */
 export function likelyKeys(chords) {
   const fits = [];
   for (let tonic = 0; tonic < 12; tonic++) {
-    const scale = new Set(MAJOR.map((i) => (tonic + i) % 12));
-    const inKey = chords.filter((c) => [...pcsOf(c)].every((pc) => scale.has(pc))).length;
+    const scale = new Set(scalePcs(tonic, "major"));
+    const inKey = chords.filter((c) => [...pcsOf(c)].every((p) => scale.has(p))).length;
     fits.push({ tonic, inKey });
   }
   const first = chords[0]?.root;
@@ -127,13 +125,14 @@ export function likelyKeys(chords) {
     .sort((a, b) => b.inKey - a.inKey || (b.tonic === first) - (a.tonic === first) || a.tonic - b.tonic);
 }
 
+/** The chord's numeral in a major key: Sketchpad's numeral (case, ♭/♯, °, +) plus the
+ *  chord's extension, so Imaj7, iii7, V7, ♭VII7. */
 export function romanOf(chord, tonic) {
-  const degree = MAJOR.indexOf((chord.root - tonic + 12) % 12);
-  if (degree < 0) return null;
-  const minor = QUALITIES[chord.quality].includes(3);
-  const base = minor ? NUMERALS[degree].toLowerCase() : NUMERALS[degree];
-  const suffix = chord.quality.replace(/^m(?!aj)/, "");
-  return base + suffix;
+  const offset = pc(chord.root - tonic);
+  let degree = MAJOR_REF.indexOf(offset);
+  if (degree < 0) degree = MAJOR_REF.indexOf(offset + 1);   // a flattened degree: ♭III, ♭VII
+  const suffix = chord.quality.replace(/^m(?!aj)/, "").replace(/^(dim|aug)/, "");
+  return romanFor(tonic, chord.root, degree, chord.quality) + suffix;
 }
 
 /* ---------- reverse search ---------- */
@@ -148,14 +147,14 @@ export function matchScore(want, got, mode) {
     return mode === "exact" ? { score: 0, kind: "none" } : { score: 0.9, kind: "inversion" };
   }
   if (mode === "exact") return { score: 0, kind: "none" };
-  const a = new Set(QUALITIES[want.quality].map((i) => (want.root + i) % 12));
-  const b = new Set(QUALITIES[got.quality].map((i) => (got.root + i) % 12));
+  const a = new Set(QUALITIES[want.quality].map((i) => pc(want.root + i)));
+  const b = new Set(QUALITIES[got.quality].map((i) => pc(got.root + i)));
   const shared = [...a].filter((x) => b.has(x)).length;
   if (third(want) === third(got) && shared >= 3 && (subset(a, b) || subset(b, a))) return { score: 0.6, kind: "close" };
   return { score: 0, kind: "none" };
 }
 
-/** Rank chord sets for a progression. TRANSPOSE_RANGE is an assumption until checked on the device. */
+/** Rank chord sets for a progression. TRANSPOSE_RANGE is an assumption until checked on the device (D-081). */
 export const TRANSPOSE_RANGE = [-6, 5];
 export function search(progression, { sets = Object.keys(SETS).map(Number), mode = "musical", transpose = true } = {}) {
   const wanted = progression.trim().split(/\s+/).map(parseChord);

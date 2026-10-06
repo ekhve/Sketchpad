@@ -39,6 +39,20 @@ test("Keys C, C#, G, D# on set 54 read as Imaj7 iii7 vi7 IVmaj7 in C major", () 
   assert.deepEqual(prog.map((c) => j.romanOf(c, 0)), ["Imaj7", "iii7", "vi7", "IVmaj7"]);
 });
 
+test("J-6 chords are spelled the way their key writes them", () => {
+  const played = (t) => ["C", "C#", "G", "D#"].map((k) => at(54, k, t).chord);
+  const prog = played(2);
+  const [best] = j.likelyKeys(prog);
+  assert.equal(best.tonic, 2);
+  assert.deepEqual(prog.map((c) => j.nameInKey(c, best.tonic)), ["Dmaj7", "F#m7", "Bm7", "Gmaj7"]);
+  assert.equal(j.nameOf(prog[1]), "G♭m7", "without a key the black keys are flats, which is why the key matters");
+  for (let t = -6; t <= 5; t++) {
+    const p = played(t);
+    const names = p.map((c) => j.nameInKey(c, j.likelyKeys(p)[0].tonic)).join(" ");
+    assert.ok(!(names.includes("#") && names.includes("♭")), `KEY ${t}: ${names}`);
+  }
+});
+
 test("Roman numerals follow the key, not the letter C", () => {
   // the same shapes a fourth up, in F major
   const prog = ["Fmaj7", "Am7", "Dm7", "B♭maj7", "C7"].map(j.parseChord);
@@ -62,6 +76,11 @@ test("Dm7 G7 Cmaj7 Am7 finds set 47 at KEY −3 with four exact matches", () => 
   assert.equal(best.transpose, -3);
   assert.equal(best.score, 1);
   assert.deepEqual(names(best), ["Dm7:exact:D#/F#", "G7:exact:A", "Cmaj7:exact:C#/E", "Am7:exact:C"]);
+  // set 54 plays Cmaj7 exactly at KEY 0 (C), +2 (A♯), −3 (D♯) and −5 (F): the nearest to 0 wins
+  const [one] = j.search("Cmaj7", { sets: [54] });
+  assert.equal(one.transpose, 0);
+  const [far] = j.search("Dmaj7", { sets: [54] });
+  assert.equal(far.transpose, -1, "KEY −1 on D♯ beats KEY +2 on C, −3 on F and +4 on A♯");
 });
 
 test("Musical search counts an inversion and a missing seventh as near matches", () => {

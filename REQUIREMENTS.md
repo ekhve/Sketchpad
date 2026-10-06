@@ -531,6 +531,8 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-356 | Exact search accepts only the same root, quality and bass. | UC-65 | A | Exact search without transpose ranks set 54 first at 75% |
 | R-357 | The KEY direction and range the engine assumes are the device's, checked on a J-6. | D-081 | M | The KEY direction and range match the hardware |
 | R-358 | The 8th lower pad is drawn as playing the C chord, as the device does. | D-083 | M | The high C pad plays the C chord |
+| R-361 | J-6 chord names are spelled the way their key writes them, through Sketchpad's spelling, and never mix sharps and flats within one key. | D-086, D-074 | A | J-6 chords are spelled the way their key writes them |
+| R-362 | The J-6 engine has no theory of its own beyond its adapter, validator, data and search: spelling, qualities, chord names and numerals come from Sketchpad's theory layer. | D-086 | I | `j6/j6.mjs` imports |
 | R-359 | The J-6 prototype screens are generated from the engine and never edited by hand. | D-084 | I | `proto/j6/build-prototype.mjs` |
 | R-360 | The J-6 scenarios live in `sketchpad.feature`, and the traceability test covers the J-6 tests. | D-085 | A | *(traceability.test.mjs)* |
 

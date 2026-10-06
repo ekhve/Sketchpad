@@ -185,7 +185,18 @@ const OTHER_MUTANTS = [
   ["offline requests go to the network",    '.then((hit) => hit || fetch(event.request)));', '.then(() => fetch(event.request)));'],
 ].map(([name, from, to]) => [name, from, to, "tools/package-site.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS];
+/* The J-6 Explorer's engine (D-079–D-086). */
+const J6_MUTANTS = [
+  ["KEY transposes the wrong way",           "chord: { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t) },", "chord: { root: pc(c.root - t), quality: c.quality, bass: pc(c.bass - t) },"],
+  ["voicings stay put when KEY moves",       "midi: voicing(notes).map((m) => m + t),", "midi: voicing(notes),"],
+  ["an inversion scores as exact",           '{ score: 0.9, kind: "inversion" }', '{ score: 1, kind: "inversion" }'],
+  ["search trusts a set that fails validation", "if (validateSet(n).length) continue;", ""],
+  ["a stray note passes validation",         "if (strays.length) problems.push(", "if (false) problems.push("],
+  ["ties go to the larger transposition",    "Math.abs(a.transpose) - Math.abs(b.transpose)", "Math.abs(b.transpose) - Math.abs(a.transpose)"],
+  ["J-6 spelling ignores the key",           "nameOf(chord, keyNames(tonic, mode));", "nameOf(chord);"],
+].map(([name, from, to]) => [name, from, to, "j6/j6.mjs"]);
+
+const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

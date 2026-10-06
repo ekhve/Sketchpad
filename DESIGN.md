@@ -550,6 +550,18 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **Decision.** The J-6 scenarios move into `sketchpad.feature` under `Feature: J-6 …` headings, and `traceability.test.mjs` reads `tests/j6.test.mjs` as well. Teaching the gates a second feature file would have meant changing four checks for no gain. The scenarios keep their names, so `proto/j6/PROTOTYPE.md` still reads as the record of what was agreed.
 
+### D-086 — J-6 shares Sketchpad's theory: extracted for Node, bundled from the source for the page
+
+**Context.** The J-6 prototype had its own small chord parser and nine chord qualities, and spelled every black key as a flat, so F♯m7 showed as G♭m7. Sketchpad's theory layer already spells all 24 keys correctly (`D-074`), reads chord names in every common chart spelling (`D-077`) and writes numerals with the right case (`D-077`). That theory lives inline in `sketchpad.jsx`, between `THEORY:START` and `THEORY:END`. The tests read it as `tests/theory.mjs`, extracted from that block on every run and never committed (`D-020`, `D-032`).
+
+**Decision.** `j6/j6.mjs` imports Sketchpad's theory, and only J-6-specific code (the adapter, the validator, the set data, the search) stays in `j6/`.
+
+1. **In Node** (the tests, the mutator, the prototype generator) it imports the extracted `tests/theory.mjs`. Every command that runs them extracts first, so the J-6 tests also run against the theory that ships.
+2. **In the page build** the same import is pointed at `sketchpad.jsx` itself, which exports the theory and the pieces the J-6 page reuses (piano, sound, colour tokens). That way the page carries one copy of the theory and of the piano recordings, not two.
+3. **Not chosen: moving the theory to its own module** that `sketchpad.jsx` imports. It would have been the tidier end state, but it would move 2,800 lines out of the app and change the extraction, every gate that reads the block (G6, G7), and the mutator's target, all in a step meant to add a page. It is worth doing on its own, as a refactor whose only test is that nothing else changes.
+
+What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole chord dictionary and its aliases, and numerals for chords outside the key (♭VII7 rather than nothing). Without a key, black keys are still spelled as flats, as `D-079` says.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -641,6 +653,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-01 | Finger numbers (`D-078`, `UC-63`): suggested fingers on lit keys for the right hand, left hand or both, chords by rule and the 24 major and natural minor scales from a checked table, hand reach as a setting, two hands told apart by fill as well as colour, on by itself in Learn and optional on the printed sheet. Prototype and spec agreed first |
 | 2026-10-05 | The build moved into the repository: `npm run build` and `npm run site` make the app and the installable site from the code alone, and a GitHub Actions workflow tests and publishes to Pages on every push (`D-076`) |
 | 2026-10-06 | J-6 Explorer moved into the repository as a second app: its engine in `j6/`, its 12 tests in the suite, its prototype in `proto/j6/`, and its 15 scenarios in `sketchpad.feature` (`D-085`). The prototype's decisions are numbered `D-079`–`D-084`, and its two workflows are `UC-64` (Explore) and `UC-65` (Find). 426 checks |
+| 2026-10-06 | J-6 shares Sketchpad's theory (`D-086`): its chord names, numerals and key detection now come from the theory layer, so chords are spelled the way their key writes them (F#m7 in D major, not G♭m7). Seven J-6 mutants added to the mutator |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

@@ -3111,6 +3111,14 @@ Feature: J-6 Explore — what am I playing?
     Then the likely key is F major
     And the numerals read Imaj7 iii7 vi7 IVmaj7 V7
 
+  @D-086 @UC-64 @auto
+  Scenario: J-6 chords are spelled the way their key writes them
+    Given chord set 54 at KEY +2
+    When the user presses C, C♯, G, D♯
+    Then the likely key is D major
+    And the chords read Dmaj7 F#m7 Bm7 Gmaj7, never G♭m7
+    And at every KEY from −6 to +5 the same four chords never mix sharps and flats
+
   @UC-64 @manual
   Scenario: The pad labels are readable at arm's length beside the hardware
     Given the phone is next to the J-6 on a desk
@@ -3133,6 +3141,7 @@ Feature: J-6 Find — how do I play this on the J-6?
     When the user searches "Dm7 G7 Cmaj7 Am7"
     Then the best match is set 47 at KEY −3 scoring 100%
     And Dm7 is on D♯ or F♯, G7 on A, Cmaj7 on C♯ or E, Am7 on C
+    And when several KEY values play a progression equally well, the one nearest 0 wins
 
   @UC-65 @auto
   Scenario: Musical search counts an inversion and a missing seventh as near matches
