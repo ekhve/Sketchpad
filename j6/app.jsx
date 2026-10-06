@@ -36,11 +36,18 @@ const SET_NUMBERS = Object.keys(j.SETS).map(Number).sort((a, b) => a - b);
 const [KEY_LO, KEY_HI] = j.TRANSPOSE_RANGE;
 const signed = (t) => (t > 0 ? `+${t}` : t < 0 ? `−${-t}` : "0");
 const DEGREE = { 0: "root", 1: "♭9", 2: "9th", 3: "3rd", 4: "3rd", 5: "4th", 6: "♭5", 7: "5th", 8: "♯5", 9: "6th", 10: "7th", 11: "7th" };
+/* with a fifth already there, 8 is a ♭13 rather than a ♯5, and with a seventh 5 and 9 are an 11th and a 13th; with both thirds, 3 is a ♯9 */
+const degreeOf = (i, iv) => (i === 8 && iv.includes(7) ? "♭13" : i === 6 && iv.includes(7) ? "♯11"
+  : i === 5 && (iv.includes(10) || iv.includes(11)) && (iv.includes(3) || iv.includes(4)) ? "11th"
+  : i === 9 && (iv.includes(10) || iv.includes(11)) ? "13th" : i === 3 && iv.includes(4) ? "♯9" : DEGREE[i]);
+/* An unlabelled key (the interval stacks, sets 14–16) or one whose label can't be read has no chord. */
+const chordName = (c, tonic) => (c.chord ? j.nameInKey(c.chord, tonic) : c.label ? "?" : "—");
+const flagged = (set, k) => j.validateSet(set).find((r) => r.key === j.KEYS[k]);
 const pitchName = (m, names) => names[pc(m)] + (Math.floor(m / 12) - 1);
 const majorKey = (tonic) => `${spelling("letters", tonic).names[tonic]} major`;
 
 /* The key a whole set suggests, for spelling its pads before anything is played. */
-const setTonic = (n, t) => j.likelyKeys(j.KEYS.map((_, k) => j.chordAt(n, k, t).chord))[0]?.tonic ?? 0;
+const setTonic = (n, t) => j.likelyKeys(j.KEYS.map((_, k) => j.chordAt(n, k, t).chord).filter(Boolean))[0]?.tonic ?? 0;
 
 /* ============================================================================
    SMALL PARTS
@@ -85,15 +92,16 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
     const m = k === 12 ? (({ order, dashed }) => ({ dashed: Boolean(order || dashed) }))(marks(0)) : marks(k);
     const fill = m.latest ? J.padLatest : m.lit ? J.padEarlier : black ? J.padBlack : J.padWhite;
     const ink = m.latest ? J.badgeInk : m.lit ? J.padEarlierInk : black ? J.padInkLight : J.padInkDark;
+    const bad = flagged(set, k % 12);
     return (
-      <button key={slot} onClick={() => onPress?.(k % 12)} aria-label={`J-6 key ${KEY_NAMES[k % 12]}${k === 12 ? " (high C)" : ""}: ${j.nameInKey(c.chord, tonic)}`}
+      <button key={slot} onClick={() => onPress?.(k % 12)} aria-label={`J-6 key ${KEY_NAMES[k % 12]}${k === 12 ? " (high C)" : ""}: ${chordName(c, tonic)}${bad ? " (the manual's notes don't match)" : ""}`}
         style={{ position: "relative", width: "100%", height: black ? 46 : 62, borderRadius: 6, background: fill, color: ink,
           border: m.dashed ? `1.5px dashed ${J.padLatest}` : 0,
           /* the latest key is told apart by a thick outline as well as by colour (R-351) */
           boxShadow: m.latest ? `0 0 0 3px ${J.panelInk}` : "none",
           display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center", padding: "4px 2px" }}>
-        <span style={{ fontSize: 10, opacity: 0.8 }}>{k === 12 ? "C′" : KEY_NAMES[k]}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.1, textAlign: "center", letterSpacing: "-.02em", whiteSpace: "nowrap", maxWidth: "100%", overflow: "hidden" }}>{j.nameInKey(c.chord, tonic)}</span>
+        <span style={{ fontSize: 10, opacity: 0.8 }}>{k === 12 ? "C′" : KEY_NAMES[k]}{bad ? " !" : ""}</span>
+        <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.1, textAlign: "center", letterSpacing: "-.02em", whiteSpace: "nowrap", maxWidth: "100%", overflow: "hidden" }}>{chordName(c, tonic)}</span>
         {m.order && (
           <span style={{ position: "absolute", top: -7, right: -5, minWidth: 18, height: 18, borderRadius: 9, fontSize: 11, fontWeight: 800,
             background: J.badge, color: J.badgeInk, boxShadow: `0 0 0 2px ${J.panel}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{m.order}</span>
@@ -115,7 +123,7 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
   );
 }
 
-function Panel({ set, t, children, onSet, onKey }) {
+function Panel({ set, t, children, onSet, onPick, onKey }) {
   const bad = j.validateSet(set);
   return (
     <div style={{ background: J.panel, color: J.panelInk, borderRadius: 18, padding: 14 }}>
@@ -123,7 +131,12 @@ function Panel({ set, t, children, onSet, onKey }) {
         <div aria-label={`chord set ${set}`} style={{ background: J.ledGround, color: J.led, fontFamily: "ui-monospace,monospace", fontSize: 30, fontWeight: 700, padding: "4px 14px", borderRadius: 6, minWidth: 72, textAlign: "center" }}>{set}</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 10.5, letterSpacing: ".12em", color: J.panelSoft }}>CHORD SET</div>
-          <div style={{ fontSize: 17, fontWeight: 700 }}>{j.SETS[set].genre}</div>
+          {onPick ? (
+            <select aria-label="chord set" value={set} onChange={(e) => onPick(Number(e.target.value))}
+              style={{ fontSize: 17, fontWeight: 700, background: "transparent", color: J.panelInk, border: 0, padding: 0, maxWidth: "100%" }}>
+              {SET_NUMBERS.map((n) => <option key={n} value={n}>{n} · {j.SETS[n].genre}</option>)}
+            </select>
+          ) : <div style={{ fontSize: 17, fontWeight: 700 }}>{j.SETS[set].genre}</div>}
           <div style={{ fontSize: 12, color: J.panelSoft }}>KEY {signed(t)} · chord mode</div>
         </div>
         {onSet && (
@@ -145,7 +158,9 @@ function Panel({ set, t, children, onSet, onKey }) {
       )}
       {bad.length > 0 && (
         <div role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12 }}>
-          The manual's chord data for set {set} fails on {bad.length} of 12 keys, so search never suggests it. Its chord names below are the manual's, not what the J-6 may play.
+          {j.untrustedSet(set)
+            ? `The manual's chord data for set ${set} fails on ${bad.length} of 12 keys, so search never suggests this set. Its chord names are the manual's, not necessarily what the J-6 plays.`
+            : `On ${bad.length === 1 ? "the key marked !" : `the ${bad.length} keys marked !`}, the manual's notes don't match its chord name, so search never suggests ${bad.length === 1 ? "it" : "them"}.`}
         </div>
       )}
       <div style={{ marginTop: 14 }}>{children}</div>
@@ -164,7 +179,7 @@ function Explore({ audio }) {
   const [held, setHeld] = useState([]);
 
   const chords = played.map((k) => j.chordAt(set, k, t));
-  const keys = j.likelyKeys(chords.map((c) => c.chord));
+  const keys = j.likelyKeys(chords.map((c) => c.chord).filter(Boolean));
   const best = keys[0], next = keys[1];
   const tonic = best ? best.tonic : setTonic(set, t);
   const names = spelling("letters", tonic).names;
@@ -195,11 +210,12 @@ function Explore({ audio }) {
   const hi = latest ? Math.max(...latest.midi) : 72;
   const start = Math.floor(lo / 12) * 12;
   const octaves = Math.max(2, Math.ceil((hi - start + 1) / 12));
-  const notes = latest ? j.QUALITIES[latest.chord.quality] : [];
+  const notes = latest?.chord ? latest.chord.iv : [];
+  const latestBad = latest && flagged(set, j.KEYS.indexOf(latest.key));
 
   return (
     <>
-      <Panel set={set} t={t} onSet={changeSet} onKey={changeKey}>
+      <Panel set={set} t={t} onSet={changeSet} onPick={(n) => { setSet(n); setPlayed([]); }} onKey={changeKey}>
         <J6Pads set={set} t={t} tonic={tonic} marks={marks} onPress={press} />
       </Panel>
       <p style={{ fontSize: 13, color: J.inkSoft, margin: "8px 4px" }}>Tap the keys in the order you played them on your J-6.</p>
@@ -212,10 +228,10 @@ function Explore({ audio }) {
           <>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.05 }}>{j.nameInKey(latest.chord, tonic)}</div>
-                <div style={{ fontSize: 12.5, color: J.inkSoft, marginTop: 4 }}>J-6 key {KEY_NAMES[j.KEYS.indexOf(latest.key)]} · manual says {latest.label}</div>
+                <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.05 }}>{chordName(latest, tonic)}</div>
+                <div style={{ fontSize: 12.5, color: J.inkSoft, marginTop: 4 }}>J-6 key {KEY_NAMES[j.KEYS.indexOf(latest.key)]} · {latest.label ? `manual says ${latest.label}` : "no chord name in the manual: an interval"}</div>
               </div>
-              {best && (
+              {best && latest.chord && (
                 <div style={{ textAlign: "center" }}>
                   <div style={{ background: J.pill, color: J.pillInk, borderRadius: 999, padding: "6px 16px", fontSize: 18, fontWeight: 800 }}>{j.romanOf(latest.chord, tonic)}</div>
                   <div style={{ fontSize: 12, color: J.inkSoft, marginTop: 4 }}>in {majorKey(tonic)}</div>
@@ -228,7 +244,7 @@ function Explore({ audio }) {
                   <div style={{ width: 50, height: 38, borderRadius: 8, background: i === 0 ? J.chipStrong : J.chip, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800 }}>
                     {names[pc(latest.chord.root + iv)]}
                   </div>
-                  <div style={{ fontSize: 11, color: J.inkSoft, marginTop: 3 }}>{DEGREE[iv]}</div>
+                  <div style={{ fontSize: 11, color: J.inkSoft, marginTop: 3 }}>{degreeOf(iv, notes)}</div>
                 </div>
               ))}
               <div style={{ marginLeft: "auto", fontSize: 11, color: J.inkSoft }}>
@@ -237,6 +253,11 @@ function Explore({ audio }) {
                 <div>low → high</div>
               </div>
             </div>
+            {latestBad && (
+              <p role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12.5 }}>
+                The manual's notes for this key don't match "{latest.label}": {latestBad.problems.join("; ")}. The piano shows the notes as printed.
+              </p>
+            )}
           </>
         )}
       </Card>
@@ -248,7 +269,7 @@ function Explore({ audio }) {
         </div>
         {showPiano && (
           <Piano startMidi={start} octaves={octaves} chordNotes={latest ? latest.midi : []}
-            chordRootMidi={latest ? latest.midi.find((m) => pc(m) === latest.chord.root) ?? -1 : -1}
+            chordRootMidi={latest?.chord ? latest.midi.find((m) => pc(m) === latest.chord.root) ?? -1 : -1}
             loopNotes={[]} scaleSet={best ? scalePcs(tonic, "major") : []} tonic={tonic} sounding={held}
             system={spelling("letters", tonic)}
             onDown={(m) => { setHeld((h) => [...h, m]); audio.holdOn(m); }}
@@ -269,7 +290,7 @@ function Explore({ audio }) {
             </div>
             <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
               {scalePcs(best.tonic, "major").map((p) => {
-                const inLatest = latest && j.pcsOf(latest.chord).has(p);
+                const inLatest = latest?.chord && j.pcsOf(latest.chord).has(p);
                 return (
                   <span key={p} style={{ width: 26, height: 26, borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11.5, fontWeight: 700,
                     background: inLatest ? J.chipStrong : J.chip, boxShadow: `0 0 0 1px ${J.edge}` }}>{names[p]}</span>
@@ -293,8 +314,8 @@ function Explore({ audio }) {
           {chords.map((c, i) => (
             <div key={i} style={{ minWidth: 82, borderRadius: 12, padding: "8px 6px", textAlign: "center",
               background: J.surface, boxShadow: i === chords.length - 1 ? `0 0 0 2px ${J.padLatest}` : `0 0 0 1px ${J.edge}` }}>
-              <div style={{ fontSize: 16, fontWeight: 800 }}>{j.nameInKey(c.chord, tonic)}</div>
-              <div style={{ fontSize: 13 }}>{best ? j.romanOf(c.chord, tonic) : ""}</div>
+              <div style={{ fontSize: 16, fontWeight: 800 }}>{chordName(c, tonic)}</div>
+              <div style={{ fontSize: 13 }}>{best && c.chord ? j.romanOf(c.chord, tonic) : ""}</div>
               <div style={{ fontSize: 10.5, color: J.inkSoft }}>J-6 key {KEY_NAMES[j.KEYS.indexOf(c.key)]}</div>
             </div>
           ))}
@@ -325,7 +346,8 @@ function Find({ audio }) {
   const ok = parsed.length > 0 && parsed.every((p) => p.chord);
   const results = useMemo(() => (ok ? j.search(tokens.join(" "), { mode, transpose }) : []), [text, mode, transpose, ok]); // eslint-disable-line
   const best = results[0] && results[0].score > 0 ? results[0] : null;
-  const skipped = SET_NUMBERS.filter((n) => j.validateSet(n).length);
+  const skipped = SET_NUMBERS.filter((n) => j.untrustedSet(n));
+  const badKeys = SET_NUMBERS.reduce((sum, n) => sum + (j.untrustedSet(n) ? 0 : j.validateSet(n).length), 0);
   const wantTonic = ok ? j.likelyKeys(parsed.map((p) => p.chord))[0]?.tonic ?? 0 : 0;
 
   /* the keys to press, in order: the first key that plays each chord. */
@@ -414,7 +436,7 @@ function Find({ audio }) {
       {results.length > 1 && (
         <Card>
           <Label>Other sets</Label>
-          {results.slice(1).map((r) => (
+          {results.slice(1, 6).map((r) => (
             <div key={r.set} style={{ margin: "8px 0 12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800 }}>
                 <span>Set {r.set} · {r.genre}</span><span>{Math.round(r.score * 1000) / 10}%</span>
@@ -425,12 +447,15 @@ function Find({ audio }) {
               </div>
             </div>
           ))}
+          {results.filter((r) => r.score > 0).length > 6 && (
+            <p style={{ fontSize: 12, color: J.inkSoft }}>and {results.filter((r) => r.score > 0).length - 6} more sets with at least one of these chords.</p>
+          )}
         </Card>
       )}
 
       <p style={{ fontSize: 11.5, color: J.inkSoft, margin: "8px 4px" }}>
-        Ranked over sets {SET_NUMBERS.filter((n) => !skipped.includes(n)).join(", ")}
-        {skipped.length ? `; set ${skipped.join(", ")} left out because the manual's data for it doesn't add up` : ""}.
+        Ranked over all {SET_NUMBERS.length - skipped.length} sets but set {skipped.join(", ")}, whose printed notes mostly don't match their chord names.
+        The {badKeys} other keys where the manual's notes and names disagree are never suggested.
         Dashed pads play the same chord as a numbered one.
       </p>
     </>
@@ -469,7 +494,7 @@ export default function J6App() {
       {/* what only the hardware can confirm stays visible until it has (D-081, D-083) */}
       <p style={{ fontSize: 11.5, color: J.inkSoft, marginTop: 14, lineHeight: 1.45 }}>
         Not yet checked on a J-6: that KEY runs from −6 to +5 and + transposes up, and that the high C pad plays the C chord.
-        Only sets {SET_NUMBERS.join(", ")} of the J-6's 100 are in the app so far.
+        Chord data: the J-6 manual's Chord Set List, all {SET_NUMBERS.length} sets, checked key by key.
       </p>
     </main>
   );

@@ -3085,6 +3085,40 @@ Feature: J-6 chord data
     Then it is valid
     But G4 B3 F3 G♯2 labelled G7 is not
 
+  @D-088 @auto
+  Scenario: All 100 chord sets are read from the manual, label and voicing as printed
+    Given the Chord Set List in the J-6 manual
+    Then there are 100 sets of 12 keys, each with a voicing of two to four notes
+    And sets 14 to 16, the interval stacks, have no labels
+    And every label is read, except set 19's "F#FM7", a typo in the manual
+    And sets 29, 47, 54 and 59 are exactly as the prototype transcribed them
+
+  @D-088 @auto
+  Scenario: The manual's chord spellings are read the way it means them
+    Then "CM9/#11" is Cmaj9 with a sharp 11, not a chord over a bass note
+    And "Cm7/b13" adds a flat 13, "CM9 (no3)/G" has no third and G in the bass
+    And "Gb6/9" and "Dm6/9" have no seventh, "Asus9/13" is suspended with a 9th and a 13th, and "D7alt" is altered
+    And "D# dim7", "FmAdd9" and "AbMaj13" are read despite the spacing and capitals
+
+  @D-082 @auto
+  Scenario: The manual's errors are listed, and the list is pinned
+    When every key of every set is validated
+    Then exactly the keys recorded in DESIGN.md fail, 56 keys in 34 sets
+    And set 59 is the only set left out of search altogether
+
+  @D-082 @auto
+  Scenario: A key whose printed voicing contradicts its label is never suggested, and the rest of its set still is
+    Given set 18, whose E key is labelled E but plays E G B
+    When the user searches "E" on set 18 without transpose
+    Then no key is suggested
+    But "Cm Dm" on set 18 is found on C and D
+
+  @D-080 @auto
+  Scenario: A rootless voicing counts as its chord
+    Given set 88's C key, "Fmaj7/9" printed as C4 A3 G3 E3, with no F
+    Then it is valid, as a jazz pianist's rootless voicing
+    But set 59's "C6", printed as F#3 B3 E3 D#3, is still flagged for its missing root
+
 Feature: J-6 Explore — what am I playing?
   Tap the J-6 keys in the order they were played on the hardware, and see each
   chord's name, numeral, notes and real voicing, and the key they suggest.

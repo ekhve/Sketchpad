@@ -518,7 +518,7 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 |---|---|---|---|---|
 | R-344 | Every voicing in a validated J-6 set sounds its label's root and no note outside its label's chord. | D-080 | A | Every chord in sets 29, 47 and 54 is spelled by its J-6 voicing |
 | R-345 | A 4-voice voicing missing a chord tone still counts as its chord; one with a stray note does not. | D-080 | A | A 4-voice voicing with a missing tone still counts as its chord |
-| R-346 | A set that fails validation is flagged key by key, with a reason, and is never recommended by search. | D-082 | A | A set whose published voicings contradict their labels is flagged and never recommended |
+| R-346 | A set that fails validation is flagged key by key, with a reason, and ~~is never recommended by search~~ a set where most keys fail is never recommended (R-371). | D-082 | A | A set whose published voicings contradict their labels is flagged and never recommended |
 | R-347 | A J-6 key's chord is shown in musician spelling, with the manual's label and the device's voicing beside it. | D-079, UC-64 | A | Pressing D# on set 54 shows Fmaj7 with the J-6 voicing F3 A3 C4 E4 |
 | R-348 | Chord symbols are read the way musicians type them (maj7, M7, -7, sharps and flats, slash chords), and unknown symbols are refused. | D-079 | A | Chord symbols are read the way musicians type them |
 | R-349 | Keys played in Explore give the likely key, how many chords fit it, and each chord's numeral. | UC-64 | A | Keys C, C#, G, D# on set 54 read as Imaj7 iii7 vi7 IVmaj7 in C major |
@@ -536,6 +536,16 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-359 | The J-6 prototype screens are generated from the engine and never edited by hand. | D-084 | I | `proto/j6/build-prototype.mjs` |
 | R-360 | The J-6 scenarios live in `sketchpad.feature`, and the traceability test covers the J-6 tests. | D-085 | A | *(traceability.test.mjs)* |
 
+## 10y-2. J-6 chord data
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-368 | All 100 J-6 chord sets are in the app, with every key's label and voicing exactly as the manual prints them. | D-088 | A | All 100 chord sets are read from the manual, label and voicing as printed |
+| R-369 | Every label in the manual is read, in the manual's own spellings, except a typo, which is reported rather than guessed. | D-088 | A | The manual's chord spellings are read the way it means them |
+| R-370 | Every key of every set is validated, and the list of keys that fail is recorded in `DESIGN.md` and pinned by a test. | D-082, D-088 | A | The manual's errors are listed, and the list is pinned |
+| R-371 | A key whose printed notes contradict its label is never suggested by search; the rest of its set still is; a set where most keys fail is left out. | D-082 | A | A key whose printed voicing contradicts its label is never suggested, and the rest of its set still is |
+| R-372 | A voicing of three or more notes with no root, every note in the chord, counts as its chord. | D-080 | A | A rootless voicing counts as its chord |
+
 ## 10z. J-6 Explorer on the site
 
 | ID | Requirement | Source | Mode | Verified by |
@@ -544,7 +554,7 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-364 | Each app's offline cache has its own name, and updating either app deletes only its own old caches. | D-087 | A | Updating one app never clears the other's offline copy |
 | R-365 | The J-6 Explorer installs on an iPhone from its link, opens full screen, works offline, and links back to Sketchpad. | D-087, UC-64, UC-65 | M | The J-6 Explorer installs from its link and works beside the J-6 |
 | R-366 | The J-6 page reuses Sketchpad's piano, sound and colour tokens rather than defining its own; its extra colour roles are tokens, and no literal colour appears below its token block. | D-087, D-018 | I | `j6/app.jsx`, and G8 in `check-done` |
-| R-367 | Until checked on a J-6, the page states the KEY range and direction and the high C behaviour as assumptions, and says how many sets it carries. | D-081, D-083, D-087 | I | `j6/app.jsx` footer |
+| R-367 | Until checked on a J-6, the page states the KEY range and direction and the high C behaviour as assumptions, and says where its chord data comes from. | D-081, D-083, D-087 | I | `j6/app.jsx` footer |
 
 ## 11. Visual system
 

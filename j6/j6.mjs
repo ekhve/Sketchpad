@@ -1,30 +1,12 @@
-// J-6 Explorer — prototype engine.
-// Pure functions only. Data transcribed from the Roland J-6 Chord Set List (manual v1.02):
-// https://static.roland.com/manuals/J-6_manual_v102/eng/28645807.html
-// Only the sets the prototype screens use are transcribed here (29, 47, 54) plus set 59,
-// kept because its published voicings do not match its labels (D-082).
+// J-6 Explorer — the engine. (D-079–D-088)
+// Pure functions only. The chord sets are the manual's, exactly as printed, in sets.mjs;
+// its labels are read by labels.mjs; the theory is Sketchpad's.
+
+import { SETS } from "./sets.mjs";
+import { readLabel } from "./labels.mjs";
+export { SETS };
 
 export const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-// Each key: [manual label, voicing high→low exactly as printed]
-export const SETS = {
-  29: { genre: "Pop", keys: [
-    ["C", "E4 C4 C3 C2"], ["FM7", "E4 C4 F2 F1"], ["G", "D4 B3 G2 G1"], ["Em7", "D4 G3 B2 E2"],
-    ["Dm7", "C4 F3 A2 D2"], ["CM7/E", "C4 G3 B2 E2"], ["F", "C4 A3 C3 F2"], ["D7/G", "D4 A3 C3 G2"],
-    ["G", "D4 B3 D3 G2"], ["Am", "E4 C4 E3 A2"], ["Dm", "F4 A3 A2 D2"], ["G7", "G4 B3 F3 G2"]] },
-  47: { genre: "Synthwave/House", keys: [
-    ["Cm7", "A#3 G3 D#3 C3"], ["D#M7", "D4 A#3 G3 D#3"], ["Dm7", "C4 A3 F3 D3"], ["Fm7", "D#4 C4 G#3 F3"],
-    ["D#M7", "D4 A#3 G3 D#3"], ["Gm7", "F4 D4 A#3 G3"], ["Fm7", "D#4 C4 G#3 F3"], ["G#M7", "G4 D#4 C4 G#3"],
-    ["Gm7", "F4 D4 A#3 G3"], ["A#7", "G#4 F4 D4 A#3"], ["G#M7", "G4 D#4 C4 G#3"], ["C#/C", "G#4 F4 C#4 C4"]] },
-  54: { genre: "House", keys: [
-    ["CM7", "B3 G3 E3 C3"], ["Em7", "D4 B3 G3 E3"], ["Dm7", "C4 A3 F3 D3"], ["FM7", "E4 C4 A3 F3"],
-    ["D#M7", "D4 A#3 G3 D#3"], ["Gm7", "F4 D4 A#3 G3"], ["FM7", "E4 C4 A3 F3"], ["Am7", "G4 E4 C4 A3"],
-    ["Gm7", "F4 D4 A#3 G3"], ["A#M7", "A4 F4 D4 A#3"], ["Am7", "G4 E4 C4 A3"], ["Bm7", "A4 F#4 D4 B3"]] },
-  59: { genre: "EDM", keys: [
-    ["CM9", "B3 A3 D3 C3"], ["C6", "F#3 B3 E3 D#3"], ["Dm9", "C#4 B3 E3 D3"], ["Dm6", "G#4 C#4 F#3 F3"],
-    ["EM9", "D#4 C#4 F#3 E3"], ["FM9", "E4 D4 G3 F3"], ["F6", "B4 E4 A3 G#3"], ["GM9", "F#4 E4 A3 G3"],
-    ["G6", "C#4 F#4 B3 A#3"], ["Am9", "G#5 F#4 B3 A3"], ["Am6", "D#5 G#4 C#4 C4"], ["Bm9", "A#5 G#4 C#4 B3"]] },
-};
 
 /* ---------- shared theory (D-086) ----------
    Spelling, chord qualities, scales and numerals come from Sketchpad's theory
@@ -56,16 +38,24 @@ export const voicing = (s) => s.split(/\s+/).map(midiOf).sort((a, b) => a - b);
 /** quality → intervals above the root, folded into one octave, from Sketchpad's dictionary. */
 export const QUALITIES = Object.fromEntries(DICTIONARY.map((d) => [d.q, [...new Set(d.iv.map(pc))]]));
 
-/** "Cmaj7", "CM7/E", "A#7", "B♭maj7" → { root, quality, bass } (pitch classes).
- *  Read by Sketchpad's chord-name reader, so both apps accept the same spellings (D-077). */
+const ivKey = (iv) => [...new Set(iv.map(pc))].sort((a, b) => a - b).join(",");
+const DICTIONARY_BY_IV = new Map(DICTIONARY.map((d) => [ivKey(d.iv), d.q]).reverse());
+
+/** "Cmaj7", "CM7/E", "A#7", "B♭maj7", "CM9/#11", "D7alt" → { root, quality, bass, iv }:
+ *  pitch classes, the quality's name, and its intervals above the root.
+ *  Sketchpad's chord-name reader comes first, so both apps read the same spellings the
+ *  same way (D-077); the manual's own spellings are read by labels.mjs (D-088). A chord
+ *  whose notes are in Sketchpad's dictionary takes the dictionary's name. */
 export function parseChord(symbol) {
   const r = parseChordName(symbol);
-  if (!r.ok) throw new Error(`cannot read chord: ${r.reason}`);
-  return { root: r.rootPc, quality: r.sym, bass: r.bassPc ?? r.rootPc };
+  if (r.ok) return { root: r.rootPc, quality: r.sym, bass: r.bassPc ?? r.rootPc, iv: QUALITIES[r.sym] };
+  const l = readLabel(symbol);
+  if (!l.ok) throw new Error(`cannot read chord: ${r.reason}`);
+  return { root: l.root, quality: DICTIONARY_BY_IV.get(ivKey(l.iv)) ?? l.name, bass: l.bass, iv: l.iv };
 }
 
-export const pcsOf = ({ root, quality, bass }) =>
-  new Set([...QUALITIES[quality].map((i) => pc(root + i)), bass]);
+export const pcsOf = ({ root, iv, bass }) => new Set([...iv.map((i) => pc(root + i)), bass]);
+const sameChord = (a, b) => a.root === b.root && ivKey(a.iv) === ivKey(b.iv);
 
 /** Display name (D-079): musician spelling. Without a key, flats for the black keys;
  *  with one, the key's own spelling (D-086), so F#m7 in D major is never G♭m7. */
@@ -76,35 +66,54 @@ export const nameInKey = (chord, tonic, mode = "major") => nameOf(chord, keyName
 export { FLAT_NAMES };
 
 /* ---------- data validation (D-082) ---------- */
-/** A J-6 voicing is valid for its label if the label's root is sounded and every sounded
- *  pitch class belongs to the labelled chord. Missing tones are allowed: the J-6 has 4 voices. */
+/** A J-6 voicing is valid for its label if the label can be read, the label's root is
+ *  sounded, every sounded pitch class belongs to the labelled chord, a slash bass is the
+ *  lowest note, and no note is printed twice. Missing tones are allowed: the J-6 has 4
+ *  voices. An unlabelled key (sets 14–16, interval stacks) is not a chord and not an error. */
 export function validateKey(label, notes) {
-  const chord = parseChord(label);
+  if (label === "") return [];
+  let chord;
+  try { chord = parseChord(label); } catch (e) { return [`the label can't be read`]; }
   const want = pcsOf(chord);
   const midi = voicing(notes);
   const got = new Set(midi.map((n) => n % 12));
   const problems = [];
-  if (!got.has(chord.root)) problems.push("root not sounded");
+  if (new Set(midi).size !== midi.length) problems.push("a note is printed twice");
   const strays = [...got].filter((pc) => !want.has(pc));
+  /* A rootless voicing (D-080, amended): jazz voicings leave the root to the bass
+     player. With three or more notes, all of them the chord's, it is the chord. */
+  const rootless = !got.has(chord.root) && !strays.length && got.size >= 3;
+  if (!got.has(chord.root) && !rootless) problems.push("root not sounded");
   if (strays.length) problems.push(`notes outside the chord: ${strays.map((p) => NAMES[p]).join(" ")}`);
   if (chord.bass !== chord.root && midi[0] % 12 !== chord.bass) problems.push("slash bass is not the lowest note");
   return problems;
 }
 
+const validated = new Map();
+/** Sets the search leaves out altogether: most of their keys fail (D-082). */
+export const untrustedSet = (n) => validateSet(n).length > 6;
 export function validateSet(n) {
-  return SETS[n].keys
+  if (!validated.has(n)) validated.set(n, SETS[n].keys
     .map(([label, notes], i) => ({ key: KEYS[i], label, problems: validateKey(label, notes) }))
-    .filter((r) => r.problems.length);
+    .filter((r) => r.problems.length));
+  return validated.get(n);
 }
 
 /* ---------- J-6 adapter ---------- */
 /** Chord produced by key index k on set n at KEY transpose t. */
+/** chord is null for an unlabelled key or a label that can't be read. */
+const parsed = new Map();
+const labelOf = (label) => {
+  if (!parsed.has(label)) { let c = null; try { if (label) c = parseChord(label); } catch (e) {} parsed.set(label, c); }
+  return parsed.get(label);
+};
+/** KEY transpose moves the chord's root and bass by t semitones (D-081). */
+const shift = (c, t) => c && { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t), iv: c.iv };
 export function chordAt(n, k, t = 0) {
   const [label, notes] = SETS[n].keys[k];
-  const c = parseChord(label);
   return {
     key: KEYS[k], label,
-    chord: { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t) },
+    chord: shift(labelOf(label), t),
     midi: voicing(notes).map((m) => m + t),
   };
 }
@@ -136,19 +145,19 @@ export function romanOf(chord, tonic) {
 }
 
 /* ---------- reverse search ---------- */
-const third = (c) => (QUALITIES[c.quality].includes(4) ? 4 : QUALITIES[c.quality].includes(3) ? 3 : null);
+const third = (c) => (c.iv.includes(4) ? 4 : c.iv.includes(3) ? 3 : null);
 const subset = (a, b) => [...a].every((x) => b.has(x));
 
 /** Score one produced chord against one requested chord. */
 export function matchScore(want, got, mode) {
-  if (got.root !== want.root) return { score: 0, kind: "none" };
-  if (got.quality === want.quality) {
+  if (!got || got.root !== want.root) return { score: 0, kind: "none" };
+  if (sameChord(got, want)) {
     if (got.bass === want.bass) return { score: 1, kind: "exact" };
     return mode === "exact" ? { score: 0, kind: "none" } : { score: 0.9, kind: "inversion" };
   }
   if (mode === "exact") return { score: 0, kind: "none" };
-  const a = new Set(QUALITIES[want.quality].map((i) => pc(want.root + i)));
-  const b = new Set(QUALITIES[got.quality].map((i) => pc(got.root + i)));
+  const a = new Set(want.iv.map((i) => pc(want.root + i)));
+  const b = new Set(got.iv.map((i) => pc(got.root + i)));
   const shared = [...a].filter((x) => b.has(x)).length;
   if (third(want) === third(got) && shared >= 3 && (subset(a, b) || subset(b, a))) return { score: 0.6, kind: "close" };
   return { score: 0, kind: "none" };
@@ -161,15 +170,19 @@ export function search(progression, { sets = Object.keys(SETS).map(Number), mode
   const [lo, hi] = transpose ? TRANSPOSE_RANGE : [0, 0];
   const results = [];
   for (const n of sets) {
-    if (validateSet(n).length) continue; // never recommend a set whose data fails validation
+    /* A key whose data fails is never suggested; a set where most keys fail is left
+       out altogether, since what it plays can't be trusted at all. (D-082, amended) */
+    const failing = new Set(validateSet(n).map((r) => KEYS.indexOf(r.key)));
+    if (failing.size > 6) continue;
     for (let t = lo; t <= hi; t++) {
       const rows = wanted.map((want) => {
         let best = { score: 0, kind: "none", keys: [] };
         for (let k = 0; k < 12; k++) {
-          const at = chordAt(n, k, t);
-          const m = matchScore(want, at.chord, mode);
-          if (m.score > best.score) best = { ...m, keys: [at.key], got: at.chord };
-          else if (m.score > 0 && m.score === best.score) best.keys.push(at.key);
+          if (failing.has(k)) continue;
+          const got = shift(labelOf(SETS[n].keys[k][0]), t);
+          const m = matchScore(want, got, mode);
+          if (m.score > best.score) best = { ...m, keys: [KEYS[k]], got };
+          else if (m.score > 0 && m.score === best.score) best.keys.push(KEYS[k]);
         }
         return { want, ...best };
       });

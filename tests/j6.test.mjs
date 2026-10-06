@@ -24,6 +24,78 @@ test("A 4-voice voicing with a missing tone still counts as its chord", () => {
   assert.deepEqual(j.validateKey("G7", "G4 B3 F3 G#2").length > 0, true);
 });
 
+/* What the validator finds in the manual, key by key: DESIGN.md D-082 lists each one. */
+const MANUAL_ERRORS = {
+  1: ["C#"], 2: ["G"], 3: ["D#"], 4: ["C#"], 5: ["C#"], 6: ["F"], 11: ["C#"], 18: ["E"], 19: ["F#"], 27: ["B"],
+  32: ["A#"], 43: ["F"], 59: j.KEYS, 62: ["C#"], 63: ["A#"], 66: ["C"], 68: ["A#"], 69: ["G"], 72: ["F#"],
+  73: ["F#"], 80: ["C#", "G#"], 81: ["G"], 83: ["C#", "D#", "F#"], 84: ["C#", "D#", "G#"], 85: ["D", "E", "A"],
+  86: ["C#", "B"], 87: ["A", "B"], 89: ["D#"], 90: ["G#", "A#"], 91: ["F#"], 93: ["F#"], 95: ["E"], 97: ["E"],
+  100: ["A", "A#"],
+};
+
+test("All 100 chord sets are read from the manual, label and voicing as printed", () => {
+  const numbers = Object.keys(j.SETS).map(Number);
+  assert.deepEqual(numbers, Array.from({ length: 100 }, (_, i) => i + 1));
+  const unread = [];
+  for (const n of numbers) {
+    assert.equal(j.SETS[n].keys.length, 12, `set ${n}`);
+    for (const [label, notes] of j.SETS[n].keys) {
+      const count = notes.split(" ").length;
+      assert.ok(count >= 2 && count <= 4, `set ${n} ${label}: ${notes}`);
+      assert.equal(label === "", [14, 15, 16].includes(n), `set ${n}: only the interval stacks are unlabelled`);
+      if (label) { try { j.parseChord(label); } catch (e) { unread.push(`${n}:${label}`); } }
+    }
+  }
+  assert.deepEqual(unread, ["19:F#FM7"], "a label that can't be read is a failure, unless it is the manual's typo");
+  assert.deepEqual(j.SETS[1].keys[0], ["Cadd9", "E4 D4 G3 C3"]);
+  assert.deepEqual(j.SETS[100].keys[11], j.SETS[100].keys[11].slice(0, 2));
+  // the prototype's hand transcription of four sets, against the import
+  assert.deepEqual(j.SETS[54].keys.map(([l]) => l), ["CM7", "Em7", "Dm7", "FM7", "D#M7", "Gm7", "FM7", "Am7", "Gm7", "A#M7", "Am7", "Bm7"]);
+  assert.deepEqual(j.SETS[59].keys[1], ["C6", "F#3 B3 E3 D#3"]);
+  assert.deepEqual(j.SETS[29].keys[11], ["G7", "G4 B3 F3 G2"]);
+  assert.deepEqual(j.SETS[47].keys[11], ["C#/C", "G#4 F4 C#4 C4"]);
+});
+
+test("The manual's chord spellings are read the way it means them", () => {
+  const notes = (s) => { const c = j.parseChord(s); return [[...c.iv].sort((a, b) => a - b).map((i) => j.FLAT_NAMES[(c.root + i) % 12]).join(" "), j.FLAT_NAMES[c.bass]]; };
+  assert.deepEqual(notes("CM9/#11"), ["C D E G♭ G B", "C"], "#11 after a slash is an added note");
+  assert.deepEqual(notes("Cm7/b13"), ["C E♭ G A♭ B♭", "C"]);
+  assert.deepEqual(notes("CM9 (no3)/G"), ["C D G B", "G"]);
+  assert.deepEqual(notes("Gb6/9"), ["G♭ A♭ B♭ D♭ E♭", "G♭"], "6/9 has no seventh");
+  assert.deepEqual(notes("Dm6/9"), ["D E F A B", "D"], "nor has the minor 6/9, which only the manual's reader reads");
+  assert.deepEqual(notes("Asus9/13"), ["A B D E G♭ G", "A"]);
+  assert.deepEqual(notes("D7alt"), ["D E♭ F G♭ A♭ A B♭ C", "D"], "♭9 ♯9 ♭5 ♯5 over D7");
+  assert.deepEqual(notes("D# dim7"), ["E♭ G♭ A C", "E♭"]);
+  assert.deepEqual(notes("FmAdd9"), ["F G A♭ C", "F"]);
+  assert.deepEqual(notes("AbMaj13"), ["A♭ B♭ C D♭ E♭ F G", "A♭"]);
+  assert.equal(j.nameOf(j.parseChord("CM7/9")), "Cmaj9", "a chord in Sketchpad's dictionary takes its name");
+  assert.throws(() => j.parseChord("F#FM7"));
+});
+
+test("The manual's errors are listed, and the list is pinned", () => {
+  const found = {};
+  for (const n of Object.keys(j.SETS)) { const v = j.validateSet(n); if (v.length) found[n] = v.map((r) => r.key); }
+  assert.deepEqual(found, MANUAL_ERRORS);
+  assert.equal(Object.values(found).flat().length, 56);
+  assert.deepEqual(Object.keys(j.SETS).filter((n) => j.untrustedSet(n)), ["59"]);
+});
+
+test("A key whose printed voicing contradicts its label is never suggested, and the rest of its set still is", () => {
+  assert.ok(j.validateSet(18).find((r) => r.key === "E").problems.some((p) => p.includes("outside the chord")));
+  const [e] = j.search("E", { sets: [18], transpose: false });
+  assert.equal(e.score, 0, "the E key says E but plays Em, so it is never offered as E");
+  const [cd] = j.search("Cm Dm", { sets: [18], transpose: false });
+  assert.equal(cd.score, 1);
+  assert.deepEqual(cd.rows.map((r) => r.keys), [["C"], ["D"]]);
+});
+
+test("A rootless voicing counts as its chord", () => {
+  assert.deepEqual(j.SETS[88].keys[0], ["Fmaj7/9", "C4 A3 G3 E3"]);
+  assert.deepEqual(j.validateKey("Fmaj7/9", "C4 A3 G3 E3"), []);
+  assert.ok(j.validateKey("C6", "F#3 B3 E3 D#3").includes("root not sounded"));
+  assert.ok(j.validateKey("Fmaj7/9", "C4 A3").includes("root not sounded"), "two notes are too few to be a rootless voicing");
+});
+
 test("Pressing D# on set 54 shows Fmaj7 with the J-6 voicing F3 A3 C4 E4", () => {
   const c = at(54, "D#");
   assert.equal(j.nameOf(c.chord), "Fmaj7");

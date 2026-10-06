@@ -518,7 +518,9 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **Context.** The J-6 has 4 voices. Its "G7" in set 29 is G B F G, with no 5th.
 
-**Decision.** A voicing counts as its chord if the root sounds and every note belongs to the chord. Missing tones are allowed. The piano lights the real voicing in its real octave, not an idealised chord.
+**Decision.** A voicing counts as its chord if ~~the root sounds and~~ every note belongs to the chord. Missing tones are allowed. The piano lights the real voicing in its real octave, not an idealised chord.
+
+*Amended 2026-10-06, when all 100 sets were imported (`D-088`):* the root may be missing too, when the voicing has three or more notes and every one of them is the chord's. Set 88 (Jazz) plays seven of its twelve chords that way, and set 86 one, as rootless voicings, the way jazz pianists leave the root to the bass. Requiring the root had flagged eight correct chords as errors. A voicing with a missing root *and* a stray note is still flagged, so set 59's "C6" still is.
 
 ### D-081 — J-6: transposition is part of the search (formerly D-J03)
 
@@ -530,15 +532,61 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **Context.** Set 59 (EDM) fails validation on all 12 keys. Its printed voicings are near-copies of set 60's: "C6" is printed as F♯ B E D♯, which has no C. Set 19 has a typo in a label, and set 43 lists F3 twice in one chord.
 
-**Decision.** Every set runs through `validateSet` before search, and a set that fails is never recommended. Errors in the manual are recorded, not silently corrected. This is also the strongest argument for capturing the voicings from the device over MIDI rather than trusting the PDF.
+**Decision.** Every set runs through `validateSet` before search, and ~~a set that fails is never recommended~~ a key that fails is never suggested. Errors in the manual are recorded, not silently corrected. This is also the strongest argument for capturing the voicings from the device over MIDI rather than trusting the PDF.
 
-**Known errors in the manual's chord list.** Recorded here rather than corrected in the data:
+*Amended 2026-10-06, when all 100 sets were imported (`D-088`):* checking every key found 56 failures in 34 sets, but in all of them except set 59 it is one, two or three keys out of twelve. Leaving out every set with a failure would have thrown away a third of the J-6 for the sake of a few typos. So the unit of distrust is the key: a failing key is never suggested, and only a set where most keys fail (more than 6 of 12, which is only set 59) is left out altogether. Explore still shows a failing key, marked **!**, with the reason, and the piano shows the notes as printed.
 
-| Set | Key | Printed | Problem | Status |
+**Known errors in the manual's chord list.** All 100 sets, checked key by key. Recorded here rather than corrected in the data, and pinned by a test (*The manual's errors are listed, and the list is pinned*), so a change to the reader or the data that moves this list fails the build. The voicing is as printed, high to low.
+
+| Set | Key | Label | Printed | Problem |
 |---|---|---|---|---|
-| 59 (EDM) | all 12 | e.g. C♯: "C6" as F♯ B E D♯ | Voicings contradict their labels on every key; they look like set 60's | In the data; flagged by `validateSet`, and a test pins it |
-| 19 | — | `F#FM7` | A typo in a label | Reported by the prototype session; set 19 is not transcribed yet |
-| 43 | F | F3 twice in one chord | A duplicated note | Reported by the prototype session; set 43 is not transcribed yet |
+| 59 (EDM) | all 12 | e.g. C♯ `C6` | F#3 B3 E3 D#3 | Voicings contradict their labels on every key; they look like set 60's. The whole set is left out of search |
+| 1 (Pop) | C♯ | `C#M9/C` | F4 D#4 C4 C#3 | slash bass is not the lowest note |
+| 2 (Pop) | G | `F/A` | F4 C4 A3 G2 | notes outside the chord: G; slash bass is not the lowest note |
+| 3 (Jazz) | D♯ | `D7#9` | F#4 C#4 G3 D#3 | root not sounded; notes outside the chord: D# G C# |
+| 4 (Jazz) | C♯ | `C#7#9` | D#4 B3 F3 C#3 | notes outside the chord: D# |
+| 5 (Jazz) | C♯ | `C#M7` | D#4 C4 F3 C#3 | notes outside the chord: D# |
+| 6 (Blues) | F | `Fm9` | G4 D#4 A3 F2 | notes outside the chord: A |
+| 11 (Pop Min) | C♯ | `Gdim/C#` | G4 D#4 A#3 C#3 | notes outside the chord: D# |
+| 18 (Utility) | E | `E` | B3 G3 E3 | notes outside the chord: G |
+| 19 (Utility) | F♯ | `F#FM7` | F4 C#4 A#3 F#3 | the label can't be read |
+| 27 (Pop/Synth) | B | `Em` | D7 B5 E5 | notes outside the chord: D |
+| 32 (Pop) | A♯ | `F7/A` | F4 D#4 C3 A3 | slash bass is not the lowest note |
+| 43 (Synthwave) | F | `A#/F` | F3 D4 A#3 F3 | a note is printed twice |
+| 62 (EDM) | C♯ | `C#sus9` | D#4 A#3 F#3 C#3 | notes outside the chord: A# |
+| 63 (EDM) | A♯ | `Bb6` | D5 G4 B3 F3 | root not sounded; notes outside the chord: B |
+| 66 (Gospel/R&B) | C | `Cm7/b13` | F4 Bb3 Ab3 C3 | notes outside the chord: F |
+| 68 (Lofi R&B) | A♯ | `Bbsus` | F4 D#4 D4 A#3 | notes outside the chord: D |
+| 69 (Lofi R&B) | G | `G6` | E3 B2 A2 G2 | notes outside the chord: A |
+| 72 (Neo Soul) | F♯ | `CM7#5` | E4 C4 G#3 G3 | notes outside the chord: G |
+| 73 (Neo Soul) | F♯ | `Edim` | Db5 Bb4 G4 E4 | notes outside the chord: C# |
+| 80 (Neo-Soul) | C♯ | `Db7sus` | F#4 D#4 B3 C#3 | notes outside the chord: D# |
+| 80 (Neo-Soul) | G♯ | `Ab7sus` | F#4 C#4 A#3 G#3 | notes outside the chord: A# |
+| 81 (Neo-Soul) | G | `Gm7b5` | C4 F3 Db3 G2 | notes outside the chord: C |
+| 83 (Bossa Nova) | C♯ | `C#dim` | E5 A#4 G4 C#4 | notes outside the chord: A# |
+| 83 (Bossa Nova) | D♯ | `D#dim` | B5 F#5 C5 D#4 | notes outside the chord: C B |
+| 83 (Bossa Nova) | F♯ | `F#dim` | A5 D#5 C5 F#4 | notes outside the chord: D# |
+| 84 (Bossa Nova) | C♯ | `C#Dim` | G5 E5 A#4 C#4 | notes outside the chord: A# |
+| 84 (Bossa Nova) | D♯ | `D#Dim` | A5 F#5 C5 D#4 | notes outside the chord: C |
+| 84 (Bossa Nova) | G♯ | `Abdim7` | E5 B4 F4 Ab3 | notes outside the chord: E |
+| 85 (Jazz) | D | `Dm9` | E5 G4 F4 D3 | notes outside the chord: G |
+| 85 (Jazz) | E | `Em9` | F#5 A4 G4 E3 | notes outside the chord: A |
+| 85 (Jazz) | A | `Am9` | B5 D5 C5 A3 | notes outside the chord: D |
+| 86 (Jazz) | C♯ | `Db9#11` | Bb4 F4 B3 Db3 | notes outside the chord: A# |
+| 86 (Jazz) | B | `Bdim7` | G5 D5 Ab4 B3 | notes outside the chord: G |
+| 87 (Jazz) | A | `Cadd9/G` | B4 E4 C4 G3 | notes outside the chord: B |
+| 87 (Jazz) | B | `Asus7` | D5 B4 G4 A3 | notes outside the chord: B |
+| 89 (Jazz) | D♯ | `D#dim#5` | B4 A4 F#4 D#4 | notes outside the chord: A |
+| 90 (Jazz) | G♯ | `Eb7/F` | E4 B3 G#3 F3 | root not sounded; notes outside the chord: G# B E |
+| 90 (Jazz) | A♯ | `A#11/F` | E4 D4 A#3 F3 | notes outside the chord: E |
+| 91 (Jazz) | F♯ | `A#/D` | D4 A#3 G3 D#3 | notes outside the chord: D# G; slash bass is not the lowest note |
+| 93 (Jazz) | F♯ | `A7/C` | A3 G3 E3 C#3 | slash bass is not the lowest note |
+| 95 (Classical) | E | `C/G` | E5 E4 C4 G4 | slash bass is not the lowest note |
+| 97 (Classical) | E | `F#/C#` | F#4 C#4 F#3 A#2 | slash bass is not the lowest note |
+| 100 (Modern) | A | `AbMaj13` | E5 Bb4 G4 Ab3 | notes outside the chord: E |
+| 100 (Modern) | A♯ | `AbDimM7` | G5 B4 F4 Ab3 | notes outside the chord: F |
+
+What they look like, in kind: a label a semitone off its notes (set 3's D♯ key "D7#9" plays D♯7♯9); a chord with one note more than its name (Fm9 with an A, 7sus with a 9th, maj7 with a 9th); "dim" printed for a diminished seventh (sets 73, 83, 84); a voicing printed out of order, so the slash bass isn't lowest (sets 32, 95); and typos (19 `F#FM7`, 63 `Bb6` with a B, 43 with F3 twice).
 
 **On `D-014`.** Sketchpad's own chord sets stay its own content. The J-6 Explorer exists to explain one instrument the owner has, so it has to carry that instrument's chord table. It is reference data about the hardware, kept in `j6/` and never mixed into Sketchpad's sets.
 
@@ -580,9 +628,23 @@ What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole c
 2. **Published at `j6/`, as its own app.** `tools/package-site.mjs` packages each page with its own manifest, home-screen title and icon (`site/j6/`), and its own offline cache. The J-6 cache is named `j6-explorer-…`, Sketchpad's `sketchpad-…`, and each app's update only deletes its own old caches, so updating one never empties the other's offline copy. The J-6 service worker's scope is `j6/`, which takes precedence over Sketchpad's for that folder.
 3. **Its own tokens extend Sketchpad's.** The J-6's black panel, LED and pads are new roles in a token block `J`, which spreads `T`. Below that block the colour gate applies as it does in `sketchpad.jsx` (G8 now reads both files).
 4. **Linked one way for now.** The J-6 page links back to Sketchpad. Sketchpad has no link to the J-6 yet, because the handover's first rule was not to touch Sketchpad's UI. One line in its How to use tab would do it, once the owner agrees.
-5. **The assumptions stay on screen.** Until they are checked on a J-6, the page says that the KEY range (−6 to +5), its direction, and the high C pad are assumptions (`D-081`, `D-083`), and how many of the 100 sets it carries.
+5. **The assumptions stay on screen.** Until they are checked on a J-6, the page says that the KEY range (−6 to +5), its direction, and the high C pad are assumptions (`D-081`, `D-083`), and where its chord data comes from.
 
-**What it does not do.** It carries 4 of the J-6's 100 sets. The rest wait on a transcription of the manual's chord list (`D-082`). It does not talk to the J-6 over MIDI, so it can't know which set or KEY the hardware is on, or hear what was played.
+**What it does not do.** ~~It carries 4 of the J-6's 100 sets. The rest wait on a transcription of the manual's chord list (`D-082`).~~ It carries all 100 sets since `D-088`. It does not talk to the J-6 over MIDI, so it can't know which set or KEY the hardware is on, or hear what was played.
+
+### D-088 — J-6: all 100 sets, imported from the manual and read in its own spelling
+
+**Context.** The prototype had 4 of the J-6's 100 sets, typed by hand. The handover asked for all of them, label and voicing exactly as printed, and said a label the reader can't read is a test failure, not a skip. The manual's page was blocked from this environment, so the owner saved it from Safari and uploaded it. It turned out to use 558 different labels, not the "roughly 80 spellings" expected, and to write them inconsistently: M7, maj7 and Maj7; "/9", "/11", "/#11" and "/b13" meaning an added note rather than a bass; sus9/13; (no3) and (no 3); "D# dim7" with a space; FmAdd9.
+
+**Decision.**
+
+1. **Imported, not typed.** `tools/j6-import.mjs` reads the saved page's one table and writes `j6/sets.mjs`: 100 sets, 1,200 keys, label and voicing as printed. Run against the same page, a second, independent parse gave identical results, and the four sets the prototype typed by hand match the import exactly. The saved page itself is not committed. It is Roland's page, and the data file records where it came from.
+2. **A reader for the manual's vocabulary.** `j6/labels.mjs` turns a label into a root, a bass and the notes it allows. Sketchpad's chord-name reader (`D-077`) comes first, so a name both read means the same thing. The manual reader takes over only for what Sketchpad's refuses. Sketchpad's reader stays strict, because for typing, refusing is right. The manual's reader is the one place its spellings are allowed. A chord whose notes are in Sketchpad's dictionary takes the dictionary's name, so `CM7/9` shows as Cmaj9.
+3. **Everything is read, except one typo.** 557 of 558 labels are read. The one that isn't, set 19's `F#FM7`, is a typo, and stays an error rather than a guess.
+4. **Unlabelled keys are not errors.** Sets 14 to 16 are octave, fourth and fifth stacks with no chord names. They show as "—" with their notes, and search ignores them.
+5. **The data drove two amendments,** both recorded where they apply: rootless voicings count (`D-080`), and the unit of distrust is the key, not the set (`D-082`).
+
+**What it does not do.** It does not correct the manual. A key whose notes and name disagree could be named from its notes instead (Sketchpad can identify a chord from its notes, `UC-42`), but which one the J-6 actually plays is a question for the device, not the PDF.
 
 ## 5. What this project has taught, so far
 
@@ -677,6 +739,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6 Explorer moved into the repository as a second app: its engine in `j6/`, its 12 tests in the suite, its prototype in `proto/j6/`, and its 15 scenarios in `sketchpad.feature` (`D-085`). The prototype's decisions are numbered `D-079`–`D-084`, and its two workflows are `UC-64` (Explore) and `UC-65` (Find). 426 checks |
 | 2026-10-06 | J-6 shares Sketchpad's theory (`D-086`): its chord names, numerals and key detection now come from the theory layer, so chords are spelled the way their key writes them (F#m7 in D major, not G♭m7). Seven J-6 mutants added to the mutator |
 | 2026-10-06 | The J-6 Explorer page (`D-087`, `UC-64`, `UC-65`): Explore and Find screens built from the agreed prototype, reusing Sketchpad's piano, sound and colour tokens, and published at `j6/` as a second installable app with its own icon and offline cache. G8 now also reads the J-6 page. 429 checks |
+| 2026-10-06 | All 100 J-6 chord sets imported from the manual's page (`D-088`), with a reader for its 558 label spellings. Validation found 56 failing keys in 34 sets, now listed under `D-082` and pinned by a test; rootless voicings now count (`D-080`, amended); a failing key, not its whole set, is kept out of search (`D-082`, amended). Explore has a set picker and marks failing keys |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

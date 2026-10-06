@@ -208,7 +208,7 @@ Not in the original plan. Each earned its place.
 | Data validated before use | **Done** | A set whose printed voicings contradict their labels is flagged and never recommended (`D-082`) |
 | Key-aware spelling | **Done** | Sketchpad's theory: F#m7 in D major, B♭maj7 in F (`D-086`) |
 | Installable at `j6/` | **Done** | Its own icon, name and offline cache (`D-087`) |
-| All 100 chord sets | **Partial** | 4 transcribed (29, 47, 54, 59). The rest need the manual's chord list or a MIDI capture (`D-082`) |
+| All 100 chord sets | **Done** | Imported from the manual's page, 558 label spellings read, 56 failing keys listed and pinned (`D-088`, `D-082`) |
 | KEY range, direction and high C checked on a J-6 | **Open** | Manual scenarios; assumptions shown on the page until then |
 
 ## Known gaps and rough edges
@@ -232,6 +232,6 @@ Anything marked **Done** should be findable in `sketchpad.feature` and, unless i
 node tools/check-done.mjs
 ```
 
-Current: 429 automated checks, 175/175 mutants killed, 15/15 gates.
+Current: 434 automated checks, 183/183 mutants killed, 15/15 gates.
 
 If a feature is listed **Done** here but has no scenario, this document is wrong — trust the feature file.

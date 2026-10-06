@@ -190,16 +190,28 @@ const OTHER_MUTANTS = [
 
 /* The J-6 Explorer's engine (D-079–D-086). */
 const J6_MUTANTS = [
-  ["KEY transposes the wrong way",           "chord: { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t) },", "chord: { root: pc(c.root - t), quality: c.quality, bass: pc(c.bass - t) },"],
+  ["KEY transposes the wrong way",           "c && { root: pc(c.root + t), quality: c.quality, bass: pc(c.bass + t), iv: c.iv };", "c && { root: pc(c.root - t), quality: c.quality, bass: pc(c.bass - t), iv: c.iv };"],
   ["voicings stay put when KEY moves",       "midi: voicing(notes).map((m) => m + t),", "midi: voicing(notes),"],
   ["an inversion scores as exact",           '{ score: 0.9, kind: "inversion" }', '{ score: 1, kind: "inversion" }'],
-  ["search trusts a set that fails validation", "if (validateSet(n).length) continue;", ""],
+  ["search trusts a set that fails validation", "if (failing.size > 6) continue;", ""],
+  ["search suggests a key that fails validation", "if (failing.has(k)) continue;", ""],
+  ["a rootless voicing is refused",          "const rootless = !got.has(chord.root) && !strays.length && got.size >= 3;", "const rootless = false;"],
+  ["a duplicated note passes validation",    'if (new Set(midi).size !== midi.length) problems.push("a note is printed twice");', ""],
   ["a stray note passes validation",         "if (strays.length) problems.push(", "if (false) problems.push("],
   ["ties go to the larger transposition",    "Math.abs(a.transpose) - Math.abs(b.transpose)", "Math.abs(b.transpose) - Math.abs(a.transpose)"],
   ["J-6 spelling ignores the key",           "nameOf(chord, keyNames(tonic, mode));", "nameOf(chord);"],
 ].map(([name, from, to]) => [name, from, to, "j6/j6.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS];
+/* The reader for the manual's chord labels (D-088). */
+const J6_LABEL_MUTANTS = [
+  ["the manual's added notes after a slash are refused", 's = s.replace(/\\/(?=[#b]?\\d)/g, "(");', ""],
+  ["6/9 grows a seventh",                    "if (n === 9 && sixth && seventh === null) { add.add(2); return true; }", ""],
+  ["a 9th chord loses its seventh",          "if (seventh === null) seventh = majorSeventh === true ? 11 : 10;   // 9, 11 and 13 carry the seventh", ""],
+  ["M7 is read as a dominant seventh",       "if (n === 7) { seventh = majorSeventh ? 11 : 10; return true; }", "if (n === 7) { seventh = 10; return true; }"],
+  ["a slash bass is ignored",                "if (b && b.rest === \"\" && !/^b\\d/.test(s.slice(slash + 1))) { bass = b.pc; s = s.slice(0, slash); }", "if (b && b.rest === \"\" && !/^b\\d/.test(s.slice(slash + 1))) { s = s.slice(0, slash); }"],
+].map(([name, from, to]) => [name, from, to, "j6/labels.mjs"]);
+
+const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {
