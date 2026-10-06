@@ -211,7 +211,17 @@ const J6_LABEL_MUTANTS = [
   ["a slash bass is ignored",                "if (b && b.rest === \"\" && !/^b\\d/.test(s.slice(slash + 1))) { bass = b.pc; s = s.slice(0, slash); }", "if (b && b.rest === \"\" && !/^b\\d/.test(s.slice(slash + 1))) { s = s.slice(0, slash); }"],
 ].map(([name, from, to]) => [name, from, to, "j6/labels.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS];
+/* Playing a chord versus keeping it (D-089). */
+const J6_PROGRESSION_MUTANTS = [
+  ["Rec is on when the page opens",          "export const START = { rec: false,", "export const START = { rec: true,"],
+  ["every tap is kept, Rec or not",          "items: state.rec ? [...state.items, k] : state.items", "items: [...state.items, k]"],
+  ["the key ignores the progression",        "(state.items.length ? state.items : state.current ? [state.current] : [])", "(state.current ? [state.current] : [])"],
+  ["remove takes the wrong chord",           "filter((_, i) => i !== action.index)", "filter((_, i) => i !== action.index + 1)"],
+  ["a search result adds the wrong keys",    "KEYS.indexOf(r.keys[0])", "KEYS.indexOf(r.keys[r.keys.length - 1])"],
+  ["a kept chord forgets its own set",       "const resolve = (k) => chordAt(k.set, k.key, k.t);", "const resolve = (k) => chordAt(54, k.key, k.t);"],
+].map(([name, from, to]) => [name, from, to, "j6/progression.mjs"]);
+
+const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

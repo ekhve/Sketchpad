@@ -88,11 +88,12 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 | Step | The player | The app |
 |---|---|---|
 | 1 | Picks the chord set they have on the J-6 | A virtual J-6 shows what every key plays, printed on the pad |
-| 2 | Taps the keys in the order they played them on the hardware | Each pad is numbered in order; the latest one is brightest |
+| 2 | Taps keys to try them | Each tap plays the chord and shows it; nothing is kept (`D-089`) |
+| 2b | Likes one, taps **+ Add**; or turns on **Rec** to copy down a sequence just played on the hardware | The chord joins the progression; with Rec on every tap does, numbered on the pads |
 | 3 | Reads the latest chord | Name in musician spelling, the manual's label, notes and degrees, the J-6's actual voicing, and its numeral |
 | 4 | Looks at the piano | The real voicing, lit in its real octave |
 | 5 | Looks at the key | The likely key, how many chords fit it, and the runner-up |
-| 6 | Plays the progression back | Undo, Clear and Play, through the piano or a pad sound |
+| 6 | Plays the progression back, or edits it | Play, tap a chord to hear it, × to take one out, Undo, Clear; through the piano or a pad sound. The key follows the progression |
 
 **Status:** built (`D-087`), at `j6/` on the site, with a KEY control and all 100 sets (`D-088`); a key where the manual's notes and name disagree is marked. Not yet: reading the hardware over MIDI.
 
@@ -105,6 +106,7 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 | 3 | Reads the best match | Set, KEY value, score, and the keys to press, numbered in order; keys that play the same chord are dashed |
 | 4 | Follows the steps on the hardware | Select the set, set KEY, play the keys |
 | 5 | Compares other sets | Each with its score and the reason it ranks lower |
+| 6 | Taps **+ Add to progression** | The best match's keys join the Explore progression, in order, each with its set and KEY (`D-089`) |
 
 **Status:** built (`D-087`), at `j6/` on the site. It ranks over all 100 sets but set 59; keys whose printed data fails are never suggested (`D-082`), and the page says so.
 

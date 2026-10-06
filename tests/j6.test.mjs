@@ -179,3 +179,57 @@ test("Chord symbols are read the way musicians type them", () => {
   assert.throws(() => j.parseChord("H7"));
   assert.throws(() => j.parseChord("Cfoo"));
 });
+
+/* ---------- playing a chord versus keeping it (D-089) ---------- */
+import * as pr from "../j6/progression.mjs";
+const run = (actions, state = pr.START) => actions.reduce(pr.explore, state);
+const tap = (key, set = 54, t = 0) => ({ type: "tap", set, key: j.KEYS.indexOf(key), t });
+const chordsOf = (items) => items.map((k) => j.nameOf(pr.resolve(k).chord));
+
+test("Tapping a J-6 key plays it without adding it to the progression", () => {
+  assert.equal(pr.START.rec, false, "Rec is off when the page opens");
+  const s = run([tap("C#"), tap("G")]);
+  assert.equal(j.nameOf(pr.resolve(s.current).chord), "Am7");
+  assert.deepEqual(s.items, []);
+});
+
+test("Add keeps the chord on screen", () => {
+  assert.deepEqual(chordsOf(run([tap("C#"), tap("G"), { type: "add" }]).items), ["Am7"]);
+  assert.deepEqual(run([{ type: "add" }]).items, [], "nothing tapped, nothing added");
+});
+
+test("With Rec on, every key tapped joins the progression in order", () => {
+  const s = run([{ type: "rec", on: true }, tap("C"), tap("C#"), tap("G"), tap("D#")]);
+  assert.deepEqual(chordsOf(s.items), ["Cmaj7", "Em7", "Am7", "Fmaj7"]);
+  assert.equal(run([{ type: "rec", on: false }, tap("A#")], s).items.length, 4);
+});
+
+test("A chord can be taken out of the progression, and undo and clear still work", () => {
+  const s = run([{ type: "rec", on: true }, tap("C"), tap("C#"), tap("G"), tap("D#")]);
+  const removed = run([{ type: "remove", index: 1 }], s);
+  assert.deepEqual(chordsOf(removed.items), ["Cmaj7", "Am7", "Fmaj7"]);
+  assert.deepEqual(chordsOf(run([{ type: "undo" }], removed).items), ["Cmaj7", "Am7"]);
+  assert.deepEqual(run([{ type: "clear" }], removed).items, []);
+});
+
+test("The key follows the progression once it has chords, and the last key tapped before that", () => {
+  assert.deepEqual(pr.keyFocus(pr.START), []);
+  const one = run([tap("D#")]);
+  assert.deepEqual(chordsOf(pr.keyFocus(one)), ["Fmaj7"]);
+  const s = run([tap("C"), { type: "add" }, tap("G"), { type: "add" }, tap("A#")]);
+  assert.deepEqual(chordsOf(pr.keyFocus(s)), ["Cmaj7", "Am7"]);
+});
+
+test("A progression can mix chord sets and KEY settings", () => {
+  const s = run([tap("C"), { type: "add" }, tap("A", 47, -3), { type: "add" }]);
+  assert.deepEqual(chordsOf(s.items), ["Cmaj7", "G7"]);
+  assert.deepEqual(s.items.map((k) => [k.set, k.t]), [[54, 0], [47, -3]]);
+  assert.deepEqual(pr.resolve(s.items[1]).midi, j.chordAt(47, j.KEYS.indexOf("A"), -3).midi, "played from its own set and KEY");
+});
+
+test("A search result can be added to the progression in one tap", () => {
+  const [best] = j.search("Dm7 G7 Cmaj7 Am7", { sets: [29, 47, 54] });
+  const s = run([{ type: "addMany", items: pr.fromSearch(best) }]);
+  assert.deepEqual(s.items.map((k) => [k.set, j.KEYS[k.key], k.t]), [[47, "D#", -3], [47, "A", -3], [47, "C#", -3], [47, "C", -3]]);
+  assert.deepEqual(chordsOf(s.items), ["Dm7", "G7", "Cmaj7", "Am7"]);
+});

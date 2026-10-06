@@ -646,6 +646,24 @@ What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole c
 
 **What it does not do.** It does not correct the manual. A key whose notes and name disagree could be named from its notes instead (Sketchpad can identify a chord from its notes, `UC-42`), but which one the J-6 actually plays is a question for the device, not the PDF.
 
+### D-089 — J-6: a tap plays a chord; keeping it is a choice
+
+**Context.** In Explore, every tap on a J-6 key both played the chord and added it to the progression. That suited one job, copying down a sequence just played on the hardware. It spoiled the other, trying pads to find the right chord, because every chord tried went into the progression and had to be cleared. The owner asked for two modes, one to play and one to add.
+
+**Decision.**
+
+1. **Tap plays.** A tap sounds the chord and shows it in Now, Piano and Key. Nothing is kept, and the pads show no numbers, only an outline on the last key tapped.
+2. **"+ Add to progression"** on the Now card keeps the chord on screen.
+3. **Rec** keeps every tap, in order, numbered on the pads, for copying down what was just played. It is off when the page opens (the owner's choice), because trying chords out is the commoner use and nothing should be kept by accident. When on, it is filled red with "● REC" in capitals; when off, an outline with "○ Rec". Fill, case and dot all change, so it reads without colour.
+4. **A kept chord remembers its own set and KEY,** so a progression can mix sets and transpositions, and Rec doesn't need to switch off when the set changes. A chord from another set says so in the progression ("set 47 · KEY −3 · key A").
+5. **Each kept chord can be played or taken out** (tap it, or ×). Undo and Clear stay.
+6. **The key follows the progression** once it has chords, and only the chord on screen before that. Trying a chord no longer moves the key.
+7. **Find adds a whole result** in one tap: "+ Add to progression" puts the best match's keys, in the order searched for, with their set and KEY.
+
+The logic is a pure reducer in `j6/progression.mjs`, so it is tested without a browser. The page holds it in `useReducer` and does the sound.
+
+**What building it found.** The set picker added with all 100 sets (`D-088`) pushed the panel wider than a phone, and long chord names (a 13th with "(no3)") did the same in Now. 87 of the 1,200 keys overflowed a 375 px screen. Both are fixed, and a headless sweep of every key at 375 px now finds none. That sweep is not yet a gate (see the headless exception in `DONE.md`).
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -740,6 +758,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6 shares Sketchpad's theory (`D-086`): its chord names, numerals and key detection now come from the theory layer, so chords are spelled the way their key writes them (F#m7 in D major, not G♭m7). Seven J-6 mutants added to the mutator |
 | 2026-10-06 | The J-6 Explorer page (`D-087`, `UC-64`, `UC-65`): Explore and Find screens built from the agreed prototype, reusing Sketchpad's piano, sound and colour tokens, and published at `j6/` as a second installable app with its own icon and offline cache. G8 now also reads the J-6 page. 429 checks |
 | 2026-10-06 | All 100 J-6 chord sets imported from the manual's page (`D-088`), with a reader for its 558 label spellings. Validation found 56 failing keys in 34 sets, now listed under `D-082` and pinned by a test; rootless voicings now count (`D-080`, amended); a failing key, not its whole set, is kept out of search (`D-082`, amended). Explore has a set picker and marks failing keys |
+| 2026-10-06 | J-6 Explore: a tap plays, "+ Add" keeps, Rec keeps every tap and starts off; kept chords remember their set and KEY, can be played or removed; the key follows the progression; Find adds a result in one tap (`D-089`). Fixed: the set picker and long chord names made the page wider than a phone on 87 keys |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

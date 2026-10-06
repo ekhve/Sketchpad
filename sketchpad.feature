@@ -3153,6 +3153,63 @@ Feature: J-6 Explore — what am I playing?
     And the chords read Dmaj7 F#m7 Bm7 Gmaj7, never G♭m7
     And at every KEY from −6 to +5 the same four chords never mix sharps and flats
 
+  @D-089 @UC-64 @auto
+  Scenario: Tapping a J-6 key plays it without adding it to the progression
+    Given the Explore screen as it opens
+    Then Rec is off
+    When the user taps C♯ and then G on set 54
+    Then G is the chord on screen
+    And the progression is still empty
+
+  @D-089 @UC-64 @auto
+  Scenario: Add keeps the chord on screen
+    Given the user has tapped C♯ and then G on set 54
+    When the user taps "+ Add"
+    Then the progression is Am7 alone
+    And "+ Add" with nothing tapped adds nothing
+
+  @D-089 @UC-64 @auto
+  Scenario: With Rec on, every key tapped joins the progression in order
+    Given Rec is on
+    When the user taps C, C♯, G and D♯ on set 54
+    Then the progression is Cmaj7 Em7 Am7 Fmaj7
+    And with Rec off again the next tap is not added
+
+  @D-089 @UC-64 @auto
+  Scenario: A chord can be taken out of the progression, and undo and clear still work
+    Given the progression Cmaj7 Em7 Am7 Fmaj7 from set 54
+    When the user removes the second chord
+    Then the progression is Cmaj7 Am7 Fmaj7
+    And undo takes off Fmaj7, and clear empties it
+
+  @D-089 @UC-64 @auto
+  Scenario: The key follows the progression once it has chords, and the last key tapped before that
+    Given an empty progression
+    When the user taps D♯ on set 54
+    Then the key is judged from Fmaj7 alone
+    When Cmaj7 and Am7 are in the progression and the user taps A♯
+    Then the key is judged from Cmaj7 and Am7, not from B♭maj7
+
+  @D-089 @UC-64 @auto
+  Scenario: A progression can mix chord sets and KEY settings
+    Given Cmaj7 kept from set 54 at KEY 0
+    When the user moves to set 47 at KEY −3 and adds its A key
+    Then the progression is Cmaj7 G7, each played from its own set and KEY
+
+  @D-089 @UC-65 @auto
+  Scenario: A search result can be added to the progression in one tap
+    Given the best match for "Dm7 G7 Cmaj7 Am7", set 47 at KEY −3
+    When the user taps "+ Add to progression"
+    Then the progression gains D♯, A, C♯ and C on set 47 at KEY −3, in that order
+    And they play Dm7 G7 Cmaj7 Am7
+
+  @D-089 @UC-64 @manual
+  Scenario: Trying chords out never fills the progression by accident
+    Given the phone next to the J-6, Rec off
+    When I tap ten pads to find the one I want and add it
+    Then the progression holds only that chord
+    And when Rec is on, I can tell at a glance, without colour, that every tap is being kept
+
   @UC-64 @manual
   Scenario: The pad labels are readable at arm's length beside the hardware
     Given the phone is next to the J-6 on a desk

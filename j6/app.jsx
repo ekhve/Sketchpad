@@ -6,9 +6,10 @@
    in j6.mjs, which takes its theory from Sketchpad's (D-086). The piano, the
    sound and the colour tokens are Sketchpad's own, imported rather than copied.
    The layout follows the agreed screens, proto/j6/explore.svg and find.svg. */
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useReducer } from "react";
 import { T, Piano, useInstrument, spelling, scalePcs, pc } from "../sketchpad.jsx";
 import * as j from "./j6.mjs";
+import * as pr from "./progression.mjs";
 
 /* ============================================================================
    DESIGN TOKENS — Sketchpad's Bone palette plus the roles the J-6 needs.
@@ -26,6 +27,7 @@ const J = {
   pill: "#FFAE45", pillInk: "#2A1A06",
   chip: "#FBE3C0", chipStrong: "#FFAE45",
   toggleOn: "#3E7D5A", toggleOff: "#CFC4AE", knob: "#2E2A27",
+  rec: "#E8412C", recInk: "#FFF6E8",      // Rec on: every tap is kept (D-089)
   warn: "#B23A48", warnGround: "#F6E1DF",
 };
 
@@ -116,24 +118,24 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
           <div key={k} style={{ position: "absolute", left: `calc(${(left + 0.5) * 12.5}% + 4px)`, width: "calc(12.5% - 6px)" }}>{pad(k, k, true)}</div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 4 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, minmax(0, 1fr))", gap: 4 }}>
         {LOWER.map((k) => <div key={k}>{pad(k, k, false)}</div>)}
       </div>
     </div>
   );
 }
 
-function Panel({ set, t, children, onSet, onPick, onKey }) {
+function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
   const bad = j.validateSet(set);
   return (
     <div style={{ background: J.panel, color: J.panelInk, borderRadius: 18, padding: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div aria-label={`chord set ${set}`} style={{ background: J.ledGround, color: J.led, fontFamily: "ui-monospace,monospace", fontSize: 30, fontWeight: 700, padding: "4px 14px", borderRadius: 6, minWidth: 72, textAlign: "center" }}>{set}</div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10.5, letterSpacing: ".12em", color: J.panelSoft }}>CHORD SET</div>
           {onPick ? (
             <select aria-label="chord set" value={set} onChange={(e) => onPick(Number(e.target.value))}
-              style={{ fontSize: 17, fontWeight: 700, background: "transparent", color: J.panelInk, border: 0, padding: 0, maxWidth: "100%" }}>
+              style={{ fontSize: 17, fontWeight: 700, background: "transparent", color: J.panelInk, border: 0, padding: 0, width: "100%", textOverflow: "ellipsis" }}>
               {SET_NUMBERS.map((n) => <option key={n} value={n}>{n} · {j.SETS[n].genre}</option>)}
             </select>
           ) : <div style={{ fontSize: 17, fontWeight: 700 }}>{j.SETS[set].genre}</div>}
@@ -153,7 +155,15 @@ function Panel({ set, t, children, onSet, onPick, onKey }) {
           <button aria-label="KEY down" onClick={() => onKey(-1)} disabled={t <= KEY_LO} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>−</button>
           <span style={{ minWidth: 22, textAlign: "center", color: J.panelInk, fontWeight: 700 }}>{signed(t)}</span>
           <button aria-label="KEY up" onClick={() => onKey(1)} disabled={t >= KEY_HI} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>+</button>
-          <span style={{ marginLeft: "auto", fontSize: 10.5 }}>sound controls: display only</span>
+          {onRec ? (
+            /* on: filled red with "REC" in capitals and a solid dot; off: an outline and a hollow dot,
+               so the state reads without colour (D-089) */
+            <button role="switch" aria-checked={rec} aria-label="record every tap into the progression" onClick={() => onRec(!rec)}
+              style={{ marginLeft: "auto", borderRadius: 999, padding: "4px 12px", fontSize: 12, fontWeight: 800, letterSpacing: ".06em",
+                border: `1.5px solid ${rec ? J.rec : J.panelSoft}`, background: rec ? J.rec : "transparent", color: rec ? J.recInk : J.panelSoft }}>
+              {rec ? "● REC" : "○ Rec"}
+            </button>
+          ) : <span style={{ marginLeft: "auto", fontSize: 10.5 }}>sound controls: display only</span>}
         </div>
       )}
       {bad.length > 0 && (
@@ -171,29 +181,28 @@ function Panel({ set, t, children, onSet, onPick, onKey }) {
 /* ============================================================================
    EXPLORE — what am I playing? (UC-64)
    ========================================================================== */
-function Explore({ audio }) {
-  const [set, setSet] = useState(54);
-  const [t, setT] = useState(0);
-  const [played, setPlayed] = useState([]);
+/* A tap plays and shows; "+ Add" keeps; Rec keeps every tap. The progression
+   lives in J6App, so Find can add to it too. (D-089) */
+function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
   const [showPiano, setShowPiano] = useState(true);
   const [held, setHeld] = useState([]);
 
-  const chords = played.map((k) => j.chordAt(set, k, t));
-  const keys = j.likelyKeys(chords.map((c) => c.chord).filter(Boolean));
+  const chords = state.items.map(pr.resolve);
+  const keys = j.likelyKeys(pr.keyFocus(state).map(pr.resolve).map((c) => c.chord).filter(Boolean));
+  const judged = pr.keyFocus(state).length;
   const best = keys[0], next = keys[1];
   const tonic = best ? best.tonic : setTonic(set, t);
   const names = spelling("letters", tonic).names;
-  const latest = chords[chords.length - 1];
+  const latest = state.current && pr.resolve(state.current);
 
-  const press = async (k) => {
-    setPlayed((p) => [...p, k]);
+  const sound = async (midi, seconds = 1.4) => {
     await audio.init(); await audio.resume();
-    audio.play(j.chordAt(set, k, t).midi, 1.4, undefined, 0.75);
+    audio.play(midi, seconds, undefined, 0.75);
   };
+  const press = (k) => { dispatch({ type: "tap", set, key: k, t }); sound(j.chordAt(set, k, t).midi); };
   const changeSet = (d) => {
     const i = SET_NUMBERS.indexOf(set);
     setSet(SET_NUMBERS[(i + d + SET_NUMBERS.length) % SET_NUMBERS.length]);
-    setPlayed([]);
   };
   const changeKey = (d) => setT((x) => Math.max(KEY_LO, Math.min(KEY_HI, x + d)));
   const playAll = async () => {
@@ -201,24 +210,33 @@ function Explore({ audio }) {
     chords.forEach((c, i) => setTimeout(() => audio.play(c.midi, 0.95, undefined, 0.75), i * 1000));
   };
 
+  /* Numbers on the pads show the order kept, and only while recording; the
+     latest tap is outlined either way. */
   const marks = (k) => {
-    const last = played.lastIndexOf(k);
-    return { order: last >= 0 ? last + 1 : null, latest: played.length > 0 && played[played.length - 1] === k, lit: last >= 0 };
+    const here = (x) => x.set === set && x.t === t && x.key === k;
+    const order = state.items.map((x, i) => (here(x) ? i + 1 : null)).filter(Boolean);
+    return { order: state.rec && order.length ? order[order.length - 1] : null,
+      latest: Boolean(state.current && here(state.current)), lit: state.rec && order.length > 0 };
   };
+  const where = (x) => `${x.set === set && x.t === t ? "" : `set ${x.set}${x.t ? ` · KEY ${signed(x.t)}` : ""} · `}key ${KEY_NAMES[x.key]}`;
 
   const lo = latest ? Math.min(...latest.midi) : 48;
   const hi = latest ? Math.max(...latest.midi) : 72;
   const start = Math.floor(lo / 12) * 12;
   const octaves = Math.max(2, Math.ceil((hi - start + 1) / 12));
   const notes = latest?.chord ? latest.chord.iv : [];
-  const latestBad = latest && flagged(set, j.KEYS.indexOf(latest.key));
+  const latestBad = latest && flagged(state.current.set, state.current.key);
 
   return (
     <>
-      <Panel set={set} t={t} onSet={changeSet} onPick={(n) => { setSet(n); setPlayed([]); }} onKey={changeKey}>
+      <Panel set={set} t={t} onSet={changeSet} onPick={setSet} onKey={changeKey}
+        rec={state.rec} onRec={(on) => dispatch({ type: "rec", on })}>
         <J6Pads set={set} t={t} tonic={tonic} marks={marks} onPress={press} />
       </Panel>
-      <p style={{ fontSize: 13, color: J.inkSoft, margin: "8px 4px" }}>Tap the keys in the order you played them on your J-6.</p>
+      <p style={{ fontSize: 13, color: J.inkSoft, margin: "8px 4px" }}>
+        {state.rec ? "Recording: every key you tap joins the progression, in order. Tap ● REC to stop."
+          : "Tap a key to hear it. + Add keeps it; ○ Rec keeps every tap, to copy down what you played on the J-6."}
+      </p>
 
       <Card>
         <Label>Now</Label>
@@ -227,9 +245,9 @@ function Explore({ audio }) {
         ) : (
           <>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.05 }}>{chordName(latest, tonic)}</div>
-                <div style={{ fontSize: 12.5, color: J.inkSoft, marginTop: 4 }}>J-6 key {KEY_NAMES[j.KEYS.indexOf(latest.key)]} · {latest.label ? `manual says ${latest.label}` : "no chord name in the manual: an interval"}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: chordName(latest, tonic).length > 7 ? 28 : 40, fontWeight: 800, lineHeight: 1.05, overflowWrap: "anywhere" }}>{chordName(latest, tonic)}</div>
+                <div style={{ fontSize: 12.5, color: J.inkSoft, marginTop: 4 }}>J-6 {where(state.current)} · {latest.label ? `manual says ${latest.label}` : "no chord name in the manual: an interval"}</div>
               </div>
               {best && latest.chord && (
                 <div style={{ textAlign: "center" }}>
@@ -253,6 +271,9 @@ function Explore({ audio }) {
                 <div>low → high</div>
               </div>
             </div>
+            {!state.rec && (
+              <div style={{ marginTop: 12 }}><Button dark onClick={() => dispatch({ type: "add" })}>+ Add to progression</Button></div>
+            )}
             {latestBad && (
               <p role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12.5 }}>
                 The manual's notes for this key don't match "{latest.label}": {latestBad.problems.join("; ")}. The piano shows the notes as printed.
@@ -284,8 +305,8 @@ function Explore({ audio }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ fontSize: 24, fontWeight: 800 }}>{majorKey(best.tonic)}</div>
               <div style={{ textAlign: "right", fontSize: 12.5 }}>
-                <div>{best.inKey === chords.length ? `all ${chords.length} chord${chords.length > 1 ? "s" : ""} fit` : `${best.inKey} of ${chords.length} chords fit`}</div>
-                {next && <div style={{ color: J.inkSoft }}>next: {majorKey(next.tonic)}, {next.inKey} of {chords.length}</div>}
+                <div>{state.items.length ? (best.inKey === judged ? `all ${judged} chord${judged > 1 ? "s" : ""} fit` : `${best.inKey} of ${judged} chords fit`) : "from the chord on screen"}</div>
+                {next && state.items.length > 0 && <div style={{ color: J.inkSoft }}>next: {majorKey(next.tonic)}, {next.inKey} of {judged}</div>}
               </div>
             </div>
             <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
@@ -305,21 +326,27 @@ function Explore({ audio }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Label>Progression</Label>
           <span style={{ display: "flex", gap: 6 }}>
-            <Button onClick={() => setPlayed((p) => p.slice(0, -1))} disabled={!played.length}>↶ Undo</Button>
-            <Button onClick={() => setPlayed([])} disabled={!played.length}>Clear</Button>
-            <Button dark onClick={playAll} disabled={!played.length}>▶ Play</Button>
+            <Button onClick={() => dispatch({ type: "undo" })} disabled={!chords.length}>↶ Undo</Button>
+            <Button onClick={() => dispatch({ type: "clear" })} disabled={!chords.length}>Clear</Button>
+            <Button dark onClick={playAll} disabled={!chords.length}>▶ Play</Button>
           </span>
         </div>
         <div style={{ display: "flex", gap: 6, overflowX: "auto", marginTop: 8 }}>
           {chords.map((c, i) => (
-            <div key={i} style={{ minWidth: 82, borderRadius: 12, padding: "8px 6px", textAlign: "center",
-              background: J.surface, boxShadow: i === chords.length - 1 ? `0 0 0 2px ${J.padLatest}` : `0 0 0 1px ${J.edge}` }}>
-              <div style={{ fontSize: 16, fontWeight: 800 }}>{chordName(c, tonic)}</div>
-              <div style={{ fontSize: 13 }}>{best && c.chord ? j.romanOf(c.chord, tonic) : ""}</div>
-              <div style={{ fontSize: 10.5, color: J.inkSoft }}>J-6 key {KEY_NAMES[j.KEYS.indexOf(c.key)]}</div>
+            <div key={i} style={{ position: "relative", minWidth: 86 }}>
+              <button onClick={() => sound(c.midi, 1.2)} aria-label={`play ${chordName(c, tonic)}`}
+                style={{ width: "100%", border: 0, borderRadius: 12, padding: "8px 6px", textAlign: "center", color: J.ink,
+                  background: J.surface, boxShadow: i === chords.length - 1 ? `0 0 0 2px ${J.padLatest}` : `0 0 0 1px ${J.edge}` }}>
+                <div style={{ fontSize: 16, fontWeight: 800 }}>{chordName(c, tonic)}</div>
+                <div style={{ fontSize: 13 }}>{best && c.chord ? j.romanOf(c.chord, tonic) : ""}</div>
+                <div style={{ fontSize: 10.5, color: J.inkSoft }}>{where(state.items[i])}</div>
+              </button>
+              <button onClick={() => dispatch({ type: "remove", index: i })} aria-label={`remove ${chordName(c, tonic)}`}
+                style={{ position: "absolute", top: -6, right: -6, width: 22, height: 22, borderRadius: 11, border: 0,
+                  background: J.ink, color: J.card, fontSize: 12, lineHeight: "22px" }}>×</button>
             </div>
           ))}
-          {!chords.length && <p style={{ fontSize: 13, color: J.inkSoft }}>Nothing yet.</p>}
+          {!chords.length && <p style={{ fontSize: 13, color: J.inkSoft }}>Nothing kept yet. Tap a key, then + Add, or turn on Rec.</p>}
         </div>
       </Card>
     </>
@@ -336,7 +363,7 @@ function reasonFor(r) {
   return [`KEY ${signed(r.transpose)}`, ...parts].join(" · ");
 }
 
-function Find({ audio }) {
+function Find({ audio, dispatch }) {
   const [text, setText] = useState("Dm7 G7 Cmaj7 Am7");
   const [mode, setMode] = useState("musical");
   const [transpose, setTranspose] = useState(true);
@@ -363,6 +390,9 @@ function Find({ audio }) {
     order.forEach((k, i) => { if (k !== null) setTimeout(() => audio.play(j.chordAt(best.set, k, best.transpose).midi, 0.95, undefined, 0.75), i * 1000); });
   };
   const exact = best ? best.rows.filter((r) => r.kind === "exact").length : 0;
+  const [added, setAdded] = useState(null);
+  useEffect(() => setAdded(null), [text, mode, transpose]);
+  const addAll = () => { const items = pr.fromSearch(best); dispatch({ type: "addMany", items }); setAdded(items.length); };
 
   return (
     <>
@@ -411,8 +441,12 @@ function Find({ audio }) {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
             <strong>On your J-6</strong>
-            <Button dark onClick={hear}>▶ Hear it</Button>
+            <span style={{ display: "flex", gap: 6 }}>
+              <Button onClick={addAll}>+ Add to progression</Button>
+              <Button dark onClick={hear}>▶ Hear it</Button>
+            </span>
           </div>
+          {added !== null && <p role="status" style={{ fontSize: 12.5, color: J.ok, margin: "6px 0 0" }}>Added {added} chord{added === 1 ? "" : "s"} to the progression in Explore.</p>}
           <ol style={{ listStyle: "none", padding: 0, margin: "8px 0", fontSize: 14, display: "grid", gap: 6 }}>
             {[`SHIFT + CHORD, turn to ${best.set}`, `SHIFT + KEY, turn to ${signed(best.transpose)}`,
               `Play ${order.filter((k) => k !== null).map((k) => KEY_NAMES[k]).join(" → ")}`].map((s, i) => (
@@ -469,6 +503,9 @@ export default function J6App() {
   const [tab, setTab] = useState("explore");
   const [sound, setSound] = useState("grand");
   const audio = useInstrument();
+  const [state, dispatch] = useReducer(pr.explore, pr.START);
+  const [set, setSet] = useState(54);
+  const [t, setT] = useState(0);
   useEffect(() => { audio.setInstrument(sound); }, [sound]); // eslint-disable-line
   const stopAll = useCallback(() => audio.panic(), [audio]);
 
@@ -482,7 +519,9 @@ export default function J6App() {
         <Segmented label="screen" value={tab} onChange={(id) => { stopAll(); setTab(id); }} options={[["explore", "Explore"], ["find", "Find"]]} />
       </header>
 
-      {tab === "explore" ? <Explore audio={audio} /> : <Find audio={audio} />}
+      {tab === "explore"
+        ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} />
+        : <Find audio={audio} dispatch={dispatch} />}
 
       <footer style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
         <span style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 700 }}>
