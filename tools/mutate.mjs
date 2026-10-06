@@ -218,6 +218,7 @@ const J6_PROGRESSION_MUTANTS = [
   ["the key ignores the progression",        "(state.items.length ? state.items : state.current ? [state.current] : [])", "(state.current ? [state.current] : [])"],
   ["remove takes the wrong chord",           "filter((_, i) => i !== action.index)", "filter((_, i) => i !== action.index + 1)"],
   ["a search result adds the wrong keys",    "KEYS.indexOf(r.keys[0])", "KEYS.indexOf(r.keys[r.keys.length - 1])"],
+  ["turning Rec off hides what was recorded", "return { order: order.length ? order[order.length - 1] : null, lit: order.length > 0,", "return { order: state.rec && order.length ? order[order.length - 1] : null, lit: state.rec && order.length > 0,"],
   ["a kept chord forgets its own set",       "const resolve = (k) => chordAt(k.set, k.key, k.t);", "const resolve = (k) => chordAt(54, k.key, k.t);"],
 ].map(([name, from, to]) => [name, from, to, "j6/progression.mjs"]);
 

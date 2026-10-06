@@ -170,7 +170,7 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
         <div role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12 }}>
           {j.untrustedSet(set)
             ? `The manual's chord data for set ${set} fails on ${bad.length} of 12 keys, so search never suggests this set. Its chord names are the manual's, not necessarily what the J-6 plays.`
-            : `On ${bad.length === 1 ? "the key marked !" : `the ${bad.length} keys marked !`}, the manual's notes don't match its chord name, so search never suggests ${bad.length === 1 ? "it" : "them"}.`}
+            : `! marks a misprint in the J-6 manual: for ${bad.length === 1 ? "that key" : `those ${bad.length} keys`}, the notes it lists don't fit the chord name it gives. You can still tap ${bad.length === 1 ? "it" : "them"} to hear the notes as printed; Find just won't suggest ${bad.length === 1 ? "it" : "them"}.`}
         </div>
       )}
       <div style={{ marginTop: 14 }}>{children}</div>
@@ -210,14 +210,8 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
     chords.forEach((c, i) => setTimeout(() => audio.play(c.midi, 0.95, undefined, 0.75), i * 1000));
   };
 
-  /* Numbers on the pads show the order kept, and only while recording; the
-     latest tap is outlined either way. */
-  const marks = (k) => {
-    const here = (x) => x.set === set && x.t === t && x.key === k;
-    const order = state.items.map((x, i) => (here(x) ? i + 1 : null)).filter(Boolean);
-    return { order: state.rec && order.length ? order[order.length - 1] : null,
-      latest: Boolean(state.current && here(state.current)), lit: state.rec && order.length > 0 };
-  };
+  /* Numbers on the pads show what has been kept, Rec on or off; the latest tap is outlined. */
+  const marks = (k) => pr.padMarks(state, set, t, k);
   const where = (x) => `${x.set === set && x.t === t ? "" : `set ${x.set}${x.t ? ` · KEY ${signed(x.t)}` : ""} · `}key ${KEY_NAMES[x.key]}`;
 
   const lo = latest ? Math.min(...latest.midi) : 48;
@@ -234,8 +228,8 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
         <J6Pads set={set} t={t} tonic={tonic} marks={marks} onPress={press} />
       </Panel>
       <p style={{ fontSize: 13, color: J.inkSoft, margin: "8px 4px" }}>
-        {state.rec ? "Recording: every key you tap joins the progression, in order. Tap ● REC to stop."
-          : "Tap a key to hear it. + Add keeps it; ○ Rec keeps every tap, to copy down what you played on the J-6."}
+        {state.rec ? "Recording: every key you tap joins the progression, in order. Tap ● REC to stop; what you recorded stays."
+          : "Tap a key to hear it. + Add keeps it; ○ Rec keeps every tap, to copy down what you played on the J-6. Clear empties the progression."}
       </p>
 
       <Card>
@@ -276,7 +270,7 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT }) {
             )}
             {latestBad && (
               <p role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12.5 }}>
-                The manual's notes for this key don't match "{latest.label}": {latestBad.problems.join("; ")}. The piano shows the notes as printed.
+                Misprint in the manual: the notes it lists for this key don't fit "{latest.label}" ({latestBad.problems.join("; ")}). You hear and see the notes as printed; Find won't suggest this key.
               </p>
             )}
           </>

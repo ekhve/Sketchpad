@@ -233,6 +233,6 @@ Anything marked **Done** should be findable in `sketchpad.feature` and, unless i
 node tools/check-done.mjs
 ```
 
-Current: 441 automated checks, 189/189 mutants killed, 15/15 gates.
+Current: 442 automated checks, 190/190 mutants killed, 15/15 gates.
 
 If a feature is listed **Done** here but has no scenario, this document is wrong — trust the feature file.

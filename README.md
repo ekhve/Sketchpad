@@ -37,7 +37,7 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 | Suite | Checks | What it protects |
 |---|---|---|
 | `theory.test.mjs` | 402 | Scales, chords, analysis, figures, key roles, naming, lessons, typed chord names |
-| `j6.test.mjs` | 25 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
+| `j6.test.mjs` | 26 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
 | `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
 
@@ -48,13 +48,13 @@ legibility. Those cannot be asserted here and are checked by hand on a phone.
 
 Passing tests prove nothing until you've seen them fail. `tools/mutate.mjs`
 breaks the theory on purpose — one change at a time — and reports whether the
-suite noticed. **189 mutants, all killed.** Two of those mutants only die because
+suite noticed. **190 mutants, all killed.** Two of those mutants only die because
 of tests written specifically after an earlier run found them surviving.
 
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 441 automated checks, all passing.
+Current state: 442 automated checks, all passing.
 
 ## Before calling anything done
 

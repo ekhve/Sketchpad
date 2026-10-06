@@ -3176,6 +3176,17 @@ Feature: J-6 Explore — what am I playing?
     And with Rec off again the next tap is not added
 
   @D-089 @UC-64 @auto
+  Scenario: Turning Rec off keeps what was recorded, numbered on the pads, until it is cleared
+    Given Rec is on and the user has tapped C, C♯, G and D♯ on set 54
+    When the user turns Rec off
+    Then the progression is still Cmaj7 Em7 Am7 Fmaj7
+    And the pads are still numbered 1 to 4
+    When the user taps A♯
+    Then it plays, is outlined as the latest tap, and gets no number
+    When the user clears the progression
+    Then no pad has a number
+
+  @D-089 @UC-64 @auto
   Scenario: A chord can be taken out of the progression, and undo and clear still work
     Given the progression Cmaj7 Em7 Am7 Fmaj7 from set 54
     When the user removes the second chord

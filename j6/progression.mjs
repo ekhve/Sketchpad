@@ -47,3 +47,14 @@ export const keyFocus = (state) => (state.items.length ? state.items : state.cur
 /** A search result's keys to press, in the order of the progression searched for. */
 export const fromSearch = (result) =>
   result.rows.filter((r) => r.keys.length).map((r) => at(result.set, KEYS.indexOf(r.keys[0]), result.transpose));
+
+/** How to draw key `key` of `set` at KEY `t`: its last number in the progression, whether it
+ *  is kept, and whether it is the last key tapped. Rec decides only whether a tap is kept;
+ *  what has been kept stays on the pads, numbered, with Rec on or off, until it is cleared.
+ *  (D-089, amended) */
+export function padMarks(state, set, t, key) {
+  const here = (x) => x.set === set && x.t === t && x.key === key;
+  const order = state.items.map((x, i) => (here(x) ? i + 1 : null)).filter(Boolean);
+  return { order: order.length ? order[order.length - 1] : null, lit: order.length > 0,
+    latest: Boolean(state.current && here(state.current)) };
+}

@@ -190,7 +190,7 @@ Open the site's **j6/** link (or "J-6 Explorer" from the home screen). Put the p
 | 8.1 | Add **j6/** to the home screen and open it; then flight mode, close, open again | Its own icon (a black J-6 with one amber pad), full screen, works offline. Sketchpad's icon still works offline too |
 | 8.2 | Without picking the phone up, read the chord names on the pads | Every pad's chord is readable at arm's length (*The pad labels are readable at arm's length beside the hardware*) |
 | 8.3 | On set 54, tap ten pads at random | Each plays and shows its chord; the progression stays empty. Tap **+ Add** on one: only that one is kept (*Trying chords out never fills the progression by accident*) |
-| 8.3b | Turn on **Rec**, tap C, C♯, G, D♯ | Rec is filled red, "● REC"; you can tell it is on without relying on the colour. Numbers 1–4 on the pads; the latest has a white outline. Progression Cmaj7 Em7 Am7 Fmaj7, key C major. Take out Em7 with × |
+| 8.3b | Turn on **Rec**, tap C, C♯, G, D♯ | Rec is filled red, "● REC"; you can tell it is on without relying on the colour. Numbers 1–4 on the pads; the latest has a white outline. Progression Cmaj7 Em7 Am7 Fmaj7, key C major. Turn Rec off: the progression and the numbers stay. Take out Em7 with ×, then Clear: the numbers go |
 | 8.4 | On the J-6: set 47, KEY −3, press A | It plays **G7** (G B D F). If not, the KEY direction is backwards: report it (*The KEY direction and range match the hardware*) |
 | 8.5 | Turn KEY as far as it goes both ways | Write down the lowest and highest values. The app assumes −6 and +5 |
 | 8.6 | On the J-6, press the 8th lower pad (high C) | Same chord as C? (*The high C pad plays the C chord*) |

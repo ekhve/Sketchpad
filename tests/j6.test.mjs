@@ -204,6 +204,19 @@ test("With Rec on, every key tapped joins the progression in order", () => {
   assert.equal(run([{ type: "rec", on: false }, tap("A#")], s).items.length, 4);
 });
 
+test("Turning Rec off keeps what was recorded, numbered on the pads, until it is cleared", () => {
+  const rec = run([{ type: "rec", on: true }, tap("C"), tap("C#"), tap("G"), tap("D#")]);
+  const off = run([{ type: "rec", on: false }], rec);
+  assert.deepEqual(chordsOf(off.items), ["Cmaj7", "Em7", "Am7", "Fmaj7"], "turning Rec off keeps the progression");
+  const number = (s, key) => pr.padMarks(s, 54, 0, j.KEYS.indexOf(key)).order;
+  assert.deepEqual(["C", "C#", "G", "D#"].map((k) => number(off, k)), [1, 2, 3, 4], "and its numbers on the pads");
+  const tapped = run([tap("A#")], off);
+  assert.deepEqual(pr.padMarks(tapped, 54, 0, j.KEYS.indexOf("A#")), { order: null, lit: false, latest: true });
+  assert.equal(pr.padMarks(tapped, 47, 0, j.KEYS.indexOf("C")).order, null, "numbers belong to their own set");
+  const cleared = run([{ type: "clear" }], tapped);
+  assert.deepEqual(j.KEYS.map((k) => number(cleared, k)).filter(Boolean), []);
+});
+
 test("A chord can be taken out of the progression, and undo and clear still work", () => {
   const s = run([{ type: "rec", on: true }, tap("C"), tap("C#"), tap("G"), tap("D#")]);
   const removed = run([{ type: "remove", index: 1 }], s);
