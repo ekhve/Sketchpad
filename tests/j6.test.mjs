@@ -360,3 +360,31 @@ test("The sheet's scale is the one chosen to play along with", () => {
   assert.deepEqual(s.scale.names, ["A", "C", "D", "E", "G"]);
   assert.equal(sh.j6Sheet(kept).scale.name, "C Major");
 });
+
+/* ---------- the key a set plays in, and the J-6's own steps (D-094) ---------- */
+test("Each chord set shows the key it plays in, and KEY moves it", () => {
+  assert.deepEqual(j.setKey(54, 0), { tonic: 5, fit: 8, of: 12 }, "F major, or D minor: 8 of 12 pads");
+  assert.equal(j.setKey(54, 2).tonic, 7);
+  for (const n of Object.keys(j.SETS)) {
+    const home = j.setKey(n, 0);
+    if ([14, 15, 16].includes(Number(n))) { assert.equal(home, null, `set ${n} is an interval stack`); continue; }
+    for (let t = -6; t <= 5; t++) assert.equal(j.setKey(n, t).tonic, (home.tonic + t + 12) % 12, `set ${n} at KEY ${t}`);
+  }
+});
+
+test("The home chord, its two closest relatives and the relative minor are marked on the pads", () => {
+  assert.equal(j.setKey(29, 0).tonic, 0, "set 29 is in C major");
+  const role = (key) => j.homeRole(j.chordAt(29, j.KEYS.indexOf(key), 0).chord, 0);
+  assert.deepEqual(["C", "F", "C#", "F#", "D", "B", "A", "E"].map(role), ["I", "I", "IV", "IV", "V", "V", "vi", null]);
+  assert.equal(j.homeRole(j.parseChord("Gm7"), 0), null, "G minor has a B flat, which isn't in C major");
+  assert.equal(j.homeRole(j.parseChord("G7"), 0), "V");
+  assert.equal(j.homeRole(null, 0), null);
+});
+
+test("Find gives the steps on the J-6 in the manual's words", () => {
+  assert.deepEqual(j.hardwareSteps({ set: 47, transpose: -3 }, ["D#", "A", "C#", "C"].map((k) => j.KEYS.indexOf(k))), [
+    "SHIFT + [CHORD], turn [TEMPO/VALUE] to 47, press [CHORD]",
+    "SHIFT + [A (KEY)], turn [TEMPO/VALUE] to −3, press [C (EXIT)]",
+    "Play D♯ → A → C♯ → C",
+  ]);
+});

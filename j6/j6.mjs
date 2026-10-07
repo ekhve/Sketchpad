@@ -118,6 +118,37 @@ export function chordAt(n, k, t = 0) {
   };
 }
 
+/* ---------- the key a set plays in, and the J-6's own steps (D-094) ---------- */
+/** The major key a chord set plays in at KEY t: the key its labelled pads fit best.
+ *  → { tonic, fit, of } (pads that fit, of pads with a chord), or null for the interval stacks. */
+export function setKey(n, t = 0) {
+  const chords = KEYS.map((_, k) => chordAt(n, k, t).chord).filter(Boolean);
+  const [best] = likelyKeys(chords);
+  return best ? { tonic: best.tonic, fit: best.inKey, of: chords.length } : null;
+}
+
+/** I, IV or V when the chord is the key's home chord or one of its two closest relatives,
+ *  and vi for the relative minor's home chord, all its notes in the key; otherwise null.
+ *  Marked on the pads so the key can be seen. A set in a minor key shows its home as vi. */
+export function homeRole(chord, tonic) {
+  if (!chord) return null;
+  const major = new Set(scalePcs(tonic, "major"));
+  if (![...pcsOf(chord)].every((p) => major.has(p))) return null;
+  const d = pc(chord.root - tonic);
+  return d === 0 ? "I" : d === 5 ? "IV" : d === 7 ? "V" : d === 9 ? "vi" : null;
+}
+
+/** The steps on the J-6 itself, in the manual's words ("Using Chord Mode"): select the chord
+ *  set, set the keyboard transposition, play the keys in order. */
+export function hardwareSteps({ set, transpose }, keys) {
+  const sign = (t) => (t > 0 ? `+${t}` : t < 0 ? `−${-t}` : "0");
+  return [
+    `SHIFT + [CHORD], turn [TEMPO/VALUE] to ${set}, press [CHORD]`,
+    `SHIFT + [A (KEY)], turn [TEMPO/VALUE] to ${sign(transpose)}, press [C (EXIT)]`,
+    `Play ${keys.map((k) => KEYS[k].replace("#", "♯")).join(" → ")}`,
+  ];
+}
+
 /* ---------- naming a voicing from its notes (D-093) ---------- */
 /** The chord a set of notes makes, read the way the validator reads a label (D-080): a root
  *  that sounds, every note in the chord, missing tones allowed. A root in the bass counts
@@ -190,9 +221,11 @@ export function likelyKeys(chords) {
     const inKey = chords.filter((c) => [...pcsOf(c)].every((p) => scale.has(p))).length;
     fits.push({ tonic, inKey });
   }
-  const first = chords[0]?.root;
+  const first = chords[0]?.root ?? 0;
+  /* the last tie-break is measured from the first chord, not from C, so that it moves with
+     KEY: transposing the chords transposes the answer (D-094) */
   return fits.filter((f) => f.inKey > 0)
-    .sort((a, b) => b.inKey - a.inKey || (b.tonic === first) - (a.tonic === first) || a.tonic - b.tonic);
+    .sort((a, b) => b.inKey - a.inKey || (b.tonic === first) - (a.tonic === first) || pc(a.tonic - first) - pc(b.tonic - first));
 }
 
 /** The chord's numeral in a major key: Sketchpad's numeral (case, ♭/♯, °, +) plus the

@@ -567,6 +567,10 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-392 | The sheet shows suggested fingering only when ticked. | D-091, D-078 | A | The sheet shows suggested fingering only when ticked |
 | R-393 | The sheet's scale is the one chosen to play along with, or the key's major scale. | D-091, D-092 | A | The sheet's scale is the one chosen to play along with |
 | R-394 | Printed, only the sheet appears, legible in black and white, with the J-6 keys listed. | D-091 | M | A printed J-6 sheet can be played from at a piano |
+| R-395 | The panel names the major key, and its relative minor, that a set's pads fit best at the current KEY, with how many pads fit; KEY moves it by exactly as many semitones. | D-094 | A | Each chord set shows the key it plays in, and KEY moves it |
+| R-396 | The pads mark I, IV, V and vi of that key, only on chords whose notes are all in it. | D-094 | A | The home chord, its two closest relatives and the relative minor are marked on the pads |
+| R-397 | Find's steps on the J-6 are the manual's: SHIFT + [CHORD] and [TEMPO/VALUE] for the set, SHIFT + [A (KEY)], [TEMPO/VALUE] and [C (EXIT)] for KEY. | D-094 | A | Find gives the steps on the J-6 in the manual's words |
+| R-398 | Beside the J-6, the key on the panel and the marked pads follow KEY as the hardware does. | D-094 | M | The key can be read off the panel beside the J-6 |
 | R-376 | Any kept chord can be taken out; undo takes off the last and clear empties the progression. | D-089 | A | A chord can be taken out of the progression, and undo and clear still work |
 | R-377 | The key is judged from the progression once it has chords, and from the chord on screen before that. | D-089 | A | The key follows the progression once it has chords, and the last key tapped before that |
 | R-378 | A kept chord keeps its own set and KEY, and plays from them. | D-089 | A | A progression can mix chord sets and KEY settings |

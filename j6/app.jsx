@@ -52,8 +52,9 @@ const flagged = (set, k) => j.validateSet(set).find((r) => r.key === j.KEYS[k]);
 const pitchName = (m, names) => names[pc(m)] + (Math.floor(m / 12) - 1);
 const majorKey = (tonic) => `${spelling("letters", tonic).names[tonic]} major`;
 
-/* The key a whole set suggests, for spelling its pads before anything is played. */
-const setTonic = (n, t) => j.likelyKeys(j.KEYS.map((_, k) => j.chordAt(n, k, t).chord).filter(Boolean))[0]?.tonic ?? 0;
+/* The key a whole set plays in (D-094), for spelling its pads before anything is played. */
+const setTonic = (n, t) => j.setKey(n, t)?.tonic ?? 0;
+const minorOf = (tonic) => `${spelling("letters", tonic).names[(tonic + 9) % 12]} minor`;
 
 /* ============================================================================
    SMALL PARTS
@@ -91,7 +92,7 @@ const Button = ({ children, onClick, dark = false, disabled = false, label }) =>
    THE VIRTUAL J-6 — what every key plays, printed on the pad.
    `marks(k)` says how to draw key k: { order, latest, dashed, lit }.
    ========================================================================== */
-function J6Pads({ set, t, tonic, marks, onPress }) {
+function J6Pads({ set, t, tonic, marks, onPress, roleTonic = null }) {
   const pad = (k, slot, black) => {
     const c = j.chordAt(set, k % 12, t);
     /* the high C plays C's chord (D-083), so it is drawn as the same chord, dashed, never numbered */
@@ -99,6 +100,8 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
     const fill = m.latest ? J.padLatest : m.lit ? J.padEarlier : black ? J.padBlack : J.padWhite;
     const ink = m.latest ? J.badgeInk : m.lit ? J.padEarlierInk : black ? J.padInkLight : J.padInkDark;
     const bad = flagged(set, k % 12);
+    /* I, IV, V and vi of the key the set plays in, so the key shows on the pads (D-094) */
+    const role = roleTonic === null ? null : j.homeRole(c.chord, roleTonic);
     return (
       <button key={slot} onClick={() => onPress?.(k % 12)} aria-label={`J-6 key ${KEY_NAMES[k % 12]}${k === 12 ? " (high C)" : ""}: ${chordName(c, tonic)}${bad ? " (the manual's notes don't match)" : ""}`}
         style={{ position: "relative", width: "100%", minHeight: black ? 46 : 62, borderRadius: 6, background: fill, color: ink,
@@ -106,7 +109,7 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
           /* the latest key is told apart by a thick outline as well as by colour (R-351) */
           boxShadow: m.latest ? `0 0 0 3px ${J.panelInk}` : "none",
           display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center", padding: "4px 1px" }}>
-        <span style={{ fontSize: 10, opacity: 0.8 }}>{k === 12 ? "C′" : KEY_NAMES[k]}{bad ? " !" : ""}</span>
+        <span style={{ fontSize: 10, opacity: 0.8, whiteSpace: "nowrap" }}>{k === 12 ? "C′" : KEY_NAMES[k]}{bad ? " !" : ""}{role && <strong style={{ opacity: 1 }}> {role}</strong>}</span>
         {/* the root on one line and the rest below it, each sized to fit the pad, so no name is cut off */}
         {(() => {
           const name = chordName(c, tonic);
@@ -144,6 +147,7 @@ function J6Pads({ set, t, tonic, marks, onPress }) {
 
 function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
   const bad = j.validateSet(set);
+  const key = j.setKey(set, t);
   return (
     <div style={{ background: J.panel, color: J.panelInk, borderRadius: 18, padding: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -156,7 +160,11 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
               {SET_NUMBERS.map((n) => <option key={n} value={n}>{n} · {j.SETS[n].genre}</option>)}
             </select>
           ) : <div style={{ fontSize: 17, fontWeight: 700 }}>{j.SETS[set].genre}</div>}
-          <div style={{ fontSize: 12, color: J.panelSoft }}>KEY {signed(t)} · chord mode</div>
+          {/* the key the set plays in at this KEY: what turning KEY changes (D-094) */}
+          <div style={{ fontSize: 12, color: J.panelSoft }}>
+            {key ? <>KEY {signed(t)} · fits <strong style={{ color: J.panelInk }}>{majorKey(key.tonic)}</strong> / {minorOf(key.tonic)} · {key.fit} of {key.of} pads</>
+              : <>KEY {signed(t)} · interval stacks, no key</>}
+          </div>
         </div>
         {onSet && (
           <div style={{ display: "flex", gap: 6 }}>
@@ -168,7 +176,7 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
       </div>
       {onKey && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 12, color: J.panelSoft }}>
-          <span>KEY</span>
+          <span title="on the J-6: SHIFT + [A (KEY)], then [TEMPO/VALUE]">KEY (transpose)</span>
           <button aria-label="KEY down" onClick={() => onKey(-1)} disabled={t <= KEY_LO} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>−</button>
           <span style={{ minWidth: 22, textAlign: "center", color: J.panelInk, fontWeight: 700 }}>{signed(t)}</span>
           <button aria-label="KEY up" onClick={() => onKey(1)} disabled={t >= KEY_HI} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>+</button>
@@ -304,7 +312,7 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts, 
     <>
       <Panel set={set} t={t} onSet={changeSet} onPick={setSet} onKey={changeKey}
         rec={state.rec} onRec={(on) => dispatch({ type: "rec", on })}>
-        <J6Pads set={set} t={t} tonic={tonic} marks={marks} onPress={press} />
+        <J6Pads set={set} t={t} tonic={tonic} marks={marks} onPress={press} roleTonic={j.setKey(set, t)?.tonic ?? null} />
       </Panel>
       <p style={{ fontSize: 13, color: J.inkSoft, margin: "8px 4px" }}>
         {state.rec ? "Recording: every key you tap joins the progression, in order. Tap ● REC to stop; what you recorded stays."
@@ -617,8 +625,7 @@ function Find({ audio, dispatch }) {
           </div>
           {added !== null && <p role="status" style={{ fontSize: 12.5, color: J.ok, margin: "6px 0 0" }}>Added {added} chord{added === 1 ? "" : "s"} to the progression in Explore.</p>}
           <ol style={{ listStyle: "none", padding: 0, margin: "8px 0", fontSize: 14, display: "grid", gap: 6 }}>
-            {[`SHIFT + CHORD, turn to ${best.set}`, `SHIFT + KEY, turn to ${signed(best.transpose)}`,
-              `Play ${order.filter((k) => k !== null).map((k) => KEY_NAMES[k]).join(" → ")}`].map((s, i) => (
+            {j.hardwareSteps(best, order.filter((k) => k !== null)).map((s, i) => (
               <li key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <span style={{ width: 20, height: 20, borderRadius: 10, background: J.chip, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>{s}
               </li>
@@ -703,7 +710,7 @@ export default function J6App() {
 
       {/* what only the hardware can confirm stays visible until it has (D-081, D-083) */}
       <p style={{ fontSize: 11.5, color: J.inkSoft, marginTop: 14, lineHeight: 1.45 }}>
-        Not yet checked on a J-6: that KEY runs from −6 to +5 and + transposes up, and that the high C pad plays the C chord.
+        KEY is SHIFT + [A (KEY)] on the J-6: it transposes the keyboard. Not yet checked on a J-6: its range (the manual doesn't give one; the app assumes −6 to +5), that + goes up, and that the high C pad plays the C chord.
         Chord data: the J-6 manual's Chord Set List, all {SET_NUMBERS.length} sets, checked key by key.
       </p>
     </main>

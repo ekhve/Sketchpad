@@ -237,6 +237,12 @@ const J6_PLAYBACK_MUTANTS = [
 const J6_ALONG_MUTANTS = [
   ["a misprint is named from any note, not the bass", "const score = (iv.length - rel.length) + (root === bass ? 0 : 2);", "const score = (iv.length - rel.length);"],
   ["the relative minor is a third too high",  '[pc(t + 9), "minor-pentatonic"]', '[pc(t + 3), "minor-pentatonic"]'],
+  ["a tied key is broken from C, not the first chord", "|| pc(a.tonic - first) - pc(b.tonic - first));", "|| a.tonic - b.tonic);"],
+  ["the set's key ignores KEY",               "const chords = KEYS.map((_, k) => chordAt(n, k, t).chord).filter(Boolean);", "const chords = KEYS.map((_, k) => chordAt(n, k, 0).chord).filter(Boolean);"],
+  ["IV is marked on the wrong degree",       'd === 5 ? "IV"', 'd === 6 ? "IV"'],
+  ["the relative minor goes unmarked",       'd === 9 ? "vi" : null', 'null'],
+  ["a chord outside the key is marked",      "if (![...pcsOf(chord)].every((p) => major.has(p))) return null;", ""],
+  ["the J-6 steps forget to exit KEY",       "press [C (EXIT)]`,", "`,"],
   ["chords outside the key go unmentioned",   "outside: real.filter((c) => ![...pcsOf(c)].every((p) => major.has(p))),", "outside: [],"],
 ].map(([name, from, to]) => [name, from, to, "j6/j6.mjs"]);
 const J6_SHEET_MUTANTS = [

@@ -526,7 +526,7 @@ Two chord types the song needed were missing: **7sus4 and 9sus4**. They are now 
 
 **Context.** None of the sampled sets contains Dm7 G7 Cmaj7 Am7 at KEY 0, but set 47 at KEY −3 contains it exactly. A search that ignores KEY misses the best answer.
 
-**Decision.** Search tries every KEY value by default, and the result always says which KEY to set. Ties go to the smaller transposition. **Assumption:** KEY runs from −6 to +5 and transposes up for positive values. Both stay visible in the UI until checked on the device (a manual scenario).
+**Decision.** Search tries every KEY value by default, and the result always says which KEY to set. Ties go to the smaller transposition. **Assumption:** KEY runs from −6 to +5 and transposes up for positive values. Both stay visible in the UI until checked on the device (a manual scenario). *Updated 2026-10-07 from the manual (`D-094`):* KEY is SHIFT + [A (KEY)] and "transposes the keyboard", which is what the app models. The manual gives no range, so the range and direction are still for the device to answer. The menu's trAn (−12 to +12) is a separate transposition of the sound generator and is not modelled.
 
 ### D-082 — J-6: the manual's data is validated before use (formerly D-J04)
 
@@ -711,6 +711,25 @@ Both pentatonics lie inside the major scale, so all three sit under every chord 
 
 **What building it found.** The page crashed on load, rendering nothing, because one new line used a value defined a few lines below it. This is the same class of bug as `D-063`, which gate G12 catches for Sketchpad's hooks. No unit test could see it; the headless run did. That run is still not a gate (`DONE.md`, exceptions).
 
+### D-094 — J-6: the key a set plays in, on the panel and on the pads
+
+**Context.** The owner couldn't see which key they were in, nor what the J-6's KEY did. The app had two "keys" with nothing tying them together: the J-6's KEY setting, a transposition, and the musical key on the Key card, worked out from the chords kept. Neither said what key the chord set itself was in.
+
+**What the manual says** (*Using Chord Mode* and *Functions and Menus*, read 2026-10-07):
+- **KEY** is SHIFT + the **[A (KEY)]** keyboard button. It "transposes the keyboard": turn [TEMPO/VALUE], then press [C (EXIT)]. The range isn't given.
+- **trAn** in the menu, −12 to +12, is a different setting: it "transposes the sounds made by the sound generator".
+- **Selecting a chord set** is SHIFT + [CHORD], then [TEMPO/VALUE], then [CHORD] to finish.
+- **OCTAVE** is SHIFT + [C♯ (OCTAVE−)] or [D♯ (OCTAVE+)].
+
+**Decision.**
+
+1. **The panel names the key the set plays in** at the current KEY: "KEY +2 · fits G major / E minor · 8 of 12 pads". It is the major key most of the set's pads fit, with its relative minor beside it, because a set like 47 is built around C minor, which has the same notes as E♭ major. The count says how sure that is.
+2. **The pads show the key.** The home chord is marked **I**, its closest relatives **IV** and **V**, and the relative minor's home **vi**, each only when all its notes are in the key. Turning KEY moves the key, and the marks stay on the same pads, because KEY moves every pad together.
+3. **The control says what it is:** "KEY (transpose)", with the J-6's own button combination as its hint.
+4. **Find's steps are the manual's,** replacing the prototype's guesses ("SHIFT + KEY, turn to −3"): SHIFT + [CHORD], turn [TEMPO/VALUE] to 47, press [CHORD]; SHIFT + [A (KEY)], turn [TEMPO/VALUE] to −3, press [C (EXIT)]; then the keys.
+
+**What building it found.** When two keys fitted a set equally well, the tie was broken by the lower note name. That answer doesn't move with KEY: set 12 at KEY −6 came out a fifth away from where the rest of its pads said it should be. The tie is now broken by distance from the first chord, which moves with KEY, and a test checks every set at every KEY. The prototype's assumption that set 54 was in C major was also wrong by count: more of its pads fit F major (8 against 7). The progression C C♯ G D♯ on it is still in C major, which the Key card says.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -810,6 +829,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6: the progression's × is no longer cut off, and pad names no longer are either: root above type, the type in lines of at most 7 characters, checked for every key, KEY and spelling (`D-089`) |
 | 2026-10-06 | J-6 progression playback: tempo 60–160 BPM, ½, 1 or 2 bars a chord, Loop, and a click with a one-bar count-in; Play/Stop, with the sounding chord highlighted in the progression and on its pad. Scheduled by Sketchpad's look-ahead scheduler; what each beat holds is a pure function. Not a sequencer (`D-090`) |
 | 2026-10-07 | J-6: the progression as Sketchpad's sheet, with suggested fingering and the J-6 keys for each chord (`D-091`); three scales offered to play over it, with the piano holding still under the loop (`D-092`); a misprinted key named from its notes (`D-093`). A crash on load from a value used before it was defined was caught by the headless run, not the tests |
+| 2026-10-07 | J-6 manual read (KEY, chord sets, menus): the panel names the key a set plays in at the current KEY, with its relative minor; I, IV, V and vi are marked on the pads; KEY is labelled as a transposition; Find's steps are the manual's (`D-094`, `D-081` updated). Fixed: a tied key was broken from C rather than from the first chord, so it didn't move with KEY |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

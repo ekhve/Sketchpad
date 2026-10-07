@@ -195,7 +195,7 @@ Open the site's **j6/** link (or "J-6 Explorer" from the home screen). Put the p
 | 8.3d | With the progression looping, tap a scale under Piano · play along and play a melody on the piano | The dots show the scale; the piano doesn't move; the loop doesn't stop (*Playing along on the piano while the progression plays*) |
 | 8.3e | Show the Sheet, tick Suggested fingering, Print (or save as PDF) | Only the sheet prints: chords as the J-6 voices them, finger numbers, and the J-6 set, KEY and key for each (*A printed J-6 sheet can be played from at a piano*) |
 | 8.4 | On the J-6: set 47, KEY −3, press A | It plays **G7** (G B D F). If not, the KEY direction is backwards: report it (*The KEY direction and range match the hardware*) |
-| 8.5 | Turn KEY as far as it goes both ways | Write down the lowest and highest values. The app assumes −6 and +5 |
+| 8.5 | Turn KEY as far as it goes both ways (SHIFT + [A (KEY)], then [TEMPO/VALUE], then [C (EXIT)]) | Write down the lowest and highest values; the manual doesn't say, and the app assumes −6 and +5. In the app, turn KEY the same way: the panel's key and the I IV V vi pads should match what you hear (*The key can be read off the panel beside the J-6*) |
 | 8.6 | On the J-6, press the 8th lower pad (high C) | Same chord as C? (*The high C pad plays the C chord*) |
 | 8.7 | In **Find**, type your own progression | Each chord gets a ✓ or a reason; the best set and KEY; ▶ Hear it plays it |
 | 8.8 | Switch Sound between Piano and Pad; tap **← Sketchpad** | Both sounds work; Sketchpad opens (*The J-6 Explorer installs from its link and works beside the J-6*) |

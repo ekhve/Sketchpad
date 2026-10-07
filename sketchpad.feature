@@ -3249,6 +3249,36 @@ Feature: J-6 Explore — what am I playing?
     Then the count-in gives me the tempo, the chord sounding is highlighted in the progression and on its pad
     And changing the tempo while it plays takes effect from the next beat, and Stop silences everything at once
 
+  @D-094 @UC-64 @auto
+  Scenario: Each chord set shows the key it plays in, and KEY moves it
+    Given set 54
+    Then at KEY 0 its pads fit F major, or its relative D minor, best: 8 of 12
+    And at KEY +2 they fit G major
+    And for every set and every KEY from −6 to +5, KEY moves the set's key by that many semitones
+    And the interval stacks, sets 14 to 16, have no key
+
+  @D-094 @UC-64 @auto
+  Scenario: The home chord, its two closest relatives and the relative minor are marked on the pads
+    Given set 29 in C major
+    Then the C key, C, and the F key, Cmaj7/E, are marked I
+    And the C♯ key, Fmaj7, and the F♯ key, F, are marked IV
+    And the D key, G, and the B key, G7, are marked V; the A key, Am, is marked vi
+    And the E key, Dm7, is not marked
+    And a chord with a note outside the key is never marked, whatever its root
+
+  @D-094 @UC-65 @auto
+  Scenario: Find gives the steps on the J-6 in the manual's words
+    Given the best match set 47 at KEY −3, keys D♯ A C♯ C
+    Then step 1 is SHIFT + [CHORD], turn [TEMPO/VALUE] to 47, press [CHORD]
+    And step 2 is SHIFT + [A (KEY)], turn [TEMPO/VALUE] to −3, press [C (EXIT)]
+    And step 3 is Play D♯ → A → C♯ → C
+
+  @D-094 @UC-64 @manual
+  Scenario: The key can be read off the panel beside the J-6
+    Given the phone next to the J-6
+    When I turn KEY on the J-6 and the same in the app
+    Then the panel says which key the set now plays in, and the I, IV and V pads move with it
+
   @D-093 @UC-64 @auto
   Scenario: A misprinted key is named from the notes it prints
     Given set 18's E key, labelled E but printed E G B

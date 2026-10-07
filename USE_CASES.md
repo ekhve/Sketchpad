@@ -87,7 +87,7 @@ A separate page for the Roland J-6 chord synthesizer, in the same repository and
 
 | Step | The player | The app |
 |---|---|---|
-| 1 | Picks the chord set they have on the J-6 | A virtual J-6 shows what every key plays, printed on the pad |
+| 1 | Picks the chord set they have on the J-6, and its KEY | A virtual J-6 shows what every key plays, printed on the pad; the panel says which key the set plays in at that KEY, and the pads mark I, IV, V and vi (`D-094`) |
 | 2 | Taps keys to try them | Each tap plays the chord and shows it; nothing is kept (`D-089`) |
 | 2b | Likes one, taps **+ Add**; or turns on **Rec** to copy down a sequence just played on the hardware | The chord joins the progression; with Rec on every tap does, numbered on the pads |
 | 3 | Reads the latest chord | Name in musician spelling, the manual's label, notes and degrees, the J-6's actual voicing, and its numeral |
