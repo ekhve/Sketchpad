@@ -150,33 +150,34 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
   const key = j.setKey(set, t);
   return (
     <div style={{ background: J.panel, color: J.panelInk, borderRadius: 18, padding: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div aria-label={`chord set ${set}`} style={{ background: J.ledGround, color: J.led, fontFamily: "ui-monospace,monospace", fontSize: 30, fontWeight: 700, padding: "4px 14px", borderRadius: 6, minWidth: 72, textAlign: "center" }}>{set}</div>
+      {/* One row: a display the size of the J-6's own four digits, the set, and the arrows.
+          The key the set plays in gets a line of its own, where it can be read (D-094). */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div aria-label={`chord set ${set}`} style={{ background: J.ledGround, color: J.led, fontFamily: "ui-monospace,monospace", fontSize: 19, fontWeight: 700, letterSpacing: ".08em", padding: "3px 8px", borderRadius: 5, minWidth: 46, textAlign: "center" }}>{set}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10.5, letterSpacing: ".12em", color: J.panelSoft }}>CHORD SET</div>
           {onPick ? (
             <select aria-label="chord set" value={set} onChange={(e) => onPick(Number(e.target.value))}
-              style={{ fontSize: 17, fontWeight: 700, background: "transparent", color: J.panelInk, border: 0, padding: 0, width: "100%", textOverflow: "ellipsis" }}>
+              style={{ fontSize: 16, fontWeight: 700, background: "transparent", color: J.panelInk, border: 0, padding: 0, width: "100%", textOverflow: "ellipsis" }}>
               {SET_NUMBERS.map((n) => <option key={n} value={n}>{n} · {j.SETS[n].genre}</option>)}
             </select>
-          ) : <div style={{ fontSize: 17, fontWeight: 700 }}>{j.SETS[set].genre}</div>}
-          {/* the key the set plays in at this KEY: what turning KEY changes (D-094) */}
-          <div style={{ fontSize: 12, color: J.panelSoft }}>
-            {key ? <>KEY {signed(t)} · fits <strong style={{ color: J.panelInk }}>{majorKey(key.tonic)}</strong> / {minorOf(key.tonic)} · {key.fit} of {key.of} pads</>
-              : <>KEY {signed(t)} · interval stacks, no key</>}
-          </div>
+          ) : <div style={{ fontSize: 16, fontWeight: 700 }}>{j.SETS[set].genre} · KEY {signed(t)}</div>}
         </div>
         {onSet && (
           <div style={{ display: "flex", gap: 6 }}>
             {[["‹", -1, "previous set"], ["›", 1, "next set"]].map(([s, d, a]) => (
-              <button key={s} aria-label={a} onClick={() => onSet(d)} style={{ width: 32, height: 32, borderRadius: 16, border: 0, background: J.padBlack, color: J.panelInk, fontSize: 18 }}>{s}</button>
+              <button key={s} aria-label={a} onClick={() => onSet(d)} style={{ width: 30, height: 30, borderRadius: 15, border: 0, background: J.padBlack, color: J.panelInk, fontSize: 17 }}>{s}</button>
             ))}
           </div>
         )}
       </div>
+      <div style={{ fontSize: 13, color: J.panelSoft, marginTop: 6 }}>
+        {key ? <>Plays in <strong style={{ color: J.panelInk }}>{majorKey(key.tonic)}</strong> / {minorOf(key.tonic)} · {key.fit} of {key.of} pads fit</>
+          : <>Interval stacks: no key</>}
+      </div>
       {onKey && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 12, color: J.panelSoft }}>
-          <span title="on the J-6: SHIFT + [A (KEY)], then [TEMPO/VALUE]">KEY (transpose)</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, fontSize: 12, color: J.panelSoft }}>
+          {/* on the J-6, KEY is the A key's second function: SHIFT + [A (KEY)] */}
+          <span title="on the J-6: SHIFT + [A (KEY)], turn [TEMPO/VALUE], then [C (EXIT)]">KEY (transpose)</span>
           <button aria-label="KEY down" onClick={() => onKey(-1)} disabled={t <= KEY_LO} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>−</button>
           <span style={{ minWidth: 22, textAlign: "center", color: J.panelInk, fontWeight: 700 }}>{signed(t)}</span>
           <button aria-label="KEY up" onClick={() => onKey(1)} disabled={t >= KEY_HI} style={{ width: 28, height: 24, borderRadius: 6, border: 0, background: J.padBlack, color: J.panelInk }}>+</button>

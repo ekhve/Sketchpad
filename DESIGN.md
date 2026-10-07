@@ -594,7 +594,7 @@ What they look like, in kind: a label a semitone off its notes (set 3's D♯ key
 
 **Context.** The J-6 has 8 lower and 5 upper pads, but the chord list has 12 columns.
 
-**Decision (assumption).** The high C plays the same chord as C. It is drawn that way, and dashed when C is in the answer. To be checked on the device.
+**Decision (assumption).** The high C plays the same chord as C. It is drawn that way, and dashed when C is in the answer. To be checked on the device. *2026-10-07:* the owner's photo of the panel confirms that the 8th white key is a high C (its second function is WRITE), but not which chord it plays.
 
 ### D-084 — J-6: prototype screens are drawn by code from the engine (formerly D-J06)
 
@@ -728,6 +728,11 @@ Both pentatonics lie inside the major scale, so all three sit under every chord 
 3. **The control says what it is:** "KEY (transpose)", with the J-6's own button combination as its hint.
 4. **Find's steps are the manual's,** replacing the prototype's guesses ("SHIFT + KEY, turn to −3"): SHIFT + [CHORD], turn [TEMPO/VALUE] to 47, press [CHORD]; SHIFT + [A (KEY)], turn [TEMPO/VALUE] to −3, press [C (EXIT)]; then the keys.
 
+**From the panel itself** (the owner's photo of the J-6, 2026-10-07):
+- **KEY isn't a separate button.** It is the second function printed under the A key, as the manual's "[A (KEY)]" says. The other white keys have second functions too: EXIT on C, ENTER on D, SHUFFLE on E, LAST on F, CLEAR on G, MENU on B and WRITE on the high C. The black keys are OCTAVE − and OCTAVE + and three blank.
+- **The 8th white key is a high C,** which supports `D-083`. Whether it plays C's chord is still for the device to answer.
+- **The display is four small digits.** The app's had been drawn far larger, taking a whole row. It is now the size of the J-6's own display, beside the set, and the key the set plays in has a line of its own.
+
 **What building it found.** When two keys fitted a set equally well, the tie was broken by the lower note name. That answer doesn't move with KEY: set 12 at KEY −6 came out a fifth away from where the rest of its pads said it should be. The tie is now broken by distance from the first chord, which moves with KEY, and a test checks every set at every KEY. The prototype's assumption that set 54 was in C major was also wrong by count: more of its pads fit F major (8 against 7). The progression C C♯ G D♯ on it is still in C major, which the Key card says.
 
 ## 5. What this project has taught, so far
@@ -830,6 +835,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6 progression playback: tempo 60–160 BPM, ½, 1 or 2 bars a chord, Loop, and a click with a one-bar count-in; Play/Stop, with the sounding chord highlighted in the progression and on its pad. Scheduled by Sketchpad's look-ahead scheduler; what each beat holds is a pure function. Not a sequencer (`D-090`) |
 | 2026-10-07 | J-6: the progression as Sketchpad's sheet, with suggested fingering and the J-6 keys for each chord (`D-091`); three scales offered to play over it, with the piano holding still under the loop (`D-092`); a misprinted key named from its notes (`D-093`). A crash on load from a value used before it was defined was caught by the headless run, not the tests |
 | 2026-10-07 | J-6 manual read (KEY, chord sets, menus): the panel names the key a set plays in at the current KEY, with its relative minor; I, IV, V and vi are marked on the pads; KEY is labelled as a transposition; Find's steps are the manual's (`D-094`, `D-081` updated). Fixed: a tied key was broken from C rather than from the first chord, so it didn't move with KEY |
+| 2026-10-07 | J-6 panel compacted after the owner's photo of the hardware: the set display is the size of the J-6's own four digits, and the set's key has a line of its own. The photo confirms KEY is the A key's second function and the 8th white key a high C (`D-094`, `D-083`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
