@@ -629,6 +629,8 @@ The music logic is a set of modules the products share. Their own requirements a
 | ID | Requirement | Source | Mode | Verified by |
 |---|---|---|---|---|
 | R-414 | The audio graph is built and the piano decoded while the page loads; only starting the audio waits for the first touch. | D-100, D-070 | M | The first note after opening is the piano and is not late |
+| R-416 | The first note waits until the audio is running, its clock is moving, the hardware has had time to come up and the instrument is ready, and never for more than a limit. | D-101 | A | The first note waits until the audio can be heard, and never for ever |
+| R-417 | The first note after opening sounds, as the piano, in both apps, and a quick tap on the first key still sounds briefly. | D-101, D-100 | M | The first note after opening is the piano and is not late |
 | R-415 | An embedded recording is converted to the bytes it holds, without a browser function. | D-100, D-070 | A | An embedded recording is turned into the bytes it holds |
 
 ## 11. Visual system

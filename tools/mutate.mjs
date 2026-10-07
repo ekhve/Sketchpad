@@ -249,6 +249,15 @@ const BYTES_MUTANTS = [
   ["the alphabet is shifted", 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";', 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";'],
 ].map(([name, from, to]) => [name, from, to, "core/instruments.mjs"]);
 
+/* The first note waits until the audio can be heard (D-101). */
+const STARTUP_MUTANTS = [
+  ["the first note does not wait for the clock", 'if (!(contextTime > 0)) return { go: false, reason: "the audio clock has not moved yet" };', ""],
+  ["the first note does not wait for the hardware", 'if (runningForMs < settleMs) return { go: false, reason: "the audio is settling" };', ""],
+  ["the first note does not wait for the piano", 'if (!ready) return { go: false, reason: "the instrument is being prepared" };', ""],
+  ["the first note waits for ever", 'if (waitedMs >= maxWaitMs) return { go: true, reason: "waited long enough" };', ""],
+  ["the first note plays before the audio runs", 'if (state !== "running") return { go: false, reason: "the audio is starting" };', ""],
+].map(([name, from, to]) => [name, from, to, "core/playback.mjs"]);
+
 /* The shared transport's driver and loop arithmetic (D-098). */
 const TRANSPORT_MUTANTS = [
   ["the first unit starts late",              "({ nextBarAt: now + lead, barIndex: 0 })", "({ nextBarAt: now + lead + 5, barIndex: 0 })"],
@@ -283,7 +292,7 @@ const J6_SHEET_MUTANTS = [
 const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
 const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
 
-const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...BYTES_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...BYTES_MUTANTS, ...STARTUP_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

@@ -1,7 +1,7 @@
 /* core/playback — unit tests, one per requirement in core/REQUIREMENTS.md (CR-PLAYBACK-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MAX_VOICES, voiceLifetime, reapVoices, allocatable, barsToSchedule, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "../playback.mjs";
+import { startupStep, MAX_VOICES, voiceLifetime, reapVoices, allocatable, barsToSchedule, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "../playback.mjs";
 
 test("CR-PLAYBACK-01 a bar lasts four beats of 60 over the tempo, or as many beats as asked", () => {
   assert.equal(barSecondsAt(60), 4); assert.equal(barSecondsAt(120), 2); assert.equal(barSecondsAt(90), 60 / 90 * 4);
@@ -88,4 +88,26 @@ test("CR-PLAYBACK-09 rollOffsets starts the notes low to high, one spread apart,
   }
   assert.ok(Math.abs(rollOffsets(8, 0.11)[7] - 0.5) < 1e-9, "a slow roll on eight notes is held to the cap");
   assert.equal(rollOffsets(8, 0.11, 0.2)[7] <= 0.2 + 1e-9, true, "or to a cap of your own");
+});
+
+const ok = { state: "running", contextTime: 0.4, runningForMs: 300, ready: true, waitedMs: 300 };
+
+test("CR-PLAYBACK-10 the first note waits until the audio is running, its clock is moving, it has settled and the instrument is ready", () => {
+  assert.deepEqual(startupStep(ok), { go: true, reason: "ready" });
+  assert.equal(startupStep({ ...ok, state: "suspended" }).go, false); assert.equal(startupStep({ ...ok, state: "interrupted" }).go, false);
+  assert.equal(startupStep({ ...ok, contextTime: 0 }).go, false, "running, but the clock has not moved");
+  assert.equal(startupStep({ ...ok, contextTime: undefined }).go, false);
+  assert.equal(startupStep({ ...ok, runningForMs: 50 }).go, false, "up, but the hardware is still coming up");
+  assert.equal(startupStep({ ...ok, ready: false }).go, false, "the piano is still being prepared");
+  const why = new Set([startupStep({ ...ok, state: "suspended" }), startupStep({ ...ok, contextTime: 0 }), startupStep({ ...ok, runningForMs: 0 }), startupStep({ ...ok, ready: false })].map((r) => r.reason));
+  assert.equal(why.size, 4, "each wait says why");
+});
+
+test("CR-PLAYBACK-11 the first note never waits for ever: after the longest wait it plays with what there is", () => {
+  for (const bad of [{ state: "suspended" }, { contextTime: 0 }, { runningForMs: 0 }, { ready: false }]) {
+    assert.equal(startupStep({ ...ok, ...bad, waitedMs: 1499 }).go, false);
+    assert.equal(startupStep({ ...ok, ...bad, waitedMs: 1500 }).go, true, JSON.stringify(bad));
+  }
+  assert.equal(startupStep({ ...ok, state: "suspended", waitedMs: 300 }, { maxWaitMs: 200 }).go, true, "or a limit of your own");
+  assert.equal(startupStep({ ...ok, runningForMs: 150 }, { settleMs: 200 }).go, false); assert.equal(startupStep({ ...ok, runningForMs: 150 }, { settleMs: 100 }).go, true);
 });

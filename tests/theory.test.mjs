@@ -3842,3 +3842,16 @@ describe("Feature: The first note is the piano, at once", () => {
     }
   });
 });
+
+
+describe("Feature: The first note waits until the audio can be heard", () => {
+  const { startupStep } = th;
+  const ok = { state: "running", contextTime: 0.4, runningForMs: 300, ready: true, waitedMs: 300 };
+  test("The first note waits until the audio can be heard, and never for ever", () => {
+    assert.equal(startupStep(ok).go, true);
+    for (const bad of [{ state: "suspended" }, { contextTime: 0 }, { runningForMs: 10 }, { ready: false }]) {
+      assert.equal(startupStep({ ...ok, ...bad }).go, false, JSON.stringify(bad));
+      assert.equal(startupStep({ ...ok, ...bad, waitedMs: 1500 }).go, true, "after the longest wait it plays with what there is");
+    }
+  });
+});

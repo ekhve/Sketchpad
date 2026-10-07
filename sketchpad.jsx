@@ -16,7 +16,7 @@ import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyA
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
 import { createDriver, loopIndex } from "./core/transport.mjs";
-import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
+import { startupStep, MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
 import { scaleById, scalePcs, fitScales, keysContaining, scalesContaining, customScaleFrom, customScalePcs, activeScalePcs } from "./core/scales.mjs";
 import { diagramKeys, sheetData, sheetAsText } from "./core/sheet.mjs";
 import { scalesForStyle } from "./core/styles.mjs";
@@ -40,6 +40,8 @@ function useInstrument() {
   const [detail, setDetail] = useState("not started");
   const [voiceCount, setVoiceCount] = useState(0);
   const muted = useRef(false);
+  const lifted = useRef(new Set());    // keys let go before their note had started
+  const starting = useRef(null);       // the first start, while it is under way, so a second touch waits for it
   const started = useRef(false);       // has the browser let the audio start? (it needs a touch first)
 
   const refresh = useCallback(() => {
@@ -167,13 +169,51 @@ function useInstrument() {
     if (preset.current.kind === "sampler") samplerFor(preset.current);
   }, [samplerFor]);
 
+  /* Is the instrument ready to play? A synth always is; a recording is once it has
+     been decoded, or has failed to be. */
+  const instrumentReady = useCallback(() => {
+    if (preset.current.kind !== "sampler") return true;
+    const e = ref.current?.samplers?.[preset.current.id];
+    return !!e && (e.loaded || e.failed);
+  }, []);
+
+  /* The first touch starts the audio, and then waits a moment: until the audio is
+     running, its clock is moving, the hardware has come up and the piano is ready,
+     or a limit is reached. Playing the instant the browser says "running" lost the
+     first note on a phone, or played it through the stand-in. (D-101) */
+  const settle = useCallback(async () => {
+    const t0 = performance.now();
+    let upSince = null;
+    for (;;) {
+      const c = Tone.getContext(), at = performance.now();
+      if (c.state === "running" && upSince === null) upSince = at;
+      const step = startupStep({ state: c.state, contextTime: c.currentTime, runningForMs: upSince === null ? 0 : at - upSince, ready: instrumentReady(), waitedMs: at - t0 });
+      if (step.go) return Math.round(at - t0);
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  }, [instrumentReady]);
+
   const init = useCallback(async () => {
     if (started.current) { await resume(); return; }
-    try { await Tone.start(); started.current = true; }
-    catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
-    build();
-    refresh();
-  }, [resume, refresh, build]);
+    if (starting.current) { await starting.current; return; }
+    /* Inside the touch: ask the browser to start, and play one silent sample,
+       which is what wakes the hardware on iOS. */
+    starting.current = (async () => {
+      try {
+        const c = Tone.getContext().rawContext;
+        const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource();
+        src.buffer = b; src.connect(c.destination); src.start(0);
+      } catch (e) {}
+      try { await Tone.start(); started.current = true; }
+      catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
+      build();
+      refresh();
+      const waited = await settle();
+      setDetail(`${preset.current.name} · started in ${waited} ms`);
+      refresh();
+    })();
+    try { await starting.current; } finally { starting.current = null; }
+  }, [resume, refresh, build, settle]);
 
   useEffect(() => { build(); }, [build]);
 
@@ -227,9 +267,10 @@ function useInstrument() {
     /* Low to high, each note a moment after the one below it. (D-068) */
     const sorted = [...list].sort((a, b) => a - b);
     const offsets = rollOffsets(sorted.length, spread);
-    const startAt = typeof time === "number"
-      ? time
-      : (() => { try { return Tone.now(); } catch (e) { return 0; } })();
+    /* Asked for "now" only when the notes are about to be struck, after any work
+       needed to make a voice: a time taken before that work can already be in the
+       past when the voice exists. (D-101) */
+    const at0 = () => (typeof time === "number" ? time : (() => { try { return Tone.now(); } catch (e) { return 0; } })());
 
     /* A recorded instrument that has not arrived yet plays through a stand-in
        rather than nothing. Waiting in silence is indistinguishable from
@@ -239,6 +280,7 @@ function useInstrument() {
       const node = samplerFor(p);
       if (node) {
         try {
+          const startAt = at0();
           sorted.forEach((m, i) => {
             node.triggerAttackRelease(
               Tone.Frequency(m, "midi").toFrequency(),
@@ -254,6 +296,7 @@ function useInstrument() {
     const pool = poolFor(voicePreset);
     if (!pool || !pool.voices.length) return;
     const dur = Math.max(0.05, seconds);
+    const startAt = at0();
     const at = startAt;
     const busy = pool.voices.map((v) => v.until);
     let sounding = 0;
@@ -278,8 +321,12 @@ function useInstrument() {
   /* Held notes: pressed and not yet let go. Kept apart from the timed voices
      so a finger on a key can never be reaped out from under itself. (D-045) */
   const holdOn = useCallback(async (midi) => {
+    lifted.current.delete(midi);
     await init(); await resume();
     if (!ref.current || muted.current || held.current.has(midi)) return;
+    /* A quick tap can be over before the first start has finished. The note was
+       still asked for: sound it briefly rather than hold it for ever or lose it. */
+    if (lifted.current.delete(midi)) { play([midi], 0.4, undefined, 0.85); return; }
     if (held.current.size >= MAX_HELD) return;
     const p = preset.current;
 
@@ -303,11 +350,11 @@ function useInstrument() {
       synth.triggerAttack(Tone.Frequency(midi, "midi").toFrequency(), undefined, 0.85);
       held.current.set(midi, synth);
     } catch (e) { setDetail(`hold failed: ${e.message}`); }
-  }, [init, resume]);
+  }, [init, resume, play]);
 
   const holdOff = useCallback((midi) => {
     const synth = held.current.get(midi);
-    if (!synth) return;
+    if (!synth) { lifted.current.add(midi); return; }
     held.current.delete(midi);
     if (synth.sampler) {
       try { synth.sampler.triggerRelease(Tone.Frequency(midi, "midi").toFrequency()); } catch (e) {}

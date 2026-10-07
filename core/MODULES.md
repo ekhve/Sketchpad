@@ -54,9 +54,9 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Purpose.** The arithmetic of playing sound, with no audio library: the look-ahead scheduler, bar length from tempo, the voice budget and its reaping, and rolling a chord.
 
-**Behaviour.** A scheduler is a question about time, and time is arithmetic: `barsToSchedule` returns every bar starting inside the look-ahead window, once, in order, never in the past, and never more than 32 at a call (CD-002). The voice budget (24) is arithmetic too: how long a voice lives, which are finished, how many can start, which to reuse.
+**Behaviour.** A scheduler is a question about time, and time is arithmetic: `barsToSchedule` returns every bar starting inside the look-ahead window, once, in order, never in the past, and never more than 32 at a call (CD-002). The voice budget (24) is arithmetic too: how long a voice lives, which are finished, how many can start, which to reuse. `startupStep` decides when the *first* note may play: not until the audio is running, its clock is moving, the hardware has had time to come up (120 ms) and the instrument is ready, and never after 1.5 s of waiting (D-101). The app reads the clock and the state; the module only decides.
 
-**Requirements.** CR-PLAYBACK-01 … CR-PLAYBACK-09 (9) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/playback.test.mjs`.
+**Requirements.** CR-PLAYBACK-01 … CR-PLAYBACK-11 (11) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/playback.test.mjs`.
 
 ### Interface
 
@@ -71,6 +71,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `reapVoices` | function | `(voices, now)` | Split voices into still sounding and finished. |
 | `rollOffsets` | function | `(count, spread, maxTotal = 0.5)` | When each note of a rolled chord starts. |
 | `rollStyleById` | function | `(id)` | A roll style by id, the first as fallback. |
+| `startupStep` | function | `({ state, contextTime, runningForMs, ready, waitedMs }, { settleMs = 120, maxWaitMs = 1500 } = {})` | Whether the first note can play yet, from what has been observed of the audio, and why not if not. |
 | `voiceLifetime` | function | `(seconds, release = 0.4, margin = 0.25)` | How long until a voice can be thrown away. |
 
 ## core/chords

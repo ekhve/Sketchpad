@@ -28,8 +28,8 @@ for (const [name, file, touch] of apps) {
   const before = await line();
   const t0 = Date.now(); await touch(page);
   const seen = [];
-  for (let i = 0; i < 40; i++) { const d = await line(); if (!seen.length || seen.at(-1)[1] !== d) seen.push([Date.now() - t0, d]); if (/Grand piano$/.test(d)) break; await page.waitForTimeout(50); }
-  const ok = seen.length === 1 && /^running · Grand piano$/.test(seen[0][1]) && !errors.length;
+  for (let i = 0; i < 40; i++) { const d = await line(); if (!seen.length || seen.at(-1)[1] !== d) seen.push([Date.now() - t0, d]); if (/started in \d+ ms$/.test(d)) break; await page.waitForTimeout(25); }
+  const ok = !seen.some(([, d]) => /preparing|stand-in|error/.test(d)) && /started in \d+ ms$/.test(seen.at(-1)[1]) && !errors.length;
   if (!ok) bad++;
   console.log(`${ok ? "ok  " : "FAIL"} ${name}: before touch "${before}"; after: ${JSON.stringify(seen)}${errors.length ? " errors: " + errors : ""}`);
   await page.close();

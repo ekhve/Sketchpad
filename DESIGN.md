@@ -798,6 +798,21 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Not changed.** The fallback voices (`D-064`) and the voice pool (`D-066`) are as they were.
 
+
+### D-101 — The first note waits until the audio can be heard
+
+**Context.** `D-100` made the piano ready at load, and the owner's phone then showed two different faults. In Sketchpad the first note did not sound at all, and the second did; the sound line went from "idle" to "running". In the J-6 the first sound began like the pad, cut, and then the piano sounded. Neither could be reproduced headless, where the audio starts at once; both fit what is known of iOS: the context reports "running" before its clock moves, the hardware needs a fraction of a second to come up (a note struck in that window is clipped or lost), and a piano that is not yet decoded when the touch arrives is replaced by the stand-in, which is then cut when the piano arrives.
+
+**Decision.** This is a diagnosis from the symptoms, not a reproduction, so the change removes each plausible cause and shows the state on the phone.
+1. **Wait, then play.** On the first touch the app starts the audio, plays one silent sample inside the touch (what wakes the hardware on iOS), and then waits until the audio is running, its clock has moved, it has been up for 120 ms and the instrument is ready, giving up after 1.5 s. The rule is a pure function, `startupStep` in `core/playback`, and the app only reads the clock and the state for it.
+2. **Only the first note pays.** About 125 ms measured headless, once. Later notes are immediate.
+3. **No stand-in at the first touch** when the piano is on its way: the wait covers it, so there is no pad-like start to cut.
+4. **Time is taken late.** A note's start time is read just before it is struck, after any voices have been built, not before; a time read before slow work can be in the past by the time the voice exists.
+5. **A quick tap is still a note.** If the finger is lifted before the first start has finished, the key sounds briefly instead of being lost or held.
+6. **The sound line says how long the start took** ("started in 126 ms") in both apps, so a bad start can be reported precisely.
+
+**Not known.** Whether this is the whole cause on the phone. If the first note is still wrong, the sound line and what is heard say which of the six is left.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -905,6 +920,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | One function names notes as a chord: `identifyChord` with a `missing` mode replaces the J-6's own `nameFromNotes` rule; the J-6 names exactly what it did (`D-099`) |
 | 2026-10-07 | Cleanups: the flat 9, sharp 9 and sharp 11 have degree names (a formula reads …♭7 – ♭9, not 13); Sketchpad's own modules (levels and tabs, guide, lessons) have unit tests and requirements of their own (`SR-` ids, `sketchpad/REQUIREMENTS.md`), held by the same checks as core's |
 | 2026-10-07 | The first note of both apps is the piano and on time: the audio graph is built and the piano decoded at load, in parallel, and the first touch only starts the audio. Reproduced and re-measured headless; the J-6 shows the sound status (`D-100`) |
+| 2026-10-07 | First-note faults on the phone (a silent first note in Sketchpad; a pad-like start cut by the piano in the J-6): the first note now waits until the audio is running, its clock is moving, the hardware has settled and the piano is ready, with a silent unlock sample, late start times and a quick-tap guard; the sound line reports the start time. Diagnosed from the symptoms, not reproduced (`D-101`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
