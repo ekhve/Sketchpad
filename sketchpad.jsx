@@ -103,6 +103,16 @@ function useInstrument() {
     return Object.fromEntries(entries);
   }, []);
 
+  /* The recordings are decoded once, as early as the page loads: decoding needs
+     no touch, and it is the slow part. Nothing else of the audio is built until
+     the first touch, because a graph built on a context that has not started was
+     silent on a phone (D-102). */
+  const decoded = useRef({});
+  const buffersFor = useCallback((preset) => {
+    if (!decoded.current[preset.id]) decoded.current[preset.id] = decodeSamples(preset);
+    return decoded.current[preset.id];
+  }, [decodeSamples]);
+
   const samplerFor = useCallback((preset) => {
     const store = ref.current?.samplers;
     if (!store) return null;
@@ -115,7 +125,7 @@ function useInstrument() {
     store[preset.id] = { node: null, loaded: false, failed: false };
     setDetail(`preparing ${preset.name}…`);
 
-    decodeSamples(preset)
+    buffersFor(preset)
       .then((buffers) => {
         const node = new Tone.Sampler({
           urls: buffers,
@@ -133,7 +143,7 @@ function useInstrument() {
       });
 
     return null;
-  }, [decodeSamples]);
+  }, [buffersFor]);
 
   const setInstrument = useCallback((id) => {
     preset.current = instrumentById(id);
@@ -141,18 +151,13 @@ function useInstrument() {
     if (preset.current.kind === "sampler" && ref.current) samplerFor(preset.current);
   }, [samplerFor]);
 
-  /* Everything that can be done before a finger touches the screen is done at
-     load: the audio graph is built and the piano is decoded, so the first note
-     is the piano, at once. Only starting the audio has to wait for a touch,
-     because the browser insists on it. Doing the lot on the first touch made
-     that note late, and played it through the stand-in while the recordings
-     were still being prepared. (D-100) */
+  /* The audio graph is built on the first touch, after the browser has started
+     the audio, as it always was. What is done earlier is only the slow part that
+     needs nothing from the browser: decoding the piano. Building the graph at
+     load as well made Sketchpad silent on a phone, where the J-6, which sets no
+     echo or room, was not. (D-100, D-102) */
   const build = useCallback(() => {
     if (ref.current) return;
-    /* An instrument should sound with the iPhone's silent switch on, as
-       GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
-       property does not exist and nothing changes. (D-076) */
-    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
     try {
       /* One delay in the chain, always present, wet at zero when off. Adding
          and removing a node while notes are in flight is a good way to lose
@@ -204,6 +209,10 @@ function useInstrument() {
         const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource();
         src.buffer = b; src.connect(c.destination); src.start(0);
       } catch (e) {}
+      /* An instrument should sound with the iPhone's silent switch on, as
+         GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
+         property does not exist and nothing changes. (D-076) */
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
       try { await Tone.start(); started.current = true; }
       catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
       build();
@@ -215,7 +224,7 @@ function useInstrument() {
     try { await starting.current; } finally { starting.current = null; }
   }, [resume, refresh, build, settle]);
 
-  useEffect(() => { build(); }, [build]);
+  useEffect(() => { if (preset.current.kind === "sampler") buffersFor(preset.current).catch(() => {}); }, [buffersFor]);   // decode now; build on the first touch
 
   const setSpace = useCallback(async (spaceId) => {
     const r = ref.current?.reverb;

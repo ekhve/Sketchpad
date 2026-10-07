@@ -2343,9 +2343,9 @@ Feature: Recorded sound is optional, not assumed
 
 
 Feature: The first note is the piano, at once
-  The audio is built and the piano is decoded while the page loads; only starting
-  the audio waits for a touch, because the browser insists on one. Doing it all on
-  the first touch made that note late and played it through a stand-in. (D-100)
+  The piano is decoded while the page loads, so the first note is not late and not
+  played through a stand-in; the audio itself is built on the first touch, after the
+  browser has started it. Building it earlier silenced Sketchpad on a phone. (D-100, D-102)
 
   @D-100 @auto
   Scenario: An embedded recording is turned into the bytes it holds
@@ -2359,6 +2359,7 @@ Feature: The first note is the piano, at once
     Then it sounds at once
     And it sounds like the piano, not like the stand-in
     And the sound line reads "running · Grand piano · started in …ms" and never "preparing"
+    And the second touch sounds too
 
   @D-101 @auto
   Scenario: The first note waits until the audio can be heard, and never for ever
