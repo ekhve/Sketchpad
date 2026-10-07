@@ -7,7 +7,9 @@ built into one self-contained HTML page, installable to the home screen.
 
 | Where | What |
 |---|---|
-| `sketchpad.jsx` | The app. The pure theory layer sits between `THEORY:START` and `THEORY:END` |
+| `sketchpad.jsx` | The app: the screens and the sound. The music logic is imported from the modules below |
+| `core/` | The **reusable assets**: 18 pure modules (naming chords from notes, voicing, harmony, bass, figures, fingering, the sheet, playback arithmetic …), each with its own requirements, interface and tests; start at `core/README.md` (`D-096`) |
+| `sketchpad/` | The three modules that belong to Sketchpad alone: levels and tabs, the guide, the lessons |
 | `sketchpad.feature` | Every behaviour as a Gherkin scenario, tagged `@auto` or `@manual` |
 | `DESIGN.md`, `REQUIREMENTS.md`, `USE_CASES.md` | Why, what and for whom; decisions are `D-nnn` |
 | `FEATURES.md`, `PLAYTEST.md`, `DONE.md` | Status, the manual test script, the definition of done |
@@ -18,15 +20,16 @@ built into one self-contained HTML page, installable to the home screen.
 # Running the tests
 
 ```bash
-node tools/extract-theory.mjs sketchpad.jsx tests/theory.mjs   # build
-node --test tests/*.test.mjs                                   # run
-node tools/mutate.mjs                                          # check the tests themselves
+node --test tests/*.test.mjs core/tests/*.test.mjs   # run everything (or: npm test)
+node tools/core-check.mjs                            # the asset checks, C1–C4
+node tools/mutate.mjs                                # check the tests themselves
+node tools/check-done.mjs                            # every automated gate
 ```
 
-**Build step.** The first command lifts the block between `/* THEORY:START */`
-and `/* THEORY:END */` out of `sketchpad.jsx` and writes it as a module. The
-tests run against the code that actually ships — there is no second copy of the
-theory to drift. `tests/theory.mjs` is generated: don't edit it, don't commit it.
+**No build step.** The theory is modules (`core/`, `sketchpad/`) that the app, the
+J-6 page and the tests all import, so the tests run against the code that ships
+and there is no generated copy to go stale (`D-096`; before that, the theory was
+cut out of `sketchpad.jsx` and tested as a generated module).
 
 **Why tooling lives in `tools/`, not `tests/`.** `node --test tests/` treats
 every file in the directory as a test file, which would execute the mutator.
@@ -40,6 +43,7 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 | `j6.test.mjs` | 39 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
 | `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
+| `core/tests/*.test.mjs` | 164 | The reusable assets, one test per requirement in `core/REQUIREMENTS.md`, plus the architecture and contract tests (`D-096`) |
 
 Scenarios tagged `@manual` in `sketchpad.feature` cover sound, timing and
 legibility. Those cannot be asserted here and are checked by hand on a phone.
@@ -54,7 +58,7 @@ of tests written specifically after an earlier run found them surviving.
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 455 automated checks, all passing.
+Current state: 619 automated checks, all passing.
 
 ## Before calling anything done
 

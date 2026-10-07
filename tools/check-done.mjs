@@ -8,6 +8,7 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
+import { checkCore } from "./core-check.mjs";
 
 const results = [];
 const gate = (id, name, ok, detail) => results.push({ id, name, ok, detail });
@@ -26,26 +27,30 @@ if (!feature || !requirements || !design || !useCases || !app) {
   process.exit(2);
 }
 
-/* ---------- G0: the tested module is current ----------
-   The suite once passed against a stale generated module: the extraction had
-   not been re-run, so the tests were checking code that was no longer shipping.
-   Rebuild first, always, and prove it changed nothing. */
-let extracted = false, extractDetail = "";
-try {
-  const before = existsSync("tests/theory.mjs") ? readFileSync("tests/theory.mjs", "utf8") : null;
-  execSync("node tools/extract-theory.mjs sketchpad.jsx tests/theory.mjs", { encoding: "utf8" });
-  const after = readFileSync("tests/theory.mjs", "utf8");
-  extracted = true;
-  extractDetail = before === after ? "already current" : "was stale — rebuilt";
-} catch (e) {
-  extractDetail = "extraction failed";
+/* ---------- the assets, loaded once ----------
+   The theory used to be cut out of sketchpad.jsx and tested as a generated copy.
+   It is now modules (core/, sketchpad/) that the tests and the apps import
+   directly, so the tests cannot be checking anything but what ships. (D-096) */
+const core = await checkCore(".");
+const moduleSource = core.modules.map((m) => m.source).join("\n");
+const appFiles = ["sketchpad.jsx", ...(existsSync("j6") ? ["j6/app.jsx", "j6/j6.mjs", "j6/playback.mjs", "j6/progression.mjs", "j6/sheet.mjs", "j6/labels.mjs"] : [])].filter(existsSync);
+
+/* ---------- G0: one copy of the theory ----------
+   Nothing an asset exports may also be defined in an app: a second copy is
+   the way two apps drift apart, and the way a fix in one misses the other. */
+const duplicated = [];
+for (const m of core.modules) for (const e of m.exports) {
+  for (const f of appFiles) {
+    if (new RegExp(`^\\s*(?:export\\s+)?(?:function|const|let|class)\\s+${e}\\b`, "m").test(readFileSync(f, "utf8"))) duplicated.push(`${e} (${m.id}) is also defined in ${f}`);
+  }
 }
-gate("G0", "The tested module matches the shipped code", extracted && extractDetail !== "extraction failed", extractDetail);
+gate("G0", "Each asset is defined once, and the apps import it", duplicated.length === 0,
+  duplicated.length ? duplicated.slice(0, 3).join("; ") : `${core.modules.reduce((n, m) => n + m.exports.length, 0)} exports in ${core.modules.length} modules, none redefined in an app`);
 
 /* ---------- G1: the suite passes ---------- */
 let testOut = "";
 try {
-  testOut = execSync("node --test tests/*.test.mjs 2>&1", { encoding: "utf8" });
+  testOut = execSync("node --test tests/*.test.mjs core/tests/*.test.mjs 2>&1", { encoding: "utf8" });
 } catch (e) {
   testOut = e.stdout || "";
 }
@@ -86,22 +91,22 @@ const untraced = [...reqBody.matchAll(/^\|\s*(R-\d+)\s*\|[^|]+\|\s*([^|]*?)\s*\|
 gate("G5", "Every requirement traces to a decision or use case", untraced.length === 0,
   untraced.length ? untraced.join(", ") : `${reqRows.length} traced`);
 
-/* ---------- G6: the app still builds ---------- */
+/* ---------- G6: the assets load standalone ---------- */
 let builds = false, buildDetail = "";
 try {
-  execSync("node -e \"import('./tests/theory.mjs').then(m => { if (!m.planBar || !m.harmonize) process.exit(1); })\"", { encoding: "utf8" });
+  execSync("node -e \"Promise.all([import('./core/index.mjs'), import('./sketchpad/index.mjs')]).then(([c, s]) => { if (!c.planBar || !c.harmonize || !c.identifyChord || !s.LESSONS) process.exit(1); })\"", { encoding: "utf8" });
   builds = true;
-  buildDetail = "module loads standalone with its exports intact";
+  buildDetail = "core and sketchpad load in Node with their exports intact";
 } catch (e) {
-  buildDetail = "the extracted module does not load";
+  buildDetail = "an asset module does not load";
 }
-gate("G6", "The theory module loads standalone", builds, buildDetail);
+gate("G6", "The assets load standalone", builds, buildDetail);
 
-/* ---------- G7: the theory block stays pure ---------- */
-/* Strip comments first: the block contains a comment saying "no Math.random
-   anywhere in this file", which the naive check happily flagged as a violation. */
-const theoryBlock = app
-  .slice(app.indexOf("THEORY:START"), app.indexOf("THEORY:END"))
+/* ---------- G7: the assets stay pure ----------
+   C3 (below) says why per module; this is the same rule over the whole of the
+   theory, with comments stripped: one comment reads "no Math.random anywhere
+   in this file", which a naive check once flagged as a violation. */
+const theoryBlock = moduleSource
   .replace(/\/\*[\s\S]*?\*\//g, "")
   .replace(/\/\/.*$/gm, "");
 const impurities = [
@@ -111,7 +116,7 @@ const impurities = [
   ["Tone", /\bTone\./],
   ["DOM", /\bdocument\.|\bwindow\./],
 ].filter(([, re]) => re.test(theoryBlock)).map(([n]) => n);
-gate("G7", "The theory layer has no impure dependency", impurities.length === 0,
+gate("G7", "The asset modules have no impure dependency", impurities.length === 0,
   impurities.length ? `found: ${impurities.join(", ")}` : "pure");
 
 /* ---------- G8: no literal colours outside the token set ---------- */
@@ -149,7 +154,7 @@ gate("G14", "Every requirement row is one the gates can read", unseenReqs.length
 
 /* ---------- G10: documents cross-reference the same decision set ---------- */
 const decisions = [...design.matchAll(/^### (D-\d+)/gm)].map((m) => m[1]);
-const referenced = new Set([...(useCases + feature + requirements + done).matchAll(/D-\d+/g)].map((m) => m[0]));
+const referenced = new Set([...(useCases + feature + requirements + done + moduleSource).matchAll(/(?<![A-Z])D-\d+/g)].map((m) => m[0]));
 const orphanDecisions = decisions.filter((d) => !referenced.has(d));
 gate("G10", "Every decision is referenced somewhere downstream", orphanDecisions.length === 0,
   orphanDecisions.length ? `never cited: ${orphanDecisions.join(", ")}` : `${decisions.length} decisions, all cited`);
@@ -187,7 +192,7 @@ gate("G12", "No hook depends on something defined later", tdz.length === 0,
    heading that did not match, and the guard against duplicates saw the
    change-log mention and skipped in silence. G10 checks that headed decisions
    are cited; this checks the reverse. */
-const cited = new Set([...(app + feature + requirements + useCases + done).matchAll(/D-\d{3}/g)].map((m) => m[0]));
+const cited = new Set([...(app + moduleSource + feature + requirements + useCases + done).matchAll(/(?<![A-Z])D-\d{3}/g)].map((m) => m[0]));
 const described = new Set([
   ...[...design.matchAll(/^### (D-\d{3})/gm)].map((m) => m[1]),
   ...[...design.matchAll(/^\|\s*(D-\d{3})\s*\|/gm)].map((m) => m[1]),
@@ -195,6 +200,11 @@ const described = new Set([
 const undescribed = [...cited].filter((id) => !described.has(id)).sort();
 gate("G13", "Every decision referenced has a section or a row", undescribed.length === 0,
   undescribed.length ? `cited but never written: ${undescribed.join(", ")}` : `${cited.size} decisions, all described`);
+
+/* ---------- C1–C4: the asset base, held to its own rules ----------
+   core/DESIGN.md says what the rules are; tools/core-check.mjs holds them, and
+   core/tests/architecture.test.mjs shows each check catching a planted fault. */
+for (const r of core.results) gate(r.id, r.name, r.ok, r.ok ? r.detail : r.problems.slice(0, 3).join("; "));
 
 /* ---------- verdict ---------- */
 const width = Math.max(...results.map((r) => r.name.length));

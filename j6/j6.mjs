@@ -13,7 +13,11 @@ export const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
    layer, the block between THEORY:START and THEORY:END in sketchpad.jsx. Node
    reads it from the module extracted for the tests; the page build points this
    same import at sketchpad.jsx itself, so there is one copy of the theory. */
-import { pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, scalePcs, romanFor, SCALES } from "../tests/theory.mjs";
+import { DICTIONARY } from "../core/chords.mjs";
+import { romanFor } from "../core/harmony.mjs";
+import { pc, NAMES, FLAT_NAMES, keyNames } from "../core/notes.mjs";
+import { scalePcs, SCALES } from "../core/scales.mjs";
+import { parseChordName } from "../core/symbols.mjs";
 
 /* ---------- notes ---------- */
 const LETTER = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -36,7 +40,7 @@ export const voicing = (s) => s.split(/\s+/).map(midiOf).sort((a, b) => a - b);
 
 /* ---------- chord symbols ---------- */
 /** quality → intervals above the root, folded into one octave, from Sketchpad's dictionary. */
-export const QUALITIES = Object.fromEntries(DICTIONARY.map((d) => [d.q, [...new Set(d.iv.map(pc))]]));
+export const CHORD_PCS = Object.fromEntries(DICTIONARY.map((d) => [d.q, [...new Set(d.iv.map(pc))]]));
 
 const ivKey = (iv) => [...new Set(iv.map(pc))].sort((a, b) => a - b).join(",");
 const DICTIONARY_BY_IV = new Map(DICTIONARY.map((d) => [ivKey(d.iv), d.q]).reverse());
@@ -48,7 +52,7 @@ const DICTIONARY_BY_IV = new Map(DICTIONARY.map((d) => [ivKey(d.iv), d.q]).rever
  *  whose notes are in Sketchpad's dictionary takes the dictionary's name. */
 export function parseChord(symbol) {
   const r = parseChordName(symbol);
-  if (r.ok) return { root: r.rootPc, quality: r.sym, bass: r.bassPc ?? r.rootPc, iv: QUALITIES[r.sym] };
+  if (r.ok) return { root: r.rootPc, quality: r.sym, bass: r.bassPc ?? r.rootPc, iv: CHORD_PCS[r.sym] };
   const l = readLabel(symbol);
   if (!l.ok) throw new Error(`cannot read chord: ${r.reason}`);
   return { root: l.root, quality: DICTIONARY_BY_IV.get(ivKey(l.iv)) ?? l.name, bass: l.bass, iv: l.iv };

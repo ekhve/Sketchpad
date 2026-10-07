@@ -11,9 +11,10 @@
    It never guesses. A label it cannot read is an error with a reason, and
    the set's validation reports it. */
 
+import { pc } from "../core/notes.mjs";
+
 const LETTER = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const NOTE = /^([A-G])(#|♯|b|♭)?/;
-const pc = (n) => ((n % 12) + 12) % 12;
 
 function readNote(text) {
   const m = NOTE.exec(text);

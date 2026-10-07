@@ -23,7 +23,7 @@
 | R-002 | The interface is usable one-handed on a portrait viewport of about 380 px. | D-002, X-01 | M | Legibility on a phone |
 | R-003 | No user data leaves the device. There is no server, account or telemetry. | D-004, X-09 | I | No network calls beyond the audio sample host |
 | R-004 | The application functions after first load without a network connection. | D-001, X-08, D-076 | M | Installed on an iPhone and iPad, it opens offline |
-| R-005 | The theory layer contains no React, audio, DOM, date or ambient-random dependency. | D-020 | A | *(enforced by extraction: the module must load standalone)* |
+| R-005 | The theory layer contains no React, audio, DOM, date or ambient-random dependency. | D-020, D-096 | A | *(`check-done` G7 and the purity check C3: the modules must load standalone)* |
 | R-006 | The application is a static build deployed to a static host on its own subdomain, not embedded in WordPress. | D-005 | I | Deployment configuration |
 | R-007 | The theory layer is typed, and musical data is expressed as data rather than code. | D-003 | I | Review at each change |
 | R-008 | Every behaviour is specified as a Given/When/Then scenario before it is asserted. | D-021 | A | *(traceability.test.mjs)* |
@@ -586,6 +586,20 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-365 | The J-6 Explorer installs on an iPhone from its link, opens full screen, works offline, and links back to Sketchpad. | D-087, UC-64, UC-65 | M | The J-6 Explorer installs from its link and works beside the J-6 |
 | R-366 | The J-6 page reuses Sketchpad's piano, sound and colour tokens rather than defining its own; its extra colour roles are tokens, and no literal colour appears below its token block. | D-087, D-018 | I | `j6/app.jsx`, and G8 in `check-done` |
 | R-367 | Until checked on a J-6, the page states the KEY range and direction and the high C behaviour as assumptions, and says where its chord data comes from. | D-081, D-083, D-087 | I | `j6/app.jsx` footer |
+
+## 10za. Reusable assets
+
+The music logic is a set of modules the products share. Their own requirements are in [`core/REQUIREMENTS.md`](core/REQUIREMENTS.md); these are the product's requirements *of* that arrangement.
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-399 | The theory is a set of modules in `core/` and `sketchpad/`, one capability each, which the products and the tests import. Nothing is generated, and no product defines what a module exports. | D-096 | A | *(`check-done` G0 and G6)* |
+| R-400 | Core imports nothing outside core. The modules' layers are their imports, acyclic, and each module's header and document state them. | D-096 | A | *(`core-check` C3, and `core/tests/architecture.test.mjs`)* |
+| R-401 | Every core requirement has a test and a source that exists; every core test names a requirement; every core decision is used. | D-096 | A | *(`core-check` C1 and C4)* |
+| R-402 | Every export of every module is described in the module's document, and nothing described is missing. | D-096 | A | *(`core-check` C2)* |
+| R-403 | Every exported function gives the same answer for the same input, leaves its arguments alone, and returns plain data. | D-096 | A | *(`core/tests/architecture.test.mjs`)* |
+| R-404 | Each architecture and traceability check is shown to fail when a fault is planted. | D-096 | A | *(`core/tests/architecture.test.mjs`)* |
+| R-405 | Moving the theory out of the app changed no behaviour: the same checks pass, scripted runs of both apps give identical screen transcripts, and the builds are the same size. | D-096 | I | `D-096`, recorded once; `tools/smoke.mjs` reruns it |
 
 ## 11. Visual system
 

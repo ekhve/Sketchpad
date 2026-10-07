@@ -32,7 +32,7 @@ theory/   pure functions — no React, no audio, no DOM, no randomness
 data/     scales, chord sets, patterns, dictionary
 ```
 
-**The rule that matters:** `theory/` is pure. It ships inside `sketchpad.jsx` between `THEORY:START` and `THEORY:END` markers and is extracted into a module for testing, so there is exactly one copy and it is the one that runs.
+**The rule that matters:** `theory/` is pure. It lives in modules (`core/`, and `sketchpad/` for what is Sketchpad's alone) that the app, the J-6 Explorer and the tests all import, so there is exactly one copy and it is the one that runs (`D-096`; it used to ship inside `sketchpad.jsx` between `THEORY:START` and `THEORY:END` markers and be extracted for testing, which `D-020` describes).
 
 **Why it matters:** every bug class that could not be tested got fixed by moving the *decision* out of the audio layer and into a pure function — scheduling, voice budget, tab fallback. The pattern is in §5.
 
@@ -84,13 +84,13 @@ Recorded once, not worth re-arguing.
 | D-015 | Session state survives reload; no saved projects | Losing a sketch to a reload is the hated failure |
 | D-018 | Bone palette; colours named by role, never by colour | A light ground leaves room for more roles |
 | D-019 | Note naming is pluggable; letters and fixed-do ship | A third system is an array, not logic |
-| D-020 | Tests are extracted from the shipped theory block | One copy of the theory, and it is the live one |
+| D-020 | ~~Tests are extracted from the shipped theory block~~ **Replaced by `D-096`**: the theory is modules that the tests import | One copy of the theory, and it is the live one — still true, by a simpler means |
 | D-021 | Behaviour is specified in Gherkin before it is asserted | The shared artefact between intent and test |
 | D-022 | Rhythm is sixteenth-note steps; no swing, no tuplets | Coarse enough to reason about, fine enough for the genres |
 | D-026 | Scenario/test traceability is enforced, not trusted | It rotted within one session when it was not |
 | D-027 | Tests are validated by mutation, not by passing | Two assertions here passed while testing nothing |
 | D-030 | Notes are short by default; mute is a standing state | Silence stops what sounds now; mute is a mode |
-| D-032 | The build step runs before the tests | A stale module once produced 70 green false passes |
+| D-032 | ~~The build step runs before the tests~~ **Replaced by `D-096`**: there is no generated module to go stale | A stale module once produced 70 green false passes; with none generated, it cannot happen |
 
 ---
 
@@ -616,6 +616,8 @@ What they look like, in kind: a label a semitone off its notes (set 3's D♯ key
 2. **In the page build** the same import is pointed at `sketchpad.jsx` itself, which exports the theory and the pieces the J-6 page reuses (piano, sound, colour tokens). That way the page carries one copy of the theory and of the piano recordings, not two.
 3. **Not chosen: moving the theory to its own module** that `sketchpad.jsx` imports. It would have been the tidier end state, but it would move 2,800 lines out of the app and change the extraction, every gate that reads the block (G6, G7), and the mutator's target, all in a step meant to add a page. It is worth doing on its own, as a refactor whose only test is that nothing else changes.
 
+*Updated 2026-10-07 (`D-096`): that refactor was done. Points 1 and 2 above no longer apply; both apps and the tests import the modules in `core/` directly.*
+
 What J-6 gains: chord names in the key's own spelling (`nameInKey`), the whole chord dictionary and its aliases, and numerals for chords outside the key (♭VII7 rather than nothing). Without a key, black keys are still spelled as flats, as `D-079` says.
 
 ### D-087 — The J-6 Explorer is a second app on the same site
@@ -735,6 +737,27 @@ Both pentatonics lie inside the major scale, so all three sit under every chord 
 
 **What building it found.** When two keys fitted a set equally well, the tie was broken by the lower note name. That answer doesn't move with KEY: set 12 at KEY −6 came out a fifth away from where the rest of its pads said it should be. The tie is now broken by distance from the first chord, which moves with KEY, and a test checks every set at every KEY. The prototype's assumption that set 54 was in C major was also wrong by count: more of its pads fit F major (8 against 7). The progression C C♯ G D♯ on it is still in C major, which the Key card says.
 
+
+### D-096 — The theory becomes reusable assets: modules in `core/`, each with its own requirements and tests
+
+**Context.** The owner's direction, after comparing the J-6's progression and loop code with Sketchpad's: *finding chords from notes, adding the bass, all that is a separate thing that could be used with any instrument, or to generate melodies or MIDI. I will have new ideas and we probably want the same assets in both, and in others.* That is a product line: a shared set of assets, and products built from them. It needs the assets to be trustworthy on their own, which means requirements, design, interface and verification **at module level**, the same as the app has.
+
+The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested as a generated copy (`D-020`, `D-032`), and the J-6 reached it either through that copy (in Node) or by importing the whole app (in the page) (`D-086`). `D-086` had already named this refactor as the tidier end state, to be done on its own with "nothing else changes" as its only test.
+
+**Decision.**
+
+1. **Move the theory out, unchanged.** The block becomes 18 modules in `core/` and 3 in `sketchpad/`, one capability each (`core/DESIGN.md` §2). `sketchpad.jsx` imports them. *Shown, not claimed:* the lines moved are the same lines (compared as a multiset: 2,770 in, 2,770 out); the 455 existing checks pass (only their imports changed); scripted headless runs of both apps (every level and tab, all keys, loops, typed chords, find-from-notes, lessons, fingers; all 100 J-6 sets at two KEY values, rec, play-along, sheet) produce byte-identical screen transcripts before and after; the build sizes are unchanged.
+2. **Core is independent of products.** It imports nothing outside itself; what belongs to Sketchpad alone (levels, guide, lessons) stays in `sketchpad/`. Layers are the import graph, acyclic, and a program checks that the documents say so (`CD-001`, `CD-008`).
+3. **Each module has what the app has.** `core/REQUIREMENTS.md` (every requirement, its source and its test), `core/DESIGN.md` (architecture, interfaces, variation, decisions `CD-nnn`, roadmap), `core/MODULES.md` (purpose, behaviour, interface per module) and `core/VERIFICATION.md` (levels of evidence, and what is not shown). One test per requirement, named by its id, importing only the module (`CD-010`).
+4. **The generated module is gone.** `tools/extract-theory.mjs` and the `THEORY:START/END` markers are removed; the tests, the mutator and both apps import the modules directly. `D-020` and `D-032` are replaced: one copy of the theory is still the rule, achieved more simply, and nothing generated can go stale.
+5. **Four new gates** (`C1`–`C4`, in `tools/core-check.mjs`, run by `check-done`): requirements and tests meet; every export is documented and nothing documented is missing; the architecture holds; everything traces to a source that exists. A fifth, **G0**, fails if an app defines something an asset exports. `core/tests/architecture.test.mjs` plants a fault for each check and requires it to be caught.
+
+**What writing the module tests found** (recorded in `core/DESIGN.md` `CD-007` as limits, not fixed here, because this step must change no behaviour): intervals 13, 15 and 18 have no degree name, so a chord's formula shows `13`, `15` or `18`; the chart spelling `C#5` cannot be read, because it reads as C♯ with an unknown `5`; and the 50 ms floor on a note's length can let two notes overlap at a bar of half a second.
+
+**Not chosen.** *A package per module:* nothing here is published, and one repository's folders do the job with no tooling. *Moving the J-6's own modules (progression, playback, sheet, labels) into core now:* only the J-6 uses them, so they stay in `j6/` until a second product wants them (`CD-001`); the roadmap in `core/DESIGN.md` §6 says which come next (a shared transport, one function for naming notes as chords, events to MIDI).
+
+**Consequence.** A new app, or a new idea such as a MIDI writer or a melody generator, starts from tested parts with documented interfaces. A change to an asset is checked once, where it lives, and every product benefits.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -836,6 +859,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | J-6: the progression as Sketchpad's sheet, with suggested fingering and the J-6 keys for each chord (`D-091`); three scales offered to play over it, with the piano holding still under the loop (`D-092`); a misprinted key named from its notes (`D-093`). A crash on load from a value used before it was defined was caught by the headless run, not the tests |
 | 2026-10-07 | J-6 manual read (KEY, chord sets, menus): the panel names the key a set plays in at the current KEY, with its relative minor; I, IV, V and vi are marked on the pads; KEY is labelled as a transposition; Find's steps are the manual's (`D-094`, `D-081` updated). Fixed: a tied key was broken from C rather than from the first chord, so it didn't move with KEY |
 | 2026-10-07 | J-6 panel compacted after the owner's photo of the hardware: the set display is the size of the J-6's own four digits, and the set's key has a line of its own. The photo confirms KEY is the A key's second function and the 8th white key a high C (`D-094`, `D-083`) |
+| 2026-10-07 | **Reusable assets.** The theory moves out of `sketchpad.jsx` into `core/` (18 modules) and `sketchpad/` (3), each with requirements, interface, decisions and tests of its own; both apps import them (`D-096`). `D-020` and `D-032` replaced; the extraction is gone. New gates C1–C4 and a G0 for a single copy; the checks are shown to catch a planted fault. Behaviour is unchanged, shown by identical results, screen transcripts and build sizes |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
@@ -870,5 +894,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | `FEATURES.md` | Feature-by-feature status against the original roadmap |
 | `PLAYTEST.md` | The manual scenarios, ordered for a real session |
 | `DONE.md` | Definition of Done: gates, thresholds, exceptions |
+| `core/` | The reusable assets and their own set of documents: `README.md`, `DESIGN.md`, `REQUIREMENTS.md`, `MODULES.md`, `VERIFICATION.md`, and `tests/` (`D-096`) |
+| `sketchpad/` | Modules that are Sketchpad's alone, with `MODULES.md` |
 | `tests/` | Automated checks and the traceability guard |
-| `tools/` | Theory extraction, mutation testing, the gate runner |
+| `tools/` | Mutation testing, the gate runner, the asset checks (`core-check.mjs`), the scripted headless run (`smoke.mjs`) |

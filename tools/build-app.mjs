@@ -5,10 +5,9 @@
      npm run build            → build/sketchpad-app.html, build/j6-app.html
      npm run site             → dist/ (the installable site, D-076), J-6 at dist/j6/
 
-   esbuild bundles each page; Tailwind keeps only the classes they use. The
-   J-6 page imports Sketchpad's theory through j6/j6.mjs, which in Node reads
-   the extracted tests/theory.mjs; here that import is pointed at sketchpad.jsx
-   itself, so the page carries one copy of the theory and the recordings. (D-086) */
+   esbuild bundles each page; Tailwind keeps only the classes they use. Both pages
+   import the same modules from core/, so a page carries one copy of the theory and of
+   the piano recordings, and the tests run against exactly the files that ship. (D-096) */
 import { build } from "esbuild";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
@@ -24,11 +23,6 @@ export const PAGES = [
   { entry: "./j6/app.jsx", file: "j6-app.html", title: "J-6 Explorer",
     description: "What the Roland J-6 is playing, and how to play a progression on it." },
 ];
-
-const theoryFromSource = {
-  name: "theory-from-source",
-  setup(b) { b.onResolve({ filter: /tests\/theory\.mjs$/ }, () => ({ path: join(root, "sketchpad.jsx") })); },
-};
 
 const input = join(out, "tailwind.in.css");
 writeFileSync(input, "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n");
@@ -48,7 +42,6 @@ for (const page of PAGES) {
     bundle: true, minify: true, write: false, format: "iife",
     loader: { ".jsx": "jsx" },
     define: { "process.env.NODE_ENV": '"production"' },
-    plugins: [theoryFromSource],
     logLevel: "warning",
   });
   const js = bundle.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");

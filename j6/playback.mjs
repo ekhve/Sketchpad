@@ -4,7 +4,7 @@
    Every chord in the progression gets the same length. Pure: this decides
    what happens on each beat; the page schedules the beats with Sketchpad's
    own look-ahead scheduler (D-043) and makes the sound. */
-import { barSecondsAt } from "../tests/theory.mjs";
+import { barSecondsAt } from "../core/playback.mjs";
 
 export const TEMPO = { min: 60, max: 160, start: 90, step: 5 };
 /** Bars per chord: half a bar, one bar, two bars. */

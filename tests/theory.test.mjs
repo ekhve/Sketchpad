@@ -1,7 +1,6 @@
 /* Sketchpad — automated checks for the @auto scenarios in sketchpad.feature
  *
- *   node tests/extract-theory.mjs sketchpad.jsx tests/theory.mjs
- *   node --test tests/
+ *   node --test tests/*.test.mjs core/tests/*.test.mjs
  *
  * Each test name is the Gherkin scenario it implements, so a failure points
  * straight at the behaviour that broke rather than at a function name.
@@ -9,7 +8,10 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import * as th from "./theory.mjs";
+import * as core from "../core/index.mjs";
+import * as sketchpad from "../sketchpad/index.mjs";
+/* Everything the app's theory offers, from the modules that now hold it (D-096). */
+const th = { ...core, ...sketchpad };
 
 const { pc, noteName, chordLabel, scalePcs, harmonize, explainChord, fitScales, keyRole, keyMarker, SCALES, scaleById } = th;
 
@@ -3243,7 +3245,7 @@ describe("Feature: Notes are spelled the way the key writes them", () => {
   test("No chord formula is listed twice", () => {
     // a repeated key in an object literal is not an error: the later one
     // silently wins. That is how sus2 disappeared. Read the source instead.
-    const src = readFileSync(new URL("./theory.mjs", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../core/chords.mjs", import.meta.url), "utf8");
     const block = src.slice(src.indexOf("const QUALITIES = {"), src.indexOf("};", src.indexOf("const QUALITIES = {")));
     const keys = [...block.matchAll(/^\s*"([\d,]+)":/gm)].map((m) => m[1]);
     assert.ok(keys.length > 20, "found the table");

@@ -71,7 +71,7 @@ function explore() {
   const state = Object.fromEntries(played.map((k, i) => [k, { lit: i === played.length - 1 ? "now" : "dim", step: i + 1 }]));
   state["C'"] = state.C ? { lit: "dim" } : {};
 
-  const ivals = j.QUALITIES[now.chord.quality];
+  const ivals = j.CHORD_PCS[now.chord.quality];
   const DEG = { 0: "root", 3: "♭3rd", 4: "3rd", 7: "5th", 9: "6th", 10: "♭7th", 11: "7th", 2: "9th" };
   const pcs = ivals.map((i) => (now.chord.root + i) % 12);
   const noteName = (pc) => j.FLAT_NAMES[pc];

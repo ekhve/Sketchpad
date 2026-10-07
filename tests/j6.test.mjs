@@ -218,7 +218,7 @@ test("Turning Rec off keeps what was recorded, numbered on the pads, until it is
 });
 
 test("Every chord name fits on its pad", async () => {
-  const { keyNames } = await import("./theory.mjs");
+  const { keyNames } = await import("../core/notes.mjs");
   assert.deepEqual(j.typeLines("maj9(no3)/G"), ["maj9", "(no3)", "/G"]);
   assert.deepEqual(j.typeLines("m7"), ["m7"]);
   let longest = 0;

@@ -8,7 +8,10 @@
    The layout follows the agreed screens, proto/j6/explore.svg and find.svg. */
 import React, { useState, useMemo, useCallback, useEffect, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { T, Piano, Diagram, PRINT_CSS, useInstrument, spelling, scalePcs, pc, barsToSchedule } from "../sketchpad.jsx";
+import { T, Piano, Diagram, PRINT_CSS, useInstrument } from "../sketchpad.jsx";
+import { spelling, pc } from "../core/notes.mjs";
+import { barsToSchedule } from "../core/playback.mjs";
+import { scalePcs } from "../core/scales.mjs";
 import * as j from "./j6.mjs";
 import * as pr from "./progression.mjs";
 import * as pb from "./playback.mjs";

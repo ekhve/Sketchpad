@@ -5,7 +5,8 @@
    per chord and, when ticked, suggested fingering (D-078). The J-6 adds two
    things: each chord is the J-6's voicing, as it sounds; and a list of where
    to find each chord on the J-6, so the sheet works at either instrument. */
-import { sheetData, sheetAsText, spelling } from "../tests/theory.mjs";
+import { spelling } from "../core/notes.mjs";
+import { sheetData, sheetAsText } from "../core/sheet.mjs";
 import { KEYS, romanOf, nameInKey, likelyKeys } from "./j6.mjs";
 import { resolve } from "./progression.mjs";
 

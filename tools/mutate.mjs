@@ -1,7 +1,7 @@
 /* Mutation testing: break the theory on purpose, one change at a time, and
    see whether the suite notices. A test that survives every mutation of the
    code it claims to cover is not testing anything. */
-import { readFileSync, writeFileSync, copyFileSync, unlinkSync } from "node:fs";
+import { readFileSync, writeFileSync, copyFileSync, unlinkSync, readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 
 const MUTANTS = [
@@ -251,7 +251,13 @@ const J6_SHEET_MUTANTS = [
   ["the sheet loses the KEY setting",         "where: `set ${k.set} · KEY ${signed(k.t)} · key ${KEY_NAMES[k.key]}`", "where: `set ${k.set} · KEY 0 · key ${KEY_NAMES[k.key]}`"],
 ].map(([name, from, to]) => [name, from, to, "j6/sheet.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+/* The theory lives in core/ and sketchpad/, one module per capability (D-096). A theory mutant
+   names the code to break, not the file, so the file is whichever module holds that code; a
+   pattern found nowhere is reported as stale below, as before. */
+const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
+const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
+
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {
@@ -261,7 +267,7 @@ for (const [name, from, to, file] of ALL) {
   writeFileSync(file, orig.replace(from, to));
   let caught = false, failing = "";
   try {
-    execSync("node --test tests/*.test.mjs 2>&1", { encoding: "utf8" });
+    execSync("node --test tests/*.test.mjs core/tests/*.test.mjs 2>&1", { encoding: "utf8" });
   } catch (e) {
     caught = true;
     failing = (e.stdout.match(/^# fail (\d+)/m) || [, "?"])[1];

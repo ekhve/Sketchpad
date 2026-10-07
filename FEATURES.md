@@ -1,6 +1,6 @@
 # Sketchpad — Feature Status
 
-**Updated:** 2026-10-06 · **Version:** working build, packaged as an installable site
+**Updated:** 2026-10-07 · **Version:** working build, packaged as an installable site
 
 Tracked against the original development order. Status is one of:
 
@@ -216,6 +216,18 @@ Not in the original plan. Each earned its place.
 | Installable at `j6/` | **Done** | Its own icon, name and offline cache (`D-087`) |
 | All 100 chord sets | **Done** | Imported from the manual's page, 558 label spellings read, 56 failing keys listed and pinned (`D-088`, `D-082`) |
 | KEY range, direction and high C checked on a J-6 | **Open** | Manual scenarios; assumptions shown on the page until then |
+
+## Reusable assets (`D-096`)
+
+| Feature | Status | Notes |
+|---|---|---|
+| The theory as modules in `core/`, one capability each | **Done** | 18 modules; 3 more in `sketchpad/` that are Sketchpad's alone; both apps import them |
+| Requirements, design, interface and verification per module | **Done** | `core/README.md`, `DESIGN.md`, `REQUIREMENTS.md`, `MODULES.md`, `VERIFICATION.md`; one test per requirement |
+| The checks that hold the architecture | **Done** | `tools/core-check.mjs`, gates C1–C4; each shown to catch a planted fault |
+| A shared transport (progression and loop) for both apps | **Open** | The J-6's is the cleaner; `core/DESIGN.md` §6 |
+| One function for naming notes as chords | **Open** | `identifyChord` and the J-6's `nameFromNotes` answer one question twice |
+| Events to a MIDI file | **Open** | Events are already instrument-free (`CD-003`); a pure function away |
+| Names for the flat 9, sharp 9 and sharp 11 | **Open** | A recorded limit (`CD-007`) |
 
 ## Known gaps and rough edges
 

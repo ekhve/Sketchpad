@@ -2,12 +2,12 @@
 
 **Status:** v1.0
 **Date:** 2026-09-05
-**Applies to:** every change that reaches `sketchpad.jsx`, the documents, or the test suite.
+**Applies to:** every change that reaches `sketchpad.jsx`, `j6/`, `core/`, `sketchpad/`, the documents, or the test suite.
 
 A change is **done** when all three of the following are true. Not one. Not two.
 
 1. Every gate below either passes or has a recorded, dated exception.
-2. `node tools/check-done.mjs` reports every automated gate passing (15 as of 2026-09-23).
+2. `node tools/check-done.mjs` reports every automated gate passing (19 as of 2026-10-07).
 3. A person has run the manual gates that the change touches.
 
 Anything less is in progress, however well it works on a phone.
@@ -48,7 +48,7 @@ A requirement that cannot be stated as true-or-false is not a requirement; it is
 |---|---|---|
 | **DoD-10** | Every automatable scenario has a test of the same name. | `traceability.test.mjs` |
 | **DoD-11** | Every test has a scenario. A test with no scenario is behaviour nobody agreed to. | `traceability.test.mjs` |
-| **DoD-12** | The whole suite passes, against a module rebuilt in the same run. A generated artefact that lags its source produces confident green results about code that is not shipping (`D-032`). | `check-done` G0, G1 |
+| **DoD-12** | The whole suite, the apps' and the assets', passes against the modules the apps import. Nothing is generated for the tests, so nothing can lag its source (`D-032`, replaced by `D-096`). | `check-done` G0, G1 |
 | **DoD-13** | A new feature ships with a new mutant in `tools/mutate.mjs`. | By hand, at review |
 | **DoD-14** | No mutant survives, and none is stale. | `check-done` G2, G3 |
 | **DoD-15** | A bug fix ships with a test that fails against the old code. | By hand, at review |
@@ -58,8 +58,9 @@ A requirement that cannot be stated as true-or-false is not a requirement; it is
 
 | Gate | Requirement | How it's judged |
 |---|---|---|
-| **DoD-17** | The theory block stays pure: no React, Tone, DOM, dates, or ambient randomness. | `check-done` G7 |
-| **DoD-18** | The theory block extracts and loads standalone. | `check-done` G6 |
+| **DoD-17** | The asset modules stay pure: no React, Tone, DOM, dates, or ambient randomness. | `check-done` G7, and C3 per module |
+| **DoD-18** | The asset modules load standalone, and nothing an asset exports is defined a second time in an app (`D-096`). | `check-done` G6 and G0 |
+| **DoD-18c** | A change to a core module updates, in the same pass, its requirement in `core/REQUIREMENTS.md` (with a source), its test (named by the requirement), and its section in `core/MODULES.md`. Core never imports a product; the layers in the header and the document are the imports. | `check-done` C1–C4 |
 | **DoD-18b** | No hook depends on a value defined later in the file. The app renders nothing at all when this is wrong, and no behavioural test here can see it (`D-063`). | `check-done` G12 |
 | **DoD-19** | No colour literals in components; every colour comes from a role-named token. | `check-done` G8 |
 | **DoD-20** | A new visual role is added to the token set before it is used. | By hand, at review |
@@ -96,13 +97,17 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
-| Generated module current | always | rebuilt before every run | G0 |
-| Automated checks passing | 100% | 455/455 | G1 |
+| Assets defined once, apps import them | always | 158 exports in 21 modules, none redefined | G0 |
+| Core requirements with a test, and tests with a requirement | 100% | 164/164 | C1 |
+| Module interfaces documented, nothing documented missing | 100% | 158 exports | C2 |
+| Architecture: acyclic, layered, pure, core independent | holds | 21 modules, 5 layers | C3 |
+| Core requirements traced to a source that exists; core decisions used | 100% | 12 decisions | C4 |
+| Automated checks passing | 100% | 619/619 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
 | Mutation score | ≥ 90% | 209/209 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
-| Requirements with a real scenario | 100% | 398/398 | G4 |
-| Requirements traced to a decision or use case | 100% | 398/398 | G5 |
+| Requirements with a real scenario | 100% | 405/405 | G4 |
+| Requirements traced to a decision or use case | 100% | 405/405 | G5 |
 | Every requirement row readable by the gates | 100% | enforced | G14 |
 | Manual share of scenarios | < 40% | about 20% | traceability |
 | Impure references in the theory layer | 0 | 0 | G7 |
@@ -125,7 +130,8 @@ Not every change needs every gate. What it never gets is a pass on the *whole* c
 |---|---|---|---|---|---|
 | **New feature** | New requirements | Decision + use case + change log | Scenarios, tests, a new mutant | Full run | Its own + the three standing |
 | **Bug fix** | Amend the requirement it violated, or add the one that was missing | Change log; a decision if the cause was structural | A test that fails against the old code | Full run | The affected scenario |
-| **Refactor** | None | Change log | No new tests; the suite must pass unchanged | Full run — a refactor that changes the mutation score changed behaviour | The three standing |
+| **Refactor** | None | Change log | No new tests; the suite must pass unchanged | Full run — a refactor that changes the mutation score changed behaviour; where it moves code, the scripted run of both apps is compared before and after (`tools/smoke.mjs`) | The three standing |
+| **Change to a core asset** | Its row in `core/REQUIREMENTS.md`, with a source | `core/MODULES.md` section; a `CD-nnn` if the cause was structural; change log | A test named by the requirement; a mutant | Full run, including C1–C4 | The affected scenario in each product that uses it |
 | **Copy or wording** | None | Change log | Update any assertion that quotes the text | G1 only | Read it on a phone |
 | **Documents only** | As applicable | Change log | None | G4, G5, G9, G10 | None |
 
