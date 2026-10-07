@@ -104,7 +104,7 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Core requirements traced to a source that exists; core decisions used | 100% | 14 decisions | C4 |
 | Automated checks passing | 100% | 659/659 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
-| Mutation score | ≥ 90% | 209/209 (100%) | G2 |
+| Mutation score | ≥ 90% | 221/221 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |
 | Requirements traced to a decision or use case | 100% | 405/405 | G5 |

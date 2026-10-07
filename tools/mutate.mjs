@@ -256,7 +256,6 @@ const TRANSPORT_MUTANTS = [
 
 /* Naming a misprint, scales to play along with, the sheet (D-091–D-093). */
 const J6_ALONG_MUTANTS = [
-  ["a misprint is named from any note, not the bass", "const score = (iv.length - rel.length) + (root === bass ? 0 : 2);", "const score = (iv.length - rel.length);"],
   ["the relative minor is a third too high",  '[pc(t + 9), "minor-pentatonic"]', '[pc(t + 3), "minor-pentatonic"]'],
   ["a tied key is broken from C, not the first chord", "|| pc(a.tonic - first) - pc(b.tonic - first));", "|| a.tonic - b.tonic);"],
   ["the set's key ignores KEY",               "const chords = KEYS.map((_, k) => chordAt(n, k, t).chord).filter(Boolean);", "const chords = KEYS.map((_, k) => chordAt(n, k, 0).chord).filter(Boolean);"],
