@@ -79,9 +79,9 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Purpose.** What a chord is: the quality tables, the dictionary of chord types with their intervals, naming a chord for display, and naming a set of notes (any notes, in any order) as chords.
 
-**Behaviour.** `QUALITIES` and the `DICTIONARY` are the two sources of names; `SIGNATURES` merges them, so a set of notes is named the same wherever it is asked. `identifyChord` returns every reading of the notes, best first: a root-position reading outranks an inversion, and two notes are named as an interval. It never invents a name: notes with no standard name give an empty list. `customChordFrom` makes a chord of your own from a selection, named if it can be. Known limit: intervals 13, 15 and 18 (the flat 9, sharp 9 and sharp 11) have no degree name, so a formula shows their semitone count (CD-007).
+**Behaviour.** `QUALITIES` and the `DICTIONARY` are the two sources of names; `SIGNATURES` merges them, so a set of notes is named the same wherever it is asked. `identifyChord` returns every reading of the notes, best first, in one shape. It has two levels of tolerance (CD-014): *exact* (the default), where the notes are a chord, a root-position reading outranks an inversion and two notes are named as an interval; and `{ missing: true }`, where the notes are part of a chord and tones may be absent, as when a hardware chord key leaves out the fifth but keeps the root at the bottom: the root in the bass then outweighs two missing tones, and the simpler chord (the dictionary's order) wins. It never invents a name: notes with no reading give an empty list. `customChordFrom` makes a chord of your own from a selection, named if it can be. Known limit: intervals 13, 15 and 18 (the flat 9, sharp 9 and sharp 11) have no degree name, so a formula shows their semitone count (CD-007).
 
-**Requirements.** CR-CHORDS-01 … CR-CHORDS-12 (12) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/chords.test.mjs`.
+**Requirements.** CR-CHORDS-01 … CR-CHORDS-15 (15) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/chords.test.mjs`.
 
 ### Interface
 
@@ -93,7 +93,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `SIGNATURES` | function | `(()` | Every interval signature either table can name. |
 | `chordLabel` | function | `(rootPc, sym, system)` | A chord's display name: root and quality in a naming system. |
 | `customChordFrom` | function | `(midis, name)` | A chord of your own from a selection of notes. |
-| `identifyChord` | function | `(midis, system = "letters")` | Name a set of notes: every reading, best first. |
+| `identifyChord` | function | `(midis, system = "letters", { missing = false } = {})` | Name a set of notes: every reading, best first; exact, or with tones allowed to be missing. |
 | `inversions` | function | `(chord)` | A chord's inversions, each with the reason it sounds as it does. |
 
 ## core/figures

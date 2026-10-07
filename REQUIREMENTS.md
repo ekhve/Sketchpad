@@ -616,6 +616,13 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-409 | Both apps start, tick and stop their loop through one driver, which is given its clock and timer and touches nothing else. | D-098, D-043 | A | *(`core/tests/transport.test.mjs`, and `check-done` G0)* |
 | R-410 | The J-6's playback behaviour is unchanged by the move: tempo, bars per chord, loop, click and count-in. | D-098, D-090 | A | Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5 |
 
+## 10zd. One chord-naming function
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-411 | One function names a set of notes as a chord, exactly or with tones missing, and returns the same reading either way. | D-099, D-047 | A | *(`core/tests/chords.test.mjs`)* |
+| R-412 | A misprinted J-6 key is named from its printed notes exactly as before the functions were joined. | D-099, D-093 | A | A misprinted key is named from the notes it prints |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

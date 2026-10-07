@@ -13,7 +13,7 @@ export const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
    layer, the block between THEORY:START and THEORY:END in sketchpad.jsx. Node
    reads it from the module extracted for the tests; the page build points this
    same import at sketchpad.jsx itself, so there is one copy of the theory. */
-import { DICTIONARY } from "../core/chords.mjs";
+import { DICTIONARY, identifyChord } from "../core/chords.mjs";
 import { romanFor } from "../core/harmony.mjs";
 import { pc, NAMES, FLAT_NAMES, keyNames } from "../core/notes.mjs";
 import { scalePcs, SCALES } from "../core/scales.mjs";
@@ -155,27 +155,13 @@ export function hardwareSteps({ set, transpose }, keys) {
 
 /* ---------- naming a voicing from its notes (D-093) ---------- */
 /** The chord a set of notes makes, read the way the validator reads a label (D-080): a root
- *  that sounds, every note in the chord, missing tones allowed. A root in the bass counts
- *  for two missing tones; then the simpler chord wins (Sketchpad's dictionary order).
+ *  that sounds, every note in the chord, missing tones allowed. That is core's identifyChord in
+ *  its `missing` mode (D-099): a root in the bass counts for two missing tones; then the
+ *  simpler chord wins (the dictionary's order).
  *  → { root, quality, bass, iv } or null. For a misprinted key: what the printed notes make. */
 export function nameFromNotes(midi) {
-  const sorted = [...midi].sort((a, b) => a - b);
-  const got = [...new Set(sorted.map(pc))];
-  if (got.length < 3) return null;
-  const bass = pc(sorted[0]);
-  let best = null;
-  for (const root of got) {
-    const rel = got.map((p) => pc(p - root));
-    DICTIONARY.forEach((d, order) => {
-      const iv = [...new Set(d.iv.map(pc))];
-      if (!rel.every((x) => iv.includes(x))) return;
-      /* the J-6 often leaves out the fifth but keeps the root at the bottom, so a root in
-         the bass outweighs a missing tone */
-      const score = (iv.length - rel.length) + (root === bass ? 0 : 2);
-      if (!best || score < best.score || (score === best.score && order < best.order)) best = { score, order, root, quality: d.q, iv };
-    });
-  }
-  return best && { root: best.root, quality: best.quality, bass, iv: best.iv };
+  const [best] = identifyChord(midi, "letters", { missing: true });
+  return best ? { root: best.rootPc, quality: best.sym, bass: best.bass, iv: best.tones } : null;
 }
 
 /* ---------- scales to play over the progression (D-092) ---------- */

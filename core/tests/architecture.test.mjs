@@ -119,7 +119,7 @@ const run8 = [60, 62, 64, 65, 67, 69, 71, 72];
 const CONTRACT = {
   "core/notes": { pc: [[61], [-1]], isWhite: [[60], [61]], noteName: [[61, "letters"], [61, "solfege"]], baseOf: [["solfege"]], leansFlat: [[5, "major"]], keyNames: [[3, "minor"]], spelling: [["letters", 3, "minor"]] },
   "core/scales": { scaleById: [["major"]], scalePcs: [[2, "dorian"]], fitScales: [[triads, 0]], keysContaining: [[[60, 64, 67]]], scalesContaining: [[[60, 63, 67, 70], 4]], customScaleFrom: [[[60, 62, 63, 67, 68], "x"]], customScalePcs: [[mine]], activeScalePcs: [[mine, 0, "major"], [null, 0, "major"]] },
-  "core/chords": { chordLabel: [[0, "m7", "letters"]], inversions: [[C]], identifyChord: [[[60, 64, 67]], [[57, 60, 64, 67], "solfege"]], customChordFrom: [[[60, 64, 67], "x"]] },
+  "core/chords": { chordLabel: [[0, "m7", "letters"]], inversions: [[C]], identifyChord: [[[60, 64, 67]], [[57, 60, 64, 67], "solfege"], [[48, 55, 58], "letters", { missing: true }]], customChordFrom: [[[60, 64, 67], "x"]] },
   "core/voicing": { voice: [[0, [0, 4, 7]]], stackAscending: [[[0, 4, 7, 11, 2], 0]], dictionaryFor: [[3, 36]], voicingsFor: [[C], [Am7]], voiceLeading: [[C, Am7]], arpeggio: [[[60, 64, 67], "updown"]], smoothestVoicing: [[C, Am7]] },
   "core/symbols": { nearestSuffix: [["maj7x"]], parseChordName: [["F#m7/C#"], ["Hmaj"]], parseChordNames: [["C | Am, F  G7"]], typedLabel: [[{ rootPc: 0, sym: "", bassPc: 4 }, "letters"]] },
   "core/styles": { scalesForStyle: [["soul", "major"]] },

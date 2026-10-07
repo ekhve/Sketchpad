@@ -146,11 +146,48 @@ const SIGNATURES = (() => {
   return map;
 })();
 
-function identifyChord(midis, system = "letters") {
+/* Notes in, names out. The question has one answer shape and two levels of
+   tolerance (D-099):
+     exact     the notes ARE a chord: every tone present, nothing left over.
+               Ranked: a reading with the lowest note as root first.
+     missing   the notes are PART of a chord: every note belongs to it, tones
+               may be absent. A hardware chord key often leaves out the fifth but
+               keeps the root at the bottom, so the root in the bass outweighs
+               two missing tones, then the simpler chord (the dictionary's order)
+               wins. Needs three different notes.
+   Each reading: { rootPc, sym, full, label, notes, bass, tones, missing, score, why }.
+   `tones` is the chord's own pitch classes above its root; `missing` how many of
+   them the notes lack (0 for an exact reading). */
+function identifyChord(midis, system = "letters", { missing = false } = {}) {
   const sorted = [...new Set(midis)].sort((a, b) => a - b);
   if (sorted.length < 2) return [];
   const pcs = [...new Set(sorted.map(pc))];
   const bass = pc(sorted[0]);
+
+  if (missing) {
+    if (pcs.length < 3) return [];
+    const found = [];
+    for (const root of pcs) {
+      const rel = pcs.map((p) => pc(p - root));
+      DICTIONARY.forEach((d, order) => {
+        const tones = [...new Set(d.iv.map(pc))];
+        if (!rel.every((x) => tones.includes(x))) return;
+        const lacking = tones.length - rel.length, inverted = root !== bass;
+        found.push({
+          order, penalty: lacking + (inverted ? 2 : 0),
+          reading: {
+            rootPc: root, sym: d.q, full: d.full, notes: sorted, bass, tones, missing: lacking,
+            label: chordLabel(root, d.q, system) + (inverted ? `/${noteName(bass, system)}` : ""),
+            score: -(lacking + (inverted ? 2 : 0)),
+            why: lacking
+              ? `${lacking} note${lacking === 1 ? " is" : "s are"} left out of this chord, which is common when only part of it is played.`
+              : "Every note of the chord is there.",
+          },
+        });
+      });
+    }
+    return found.sort((a, b) => a.penalty - b.penalty || a.order - b.order).map((f) => f.reading);
+  }
 
   if (pcs.length === 2) {
     /* measured upward from the lowest note played, not by the smaller of the
@@ -160,6 +197,7 @@ function identifyChord(midis, system = "letters") {
     return [{
       label: `${noteName(bass, system)} + ${noteName(top, system)}`,
       full: INTERVAL_NAMES[up] ?? "interval", rootPc: bass, sym: "", notes: sorted, bass,
+      tones: [0, up], missing: 0,
       score: 1, why: "Two notes are an interval, not yet a chord. Add a third to give it a mood.",
     }];
   }
@@ -172,6 +210,7 @@ function identifyChord(midis, system = "letters") {
     const inverted = root !== bass;
     out.push({
       rootPc: root, sym: q.sym, full: q.full, notes: sorted, bass,
+      tones: sig.split(",").map(Number), missing: 0,
       label: chordLabel(root, q.sym, system) + (inverted ? `/${noteName(bass, system)}` : ""),
       score: q.rank + (inverted ? 0 : 2),
       why: inverted

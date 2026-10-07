@@ -141,3 +141,55 @@ test("CR-CHORDS-12 customChordFrom turns a selection into a chord of your own, n
   assert.equal(customChordFrom([60]), null, "one note is not a chord");
   assert.equal(customChordFrom([]), null);
 });
+
+/** The rule the J-6 Explorer used before it was joined to identifyChord (D-093), kept here as an independent reference. */
+function reference(midis) {
+  const sorted = [...midis].sort((a, b) => a - b), got = [...new Set(sorted.map(pc))];
+  if (got.length < 3) return null;
+  const bass = pc(sorted[0]); let best = null;
+  for (const root of got) {
+    const rel = got.map((p) => pc(p - root));
+    DICTIONARY.forEach((d, order) => {
+      const iv = [...new Set(d.iv.map(pc))];
+      if (!rel.every((x) => iv.includes(x))) return;
+      const score = (iv.length - rel.length) + (root === bass ? 0 : 2);
+      if (!best || score < best.score || (score === best.score && order < best.order)) best = { score, order, root, quality: d.q, iv };
+    });
+  }
+  return best;
+}
+
+test("CR-CHORDS-13 in missing mode, notes that are part of a chord are named by it, the root in the bass outweighing two missing tones, then the simpler chord", () => {
+  const read = (m) => identifyChord(m, "letters", { missing: true });
+  assert.equal(read([48, 52])[0], undefined, "two notes are not enough to name a chord");
+  const cgb = read([48, 55, 58]);                       // C G B♭: the third is left out, so major or minor fit equally
+  assert.deepEqual(cgb.slice(0, 3).map((r) => r.label), ["Cm7", "C7", "C7sus4"], "equally good readings keep the dictionary's order");
+  assert.ok(cgb.slice(0, 3).every((r) => r.missing === 1 && r.score === -1));
+  const cEG = read([48, 52, 55])[0]; assert.equal(cEG.sym, ""); assert.equal(cEG.missing, 0, "a whole chord has nothing missing");
+  assert.equal(read([52, 55, 60])[0].label, "C/E", "an inversion is named with its bass");
+  for (const r of read([48, 52, 58])) assert.equal(r.score, -(r.missing + (r.rootPc === 0 ? 0 : 2)));
+  const all = read([48, 52, 55, 59]); assert.ok(all.every((r, i) => i === 0 || r.score <= all[i - 1].score), "best first");
+  for (const r of all) { assert.deepEqual(r.notes, [48, 52, 55, 59]); assert.ok(r.tones.length >= 3); }
+});
+
+test("CR-CHORDS-14 missing mode agrees with the reference rule on every chord, every root, with any one tone left out and notes spread over octaves", () => {
+  let checked = 0;
+  for (const d of DICTIONARY) for (let root = 0; root < 12; root++) {
+    const full = d.iv.map((i) => 36 + root + i);
+    const variants = [full, ...full.map((_, k) => full.filter((_, j) => j !== k)), full.map((m, i) => m + (i % 2) * 12), full.map((m, i) => (i === 1 ? m - 24 : m))];
+    for (const notes of variants) {
+      const want = reference(notes), got = identifyChord(notes, "letters", { missing: true })[0] ?? null;
+      assert.equal(got === null, want === null, `${d.q} ${root} ${notes}`);
+      if (want) { assert.deepEqual([got.rootPc, got.sym, got.bass, got.tones], [want.root, want.quality, pc(Math.min(...notes)), want.iv], `${d.q} on ${root}: ${notes}`); checked++; }
+    }
+  }
+  assert.ok(checked > 600, `${checked} readings compared`);
+});
+
+test("CR-CHORDS-15 every reading has the same shape in both modes, so a caller handles one answer", () => {
+  const keys = ["bass", "full", "label", "missing", "notes", "rootPc", "score", "sym", "tones", "why"];
+  for (const opts of [{}, { missing: true }]) for (const notes of [[60, 64, 67], [57, 60, 64, 67], [52, 55, 60]]) for (const r of identifyChord(notes, "letters", opts)) assert.deepEqual(Object.keys(r).sort(), keys);
+  assert.deepEqual(Object.keys(identifyChord([60, 67])[0]).sort(), keys, "an interval too");
+  assert.equal(identifyChord([60, 64, 67], "letters", { missing: false })[0].label, "C", "exact is the default");
+  assert.deepEqual(identifyChord([60, 64, 67]), identifyChord([60, 64, 67], "letters", {}));
+});

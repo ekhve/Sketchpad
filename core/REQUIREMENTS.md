@@ -48,6 +48,9 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-CHORDS-10 | IdentifyChord writes names in the naming system it is given, and leaves its input alone. | D-035, D-047, D-074, UC-42 | A | `core/tests/chords.test.mjs` |
 | CR-CHORDS-11 | Inversions lifts the lowest note an octave at a time, up to four, keeping the chord's notes. | D-035, D-047, D-074, UC-42 | A | `core/tests/chords.test.mjs` |
 | CR-CHORDS-12 | CustomChordFrom turns a selection into a chord of your own, named if it can be. | D-047 | A | `core/tests/chords.test.mjs` |
+| CR-CHORDS-13 | In missing mode, notes that are part of a chord are named by it, the root in the bass outweighing two missing tones, then the simpler chord. | D-035, D-047, D-074, UC-42 | A | `core/tests/chords.test.mjs` |
+| CR-CHORDS-14 | Missing mode agrees with the reference rule on every chord, every root, with any one tone left out and notes spread over octaves. | D-035, D-047, D-074, UC-42 | A | `core/tests/chords.test.mjs` |
+| CR-CHORDS-15 | Every reading has the same shape in both modes, so a caller handles one answer. | D-035, D-047, D-074, UC-42 | A | `core/tests/chords.test.mjs` |
 
 ## core/voicing
 

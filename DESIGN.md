@@ -778,6 +778,15 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Consequence.** The timing loop exists once and is tested without a browser (`CR-TRANSPORT-09` to `15`). A sequencer, a metronome or a MIDI player can use the same driver.
 
+
+### D-099 — One function names notes as a chord: `identifyChord`, with a tolerance
+
+**Context.** Sketchpad's Find tab and the J-6's misprint naming (`D-093`) asked the same question and had two implementations. The owner asked for one.
+
+**Decision.** `core/chords.identifyChord` takes an option, `{ missing: true }`, for notes that are part of a chord. The J-6's `nameFromNotes` is now that call plus a change of shape; it names exactly what it named before, shown by a comparison with the old rule over every dictionary chord on every root, and by the J-6 tests that pin 54 of the 56 misprints (`D-093`). The reading shape gained `tones` and `missing`, which are the same for both modes.
+
+**Consequence.** The ranking rule lives once, in `core/chords`, with its tests (`CR-CHORDS-13` to `15`) and four mutants. Sketchpad's Find tab could now offer "part of a chord" readings as well; that is a feature, not done here.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -882,6 +891,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | **Reusable assets.** The theory moves out of `sketchpad.jsx` into `core/` (18 modules) and `sketchpad/` (3), each with requirements, interface, decisions and tests of its own; both apps import them (`D-096`). `D-020` and `D-032` replaced; the extraction is gone. New gates C1–C4 and a G0 for a single copy; the checks are shown to catch a planted fault. Behaviour is unchanged, shown by identical results, screen transcripts and build sizes |
 | 2026-10-07 | Sharps are Sketchpad's default spelling again, with the key's own spelling as a setting beside the naming button; lessons keep spelling for their own key (`D-097`) |
 | 2026-10-07 | One transport for both apps (`core/transport`): the J-6's playback model plus the look-ahead loop both apps wrote by hand, as a driver over an injected clock and timer, tested with a fake one (`D-098`) |
+| 2026-10-07 | One function names notes as a chord: `identifyChord` with a `missing` mode replaces the J-6's own `nameFromNotes` rule; the J-6 names exactly what it did (`D-099`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

@@ -192,6 +192,14 @@ Where a product needs behaviour an asset does not offer, it adds it *in the prod
 
 **Consequence.** The timing loop is tested without audio or a screen (`CR-TRANSPORT-09` to `15`), and a change to it reaches both apps. The contract table lists `createDriver` as stateful.
 
+### CD-014 — One question, one answer shape, a parameter for how tolerant
+
+**Context.** *What chord is this?* was answered twice: Sketchpad's `identifyChord` (the notes are a chord; every reading, ranked) and the J-6's `nameFromNotes` (the notes are part of a chord, as a hardware key often leaves out the fifth; the single best). Two functions, two result shapes, two sets of tests, and a fix to one would not reach the other.
+
+**Decision.** `identifyChord(notes, system, { missing })`. Without `missing`, the notes must be the whole chord. With it, tones may be absent, and a root in the bass outweighs two missing tones. Both return the same reading, `{ rootPc, sym, full, label, notes, bass, tones, missing, score, why }`. The J-6's function is now a few lines on top of it. The old J-6 rule is kept in the tests as an independent reference, and the new function is compared with it over every dictionary chord on every root with each tone left out.
+
+**Consequence.** Any app that has some notes and wants a name uses one function and chooses how forgiving to be. `CR-CHORDS-13` to `15`.
+
 ## 6. Roadmap
 
 Not built; listed so the shape is deliberate. Each item arrives as a module with requirements and tests before an app uses it.
@@ -199,7 +207,6 @@ Not built; listed so the shape is deliberate. Each item arrives as a module with
 | Next | What it is | Why it fits |
 |---|---|---|
 | **Events to MIDI** | A module turning events (§3) into a Standard MIDI File, in bytes | Events are already instrument-free (CD-003); it is a pure function of events and a tempo |
-| **One name for notes** | `identifyChord` (any notes, ranked readings) and the J-6's `nameFromNotes` (a key's printed notes) are two answers to one question | One function with a parameter for what the caller knows, and one test |
 | **Shared progression state** | The J-6's pure progression reducer (add, remove, undo, rec), which Sketchpad's loop could use | The transport is shared (`D-098`); the reducer is next |
 | **Melody from harmony** | Motifs and phrases over a progression, seeded, using `melody` and `figures` | The patterns and the rules already generate notes; this arranges them |
 | **Degree names** | Names for 13, 15 and 18 semitones | Closes a CD-007 limit |

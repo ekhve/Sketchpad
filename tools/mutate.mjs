@@ -235,6 +235,14 @@ const J6_PLAYBACK_MUTANTS = [
   ["chords ring into the next",              "bars * BEATS_PER_BAR * beatSeconds(bpm) * 0.92", "bars * BEATS_PER_BAR * beatSeconds(bpm) * 1.2"],
 ].map(([name, from, to]) => [name, from, to, "core/transport.mjs"]);
 
+/* Naming notes with tones missing: one function for both apps (D-099). */
+const MISSING_MUTANTS = [
+  ["a bass root stops outweighing missing tones", "penalty: lacking + (inverted ? 2 : 0),", "penalty: lacking,"],
+  ["two notes are named as a chord when tones may be missing", "if (pcs.length < 3) return [];\n    const found", "const found"],
+  ["equal readings lose the dictionary's order", "a.penalty - b.penalty || a.order - b.order", "a.penalty - b.penalty || b.order - a.order"],
+  ["a note outside the chord is allowed", "if (!rel.every((x) => tones.includes(x))) return;", "if (!rel.some((x) => tones.includes(x))) return;"],
+].map(([name, from, to]) => [name, from, to, "core/chords.mjs"]);
+
 /* The shared transport's driver and loop arithmetic (D-098). */
 const TRANSPORT_MUTANTS = [
   ["the first unit starts late",              "({ nextBarAt: now + lead, barIndex: 0 })", "({ nextBarAt: now + lead + 5, barIndex: 0 })"],
@@ -270,7 +278,7 @@ const J6_SHEET_MUTANTS = [
 const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
 const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
 
-const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {
