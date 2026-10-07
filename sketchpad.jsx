@@ -5027,4 +5027,4 @@ export default function App() {
    colour tokens and the theory from here, imported rather than copied, so
    there is one of each. Its engine's theory import is pointed at this file
    when the page is bundled. (D-086) */
-export { T, Piano, useInstrument, pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, spelling, scalePcs, romanFor, barSecondsAt, barsToSchedule };
+export { T, Piano, Diagram, PRINT_CSS, useInstrument, pc, NAMES, FLAT_NAMES, DICTIONARY, SCALES, parseChordName, keyNames, spelling, scalePcs, romanFor, barSecondsAt, barsToSchedule, sheetData, sheetAsText };

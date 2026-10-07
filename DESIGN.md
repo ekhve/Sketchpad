@@ -683,6 +683,34 @@ Play becomes Play/Stop. While it plays, the chord sounding is highlighted in the
 
 **Not a sequencer.** No per-chord lengths, rests, steps, swing, rhythm patterns or saving. If a progression needs any of those, it is a job for Sketchpad's Create mode or a DAW.
 
+### D-091 — J-6: the progression as a sheet, Sketchpad's, with the J-6 keys
+
+**Context.** The progression could be seen and heard, but not taken away. The owner wanted to play progressions themselves, at a piano, and asked for Sketchpad's export with its toggle.
+
+**Decision.** A **Sheet** card at the foot of Explore, hidden until shown, reuses Sketchpad's sheet (`D-057`): `sheetData` lays it out, `sheetAsText` writes it as text, the `Diagram` component draws the keys, and `PRINT_CSS` prints only the sheet. Its toggle is the same one, **suggested fingering** (`D-078`), off until ticked. The J-6 adds three things: each chord is drawn as the J-6's own voicing; the chord name keeps any slash bass; and every chord says where it is on the J-6 (set, KEY, key), on the sheet and at the end of the text. The sheet's scale is the one chosen to play along with (`D-092`), or the key's major scale. Nothing is new in the layout: if Sketchpad's sheet improves, so does this one.
+
+### D-092 — J-6: two or three scales to play over the progression
+
+**Context.** With the progression looping, the owner wanted to play notes over it on the piano, and asked to be offered "the scale we should play, like these two or three could work".
+
+**Decision.** The Piano card offers three scales for the key the progression is in:
+
+1. **The key's major scale.** Every note fits.
+2. **Its major pentatonic.** Five notes and nothing to avoid, the easiest place to start.
+3. **The relative minor's pentatonic.** The same five-note ease, darker and bluesier.
+
+Both pentatonics lie inside the major scale, so all three sit under every chord in the key, and a test says so. A chord outside the key is named ("over B♭7 some of these notes will clash"), rather than the offer pretending to cover it. Choosing a scale puts its dots on the piano and its tonic as the home dot. The piano now spans the whole progression and holds still while it plays, lighting the chord sounding, so a melody can be played over the loop without the keys moving. Tapping a scale again turns it off.
+
+**Not chosen: ranking every scale that fits.** Sketchpad's `fitScales` ranks ten scales, but over a diatonic progression its top answers are the same seven notes under different names (C major, D dorian, A minor…). That is more choice and no more information for someone who wants to play. Three fixed, different-sounding answers are the point.
+
+### D-093 — J-6: a misprinted key is named from its notes
+
+**Context.** A key marked **!** said that the manual's notes don't fit its chord name, but not what they are. The notes are what the J-6 plays if the manual is right about them, so they are worth naming.
+
+**Decision.** `nameFromNotes` names a voicing the way the validator reads a label (`D-080`): a root that sounds, every note in the chord, missing tones allowed. A root in the bass outweighs two missing tones, because the J-6 often leaves out the fifth but keeps the root at the bottom. Then the simpler chord wins, in Sketchpad's dictionary order. It names 54 of the 56 misprinted keys: set 18's "E" makes Em, set 80's "Db7sus" makes D♭9sus4, set 3's "D7#9" makes E♭7♯9. The Now card says "The printed notes make Em." Sketchpad's own `identifyChord` was tried first. It names only exact chords, which found 23 of the 56, because the J-6's four voices so often leave a tone out.
+
+**What building it found.** The page crashed on load, rendering nothing, because one new line used a value defined a few lines below it. This is the same class of bug as `D-063`, which gate G12 catches for Sketchpad's hooks. No unit test could see it; the headless run did. That run is still not a gate (`DONE.md`, exceptions).
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -781,6 +809,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-06 | J-6: turning Rec off no longer hides what was recorded; the numbers stay on the pads until Clear (`D-089`, amended). The "!" message now says plainly that it marks a misprint in the manual |
 | 2026-10-06 | J-6: the progression's × is no longer cut off, and pad names no longer are either: root above type, the type in lines of at most 7 characters, checked for every key, KEY and spelling (`D-089`) |
 | 2026-10-06 | J-6 progression playback: tempo 60–160 BPM, ½, 1 or 2 bars a chord, Loop, and a click with a one-bar count-in; Play/Stop, with the sounding chord highlighted in the progression and on its pad. Scheduled by Sketchpad's look-ahead scheduler; what each beat holds is a pure function. Not a sequencer (`D-090`) |
+| 2026-10-07 | J-6: the progression as Sketchpad's sheet, with suggested fingering and the J-6 keys for each chord (`D-091`); three scales offered to play over it, with the piano holding still under the loop (`D-092`); a misprinted key named from its notes (`D-093`). A crash on load from a value used before it was defined was caught by the headless run, not the tests |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

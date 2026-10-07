@@ -311,3 +311,52 @@ test("The click counts in one bar, then marks every beat with the first of each 
     [[0, "accent"], [null, "beat"], [1, "beat"], [null, "beat"], [2, "accent"]]);
   assert.deepEqual(pb.beatAt(0, 2, { bars: 1, loop: true, click: false }), { chord: 0, click: null, end: false });
 });
+
+/* ---------- naming a misprint, scales to play along, the sheet (D-091–D-093) ---------- */
+import * as sh from "../j6/sheet.mjs";
+const named = (set, key) => { const c = j.nameFromNotes(j.chordAt(set, j.KEYS.indexOf(key), 0).midi); return c && j.nameOf(c); };
+
+test("A misprinted key is named from the notes it prints", () => {
+  assert.equal(named(18, "E"), "Em");
+  assert.equal(named(80, "C#"), "D♭9sus4");
+  assert.equal(named(3, "D#"), "E♭7♯9");
+  assert.equal(j.nameFromNotes([48, 55]), null);
+});
+
+test("Two or three scales are offered to play over the progression", () => {
+  const { scales, outside } = j.scalesToPlay(["Cmaj7", "Em7", "Am7", "Fmaj7", "Bb7"].map(j.parseChord));
+  assert.deepEqual(scales.map((s) => `${j.FLAT_NAMES[s.tonic]} ${s.id}`), ["C major", "C major-pentatonic", "A minor-pentatonic"]);
+  const major = new Set(scales[0].notes);
+  for (const s of scales.slice(1)) assert.ok(s.notes.every((p) => major.has(p)), `${s.name} lies inside the major scale`);
+  assert.deepEqual(outside.map((c) => j.nameOf(c)), ["B♭7"]);
+  assert.deepEqual(j.scalesToPlay([]), { scales: [], outside: [] });
+});
+
+const kept = [0, 1, 7, 3].map((key) => ({ set: 54, key, t: 0 }));
+
+test("The progression can be taken away as a sheet, with the J-6 keys for each chord", () => {
+  const s = sh.j6Sheet(kept, { bpm: 100, bars: 1 });
+  assert.equal(s.title, "C major");
+  assert.ok(s.meta.includes("100 bpm") && s.meta.includes("each chord 1 bar"));
+  assert.deepEqual(s.chords.map((c) => [c.label, c.roman]), [["Cmaj7", "Imaj7"], ["Em7", "iii7"], ["Am7", "vi7"], ["Fmaj7", "IVmaj7"]]);
+  assert.deepEqual(s.chords[3].notes, j.chordAt(54, j.KEYS.indexOf("D#"), 0).midi, "the J-6's own voicing");
+  assert.deepEqual(s.j6.map((x) => x.where), ["set 54 · KEY 0 · key C", "set 54 · KEY 0 · key C♯", "set 54 · KEY 0 · key G", "set 54 · KEY 0 · key D♯"]);
+  assert.match(sh.j6SheetText(s), /On the J-6:\n1\. set 54 · KEY 0 · key C\n2\. set 54 · KEY 0 · key C♯/);
+  const moved = sh.j6Sheet([{ set: 47, key: j.KEYS.indexOf("A"), t: -3 }]);
+  assert.equal(moved.j6[0].where, "set 47 · KEY −3 · key A");
+});
+
+test("The sheet shows suggested fingering only when ticked", () => {
+  const off = sh.j6Sheet(kept);
+  assert.ok(off.chords.every((c) => c.fingers.length === 0) && off.bass.every((b) => b.finger === null));
+  const on = sh.j6Sheet(kept, { fingering: true });
+  assert.ok(on.chords.every((c) => c.fingers.length === c.notes.length));
+  assert.ok(on.bass.every((b) => b.finger === 5));
+});
+
+test("The sheet's scale is the one chosen to play along with", () => {
+  const s = sh.j6Sheet(kept, { scale: { tonic: 9, id: "minor-pentatonic" } });
+  assert.equal(s.scale.name, "A Minor pentatonic");
+  assert.deepEqual(s.scale.names, ["A", "C", "D", "E", "G"]);
+  assert.equal(sh.j6Sheet(kept).scale.name, "C Major");
+});

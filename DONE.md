@@ -97,17 +97,17 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
 | Generated module current | always | rebuilt before every run | G0 |
-| Automated checks passing | 100% | 447/447 | G1 |
+| Automated checks passing | 100% | 452/452 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
-| Mutation score | ≥ 90% | 197/197 (100%) | G2 |
+| Mutation score | ≥ 90% | 203/203 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
-| Requirements with a real scenario | 100% | 387/387 | G4 |
-| Requirements traced to a decision or use case | 100% | 387/387 | G5 |
+| Requirements with a real scenario | 100% | 394/394 | G4 |
+| Requirements traced to a decision or use case | 100% | 394/394 | G5 |
 | Every requirement row readable by the gates | 100% | enforced | G14 |
 | Manual share of scenarios | < 40% | about 20% | traceability |
 | Impure references in the theory layer | 0 | 0 | G7 |
 | Stray colour literals | 0 | 0, allow-list empty | G8 |
-| Decisions never cited downstream | 0 | 0 (66 headed, 88 in all) | G10 |
+| Decisions never cited downstream | 0 | 0 (69 headed, 91 in all) | G10 |
 | Decisions cited but never written | 0 | 0, enforced by G13 |
 | Hooks naming later definitions | 0 | 0 (16 callbacks) | G12 |
 
@@ -146,7 +146,7 @@ Record it in the table below with a date, the gate, the reason, and what would h
 | 2026-09-05 | DoD-19 | ~~`R-120` rests on review~~ **Closed same day.** `check-done` G8 now enforces it with an empty allow-list | — | Closed |
 | 2026-09-05 | DoD-19 | ~~`R-132` (no ambient randomness) rests on review~~ **Closed:** `check-done` G7 already rejects `Math.random` in the theory layer | — | Closed |
 | 2026-09-05 | DoD-19 | `R-121` (a visual role is added to the token set before it is used) rests on review | Lintable, but the check would need to read the component layer | A static check reads the fill roles and confirms each has a treatment |
-| 2026-09-23 | DoD-22 (the shell) | The Learn tab's shell behaviour was checked headless (21 checks in Chromium) but that run is not yet a gate, so a shell regression would not fail the build | It needs esbuild, React, Tone and Playwright, which the project does not install | The headless run is added to `tools/` and `check-done` as a gate |
+| 2026-09-23 | DoD-22 (the shell) | The Learn tab's shell behaviour was checked headless (21 checks in Chromium) but that run is not yet a gate, so a shell regression would not fail the build. *2026-10-07:* the J-6 page has been checked the same way at every change, and that run, not the suite, caught a crash on load (`D-093`) and 87 keys too wide for a phone (`D-089`). The case for making it a gate grows | It needs esbuild, React, Tone and Playwright, which the project does not install | The headless run is added to `tools/` and `check-done` as a gate |
 | 2026-09-05 | DoD-13 | No mutants for the mute toggle, key colours, note durations, instrument presets or the piano's scroll and hold | The mutator operates on the theory layer; those changes live in the audio and view layers, which it cannot reach | Either the mutator is extended to the view layer, or these stay covered by manual scenarios only |
 
 ---

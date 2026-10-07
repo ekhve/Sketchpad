@@ -8,10 +8,11 @@
    The layout follows the agreed screens, proto/j6/explore.svg and find.svg. */
 import React, { useState, useMemo, useCallback, useEffect, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { T, Piano, useInstrument, spelling, scalePcs, pc, barsToSchedule } from "../sketchpad.jsx";
+import { T, Piano, Diagram, PRINT_CSS, useInstrument, spelling, scalePcs, pc, barsToSchedule } from "../sketchpad.jsx";
 import * as j from "./j6.mjs";
 import * as pr from "./progression.mjs";
 import * as pb from "./playback.mjs";
+import { j6Sheet, j6SheetText } from "./sheet.mjs";
 
 /* ============================================================================
    DESIGN TOKENS — Sketchpad's Bone palette plus the roles the J-6 needs.
@@ -199,7 +200,7 @@ function Panel({ set, t, children, onSet, onPick, onKey, rec, onRec }) {
    ========================================================================== */
 /* A tap plays and shows; "+ Add" keeps; Rec keeps every tap. The progression
    lives in J6App, so Find can add to it too. (D-089) */
-function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }) {
+function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts, along, setAlong }) {
   const [showPiano, setShowPiano] = useState(true);
   const [held, setHeld] = useState([]);
 
@@ -282,12 +283,22 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }
   };
   const where = (x) => `${x.set === set && x.t === t ? "" : `set ${x.set}${x.t ? ` · KEY ${signed(x.t)}` : ""} · `}key ${KEY_NAMES[x.key]}`;
 
-  const lo = latest ? Math.min(...latest.midi) : 48;
-  const hi = latest ? Math.max(...latest.midi) : 72;
+  /* The piano spans the whole progression and the chord on screen, so it holds still while
+     the progression plays under a melody (D-092). */
+  const span = [...chords.flatMap((c) => c.midi), ...(latest ? latest.midi : [])];
+  const lo = span.length ? Math.min(...span) : 48;
+  const hi = span.length ? Math.max(...span) : 72;
+  const lit = sounding !== null && chords[sounding] ? chords[sounding] : latest;
+  const offer = j.scalesToPlay(pr.keyFocus(state).map(pr.resolve).map((c) => c.chord));
+  const [sheetOn, setSheetOn] = useState(false);
+  const [fingers, setFingers] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const sheet = sheetOn && chords.length ? j6Sheet(state.items, { bpm: opts.bpm, bars: opts.bars, scale: along, fingering: fingers }) : null;
   const start = Math.floor(lo / 12) * 12;
   const octaves = Math.max(2, Math.ceil((hi - start + 1) / 12));
   const notes = latest?.chord ? latest.chord.iv : [];
   const latestBad = latest && flagged(state.current.set, state.current.key);
+  const misread = latestBad && j.nameFromNotes(latest.midi);   // what the printed notes make (D-093)
 
   return (
     <>
@@ -338,7 +349,7 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }
             )}
             {latestBad && (
               <p role="alert" style={{ marginTop: 10, background: J.warnGround, color: J.warn, borderRadius: 8, padding: "6px 10px", fontSize: 12.5 }}>
-                Misprint in the manual: the notes it lists for this key don't fit "{latest.label}" ({latestBad.problems.join("; ")}). You hear and see the notes as printed; Find won't suggest this key.
+                Misprint in the manual: the notes it lists for this key don't fit "{latest.label}" ({latestBad.problems.join("; ")}). {misread ? ` The printed notes make ${j.nameInKey(misread, tonic)}.` : ""} You hear and see the notes as printed; Find won't suggest this key.
               </p>
             )}
           </>
@@ -347,13 +358,40 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }
 
       <Card style={{ paddingBottom: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Label>Piano</Label>
+          <Label>Piano · play along</Label>
           <span style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12.5, color: J.inkSoft }}>Show <Toggle on={showPiano} onChange={setShowPiano} label="show the piano" /></span>
         </div>
+        {/* scales to play a melody with over the progression (D-092) */}
+        {offer.scales.length > 0 && (
+          <div style={{ margin: "6px 0 10px" }}>
+            <div style={{ fontSize: 12.5, color: J.inkSoft, marginBottom: 6 }}>Scales that work over {state.items.length ? "the progression" : "this chord"}:</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {offer.scales.map((s) => {
+                const on = along && along.tonic === s.tonic && along.id === s.id;
+                return (
+                  <button key={s.id} onClick={() => setAlong(on ? null : { tonic: s.tonic, id: s.id })} aria-pressed={Boolean(on)}
+                    style={{ border: 0, borderRadius: 12, padding: "6px 10px", textAlign: "left", maxWidth: 200,
+                      background: on ? J.chipStrong : J.chip, color: J.ink, boxShadow: on ? `0 0 0 2px ${J.ink}` : "none" }}>
+                    <div style={{ fontSize: 13, fontWeight: 800 }}>{spelling("letters", s.tonic).names[s.tonic]} {s.name.toLowerCase()}</div>
+                    <div style={{ fontSize: 11 }}>{s.notes.map((p) => spelling("letters", s.tonic).names[p]).join(" ")}</div>
+                    <div style={{ fontSize: 10.5, color: J.inkSoft }}>{s.mood}</div>
+                  </button>
+                );
+              })}
+            </div>
+            {offer.outside.length > 0 && (
+              <p style={{ fontSize: 12, color: J.inkSoft, margin: "6px 0 0" }}>
+                Over {offer.outside.map((c) => j.nameInKey(c, tonic)).join(", ")} some of these notes will clash: {offer.outside.length === 1 ? "it isn't" : "they aren't"} in the key.
+              </p>
+            )}
+            {along && <p style={{ fontSize: 12, color: J.inkSoft, margin: "6px 0 0" }}>Dots on the piano mark the scale; play over the progression while it loops.</p>}
+          </div>
+        )}
         {showPiano && (
-          <Piano startMidi={start} octaves={octaves} chordNotes={latest ? latest.midi : []}
-            chordRootMidi={latest?.chord ? latest.midi.find((m) => pc(m) === latest.chord.root) ?? -1 : -1}
-            loopNotes={[]} scaleSet={best ? scalePcs(tonic, "major") : []} tonic={tonic} sounding={held}
+          <Piano startMidi={start} octaves={octaves} chordNotes={lit ? lit.midi : []}
+            chordRootMidi={lit?.chord ? lit.midi.find((m) => pc(m) === lit.chord.root) ?? -1 : -1}
+            loopNotes={[]} scaleSet={along ? scalePcs(along.tonic, along.id) : best ? scalePcs(tonic, "major") : []}
+            tonic={along ? along.tonic : tonic} sounding={held}
             system={spelling("letters", tonic)}
             onDown={(m) => { setHeld((h) => [...h, m]); audio.holdOn(m); }}
             onUp={(m) => { setHeld((h) => h.filter((x) => x !== m)); audio.holdOff(m); }} />
@@ -430,6 +468,55 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts }
           ))}
           {!chords.length && <p style={{ fontSize: 13, color: J.inkSoft }}>Nothing kept yet. Tap a key, then + Add, or turn on Rec.</p>}
         </div>
+      </Card>
+
+      {/* Sketchpad's sheet (D-057), for taking the progression to a piano (D-091) */}
+      <Card>
+        <style>{PRINT_CSS}</style>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }} className="no-print">
+          <Label>Sheet</Label>
+          <span style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12.5, color: J.inkSoft }}>Show <Toggle on={sheetOn} onChange={setSheetOn} label="show the sheet" /></span>
+        </div>
+        {sheetOn && !sheet && <p style={{ fontSize: 13, color: J.inkSoft }}>Keep a few chords first: the sheet is the progression, written out to play at a piano.</p>}
+        {sheet && (
+          <>
+            <div className="no-print" style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", margin: "6px 0 10px" }}>
+              <Button dark onClick={() => window.print()}>Print</Button>
+              <Button onClick={() => { try { navigator.clipboard?.writeText(j6SheetText(sheet)); setCopied(true); } catch (e) {} }}>{copied ? "Copied" : "Copy as text"}</Button>
+              <span style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12.5, color: J.inkSoft, marginLeft: "auto" }}>
+                Suggested fingering <Toggle on={fingers} onChange={setFingers} label="show suggested fingering" />
+              </span>
+              <span style={{ fontSize: 11, color: J.inkSoft, width: "100%" }}>Print, or save as PDF from the print dialogue.</span>
+            </div>
+            <div id="sheet" style={{ background: J.paper, color: J.paperInk, borderRadius: 10, padding: 14, boxShadow: `inset 0 0 0 1px ${J.edge}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
+                <strong style={{ fontSize: 17 }}>{sheet.title}</strong>
+                <span style={{ fontSize: 11, color: J.paperFaint }}>{sheet.meta.join("  ·  ")}</span>
+              </div>
+              <div style={{ fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: J.paperFaint }}>Scale</div>
+              <Diagram startMidi={sheet.scale.start} octaves={2} notes={sheet.scale.notes} width={300} height={52} />
+              <div style={{ fontSize: 11, margin: "2px 0 12px" }}>{sheet.scale.name}: {sheet.scale.names.join("  ")}</div>
+              <div style={{ fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: J.paperFaint, marginBottom: 6 }}>Chords</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "12px 10px", marginBottom: 12 }}>
+                {sheet.chords.map((c, i) => (
+                  <div key={c.bar} style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
+                      <strong style={{ fontSize: 13 }}>{c.bar}. {c.label}</strong>
+                      <span style={{ fontSize: 10, color: J.paperFaint }}>{c.roman}</span>
+                    </div>
+                    <Diagram startMidi={sheet.range.startMidi} octaves={sheet.range.octaves} notes={c.notes} width={150} height={42} fingers={c.fingers} />
+                    <div style={{ fontSize: 10, color: J.paperLine }}>{c.names.join(" ")}</div>
+                    <div style={{ fontSize: 10, color: J.paperFaint }}>J-6 {sheet.j6[i].where}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: J.paperFaint }}>Bass</div>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 11 }}>
+                {sheet.bass.map((b) => <span key={b.bar}><strong>{b.bar}.</strong> {b.names.join(" ")}{b.finger ? ` (left hand ${b.finger})` : ""}</span>)}
+              </div>
+            </div>
+          </>
+        )}
       </Card>
     </>
   );
@@ -589,6 +676,7 @@ export default function J6App() {
   const [set, setSet] = useState(54);
   const [t, setT] = useState(0);
   const [opts, setOpts] = useState(pb.OPTIONS);
+  const [along, setAlong] = useState(null);           // the scale chosen to play over the progression (D-092)
   useEffect(() => { audio.setInstrument(sound); }, [sound]); // eslint-disable-line
   const stopAll = useCallback(() => audio.panic(), [audio]);
 
@@ -603,7 +691,7 @@ export default function J6App() {
       </header>
 
       {tab === "explore"
-        ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} opts={opts} setOpts={setOpts} />
+        ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} opts={opts} setOpts={setOpts} along={along} setAlong={setAlong} />
         : <Find audio={audio} dispatch={dispatch} />}
 
       <footer style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>

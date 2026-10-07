@@ -233,7 +233,19 @@ const J6_PLAYBACK_MUTANTS = [
   ["chords ring into the next",              "bars * BEATS_PER_BAR * beatSeconds(bpm) * 0.92", "bars * BEATS_PER_BAR * beatSeconds(bpm) * 1.2"],
 ].map(([name, from, to]) => [name, from, to, "j6/playback.mjs"]);
 
-const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS];
+/* Naming a misprint, scales to play along with, the sheet (D-091–D-093). */
+const J6_ALONG_MUTANTS = [
+  ["a misprint is named from any note, not the bass", "const score = (iv.length - rel.length) + (root === bass ? 0 : 2);", "const score = (iv.length - rel.length);"],
+  ["the relative minor is a third too high",  '[pc(t + 9), "minor-pentatonic"]', '[pc(t + 3), "minor-pentatonic"]'],
+  ["chords outside the key go unmentioned",   "outside: real.filter((c) => ![...pcsOf(c)].every((p) => major.has(p))),", "outside: [],"],
+].map(([name, from, to]) => [name, from, to, "j6/j6.mjs"]);
+const J6_SHEET_MUTANTS = [
+  ["the sheet ignores the fingering box",     "customScale: null, progression, bpm, system, fingering });", "customScale: null, progression, bpm, system, fingering: false });"],
+  ["the sheet ignores the chosen scale",      'scaleId: scale ? scale.id : "major",', 'scaleId: "major",'],
+  ["the sheet loses the KEY setting",         "where: `set ${k.set} · KEY ${signed(k.t)} · key ${KEY_NAMES[k.key]}`", "where: `set ${k.set} · KEY 0 · key ${KEY_NAMES[k.key]}`"],
+].map(([name, from, to]) => [name, from, to, "j6/sheet.mjs"]);
+
+const ALL = [...MUTANTS.map((m) => [...m, "tests/theory.mjs"]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

@@ -13,7 +13,7 @@ export const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
    layer, the block between THEORY:START and THEORY:END in sketchpad.jsx. Node
    reads it from the module extracted for the tests; the page build points this
    same import at sketchpad.jsx itself, so there is one copy of the theory. */
-import { pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, scalePcs, romanFor } from "../tests/theory.mjs";
+import { pc, NAMES, FLAT_NAMES, DICTIONARY, parseChordName, keyNames, scalePcs, romanFor, SCALES } from "../tests/theory.mjs";
 
 /* ---------- notes ---------- */
 const LETTER = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -115,6 +115,53 @@ export function chordAt(n, k, t = 0) {
     key: KEYS[k], label,
     chord: shift(labelOf(label), t),
     midi: voicing(notes).map((m) => m + t),
+  };
+}
+
+/* ---------- naming a voicing from its notes (D-093) ---------- */
+/** The chord a set of notes makes, read the way the validator reads a label (D-080): a root
+ *  that sounds, every note in the chord, missing tones allowed. A root in the bass counts
+ *  for two missing tones; then the simpler chord wins (Sketchpad's dictionary order).
+ *  → { root, quality, bass, iv } or null. For a misprinted key: what the printed notes make. */
+export function nameFromNotes(midi) {
+  const sorted = [...midi].sort((a, b) => a - b);
+  const got = [...new Set(sorted.map(pc))];
+  if (got.length < 3) return null;
+  const bass = pc(sorted[0]);
+  let best = null;
+  for (const root of got) {
+    const rel = got.map((p) => pc(p - root));
+    DICTIONARY.forEach((d, order) => {
+      const iv = [...new Set(d.iv.map(pc))];
+      if (!rel.every((x) => iv.includes(x))) return;
+      /* the J-6 often leaves out the fifth but keeps the root at the bottom, so a root in
+         the bass outweighs a missing tone */
+      const score = (iv.length - rel.length) + (root === bass ? 0 : 2);
+      if (!best || score < best.score || (score === best.score && order < best.order)) best = { score, order, root, quality: d.q, iv };
+    });
+  }
+  return best && { root: best.root, quality: best.quality, bass, iv: best.iv };
+}
+
+/* ---------- scales to play over the progression (D-092) ---------- */
+/** Two or three scales to play a melody with, over chords in a major key: the key's own
+ *  major scale (every note fits), its major pentatonic (five notes, nothing to avoid), and
+ *  the relative minor's pentatonic (the same five-note feel, darker and bluesier). Each
+ *  pentatonic lies inside the major scale, so all three sit under every chord in the key.
+ *  Chords outside the key are named, because over them some notes will clash. */
+export function scalesToPlay(chords) {
+  const real = chords.filter(Boolean);
+  const [key] = likelyKeys(real);
+  if (!key) return { scales: [], outside: [] };
+  const t = key.tonic;
+  const pick = [[t, "major"], [t, "major-pentatonic"], [pc(t + 9), "minor-pentatonic"]];
+  const major = new Set(scalePcs(t, "major"));
+  return {
+    scales: pick.map(([tonic, id]) => {
+      const s = SCALES.find((x) => x.id === id);
+      return { tonic, id, name: s.name, mood: s.mood, notes: scalePcs(tonic, id) };
+    }),
+    outside: real.filter((c) => ![...pcsOf(c)].every((p) => major.has(p))),
   };
 }
 

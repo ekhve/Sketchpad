@@ -560,6 +560,13 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-385 | With Loop on (to start) the progression repeats until stopped; with it off it plays once and stops. | D-090 | A | With Loop on the progression repeats, and with it off it plays once and stops |
 | R-386 | With the click on (off to start), one bar is counted in, then every beat clicks, the first of each bar stronger. | D-090 | A | The click counts in one bar, then marks every beat with the first of each bar stronger |
 | R-387 | While playing, the chord sounding is highlighted in the progression and on its pad; a tempo change takes effect from the next beat; Stop silences everything at once. | D-090 | M | Playing along with the J-6 at the app's tempo |
+| R-388 | A misprinted key is named from the notes it prints, the way a label is checked: root sounding, missing tones allowed, a root in the bass preferred. | D-093 | A | A misprinted key is named from the notes it prints |
+| R-389 | The key's major scale, its major pentatonic and the relative minor's pentatonic are offered to play over the progression; chords outside the key are named. | D-092 | A | Two or three scales are offered to play over the progression |
+| R-390 | With a scale chosen, the piano shows it, holds still and lights the chord sounding, and can be played while the progression loops. | D-092 | M | Playing along on the piano while the progression plays |
+| R-391 | The progression can be shown as Sketchpad's sheet, printed or copied as text, each chord in its J-6 voicing with its numeral and where it is on the J-6. | D-091, D-057 | A | The progression can be taken away as a sheet, with the J-6 keys for each chord |
+| R-392 | The sheet shows suggested fingering only when ticked. | D-091, D-078 | A | The sheet shows suggested fingering only when ticked |
+| R-393 | The sheet's scale is the one chosen to play along with, or the key's major scale. | D-091, D-092 | A | The sheet's scale is the one chosen to play along with |
+| R-394 | Printed, only the sheet appears, legible in black and white, with the J-6 keys listed. | D-091 | M | A printed J-6 sheet can be played from at a piano |
 | R-376 | Any kept chord can be taken out; undo takes off the last and clear empties the progression. | D-089 | A | A chord can be taken out of the progression, and undo and clear still work |
 | R-377 | The key is judged from the progression once it has chords, and from the chord on screen before that. | D-089 | A | The key follows the progression once it has chords, and the last key tapped before that |
 | R-378 | A kept chord keeps its own set and KEY, and plays from them. | D-089 | A | A progression can mix chord sets and KEY settings |

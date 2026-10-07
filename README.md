@@ -13,7 +13,7 @@ built into one self-contained HTML page, installable to the home screen.
 | `FEATURES.md`, `PLAYTEST.md`, `DONE.md` | Status, the manual test script, the definition of done |
 | `tests/`, `tools/` | Tests, mutation testing, the DoD gates, the build |
 | `site/`, `proto/` | App icons; prototypes agreed before building |
-| `j6/` | The **J-6 Explorer**, a second app for the Roland J-6: `j6.mjs` (engine, search), `sets.mjs` (the 100 chord sets, imported by `tools/j6-import.mjs`), `labels.mjs` (reads the manual's chord labels), `app.jsx` (the page). It shares Sketchpad's theory, piano and sound (`D-086`, `D-087`) |
+| `j6/` | The **J-6 Explorer**, a second app for the Roland J-6: `j6.mjs` (engine, search), `sets.mjs` (the 100 chord sets, imported by `tools/j6-import.mjs`), `labels.mjs` (reads the manual's chord labels), `progression.mjs`, `playback.mjs`, `sheet.mjs`, `app.jsx` (the page). It shares Sketchpad's theory, piano and sound (`D-086`, `D-087`) |
 
 # Running the tests
 
@@ -37,7 +37,7 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 | Suite | Checks | What it protects |
 |---|---|---|
 | `theory.test.mjs` | 402 | Scales, chords, analysis, figures, key roles, naming, lessons, typed chord names |
-| `j6.test.mjs` | 31 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
+| `j6.test.mjs` | 36 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
 | `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
 
@@ -48,13 +48,13 @@ legibility. Those cannot be asserted here and are checked by hand on a phone.
 
 Passing tests prove nothing until you've seen them fail. `tools/mutate.mjs`
 breaks the theory on purpose — one change at a time — and reports whether the
-suite noticed. **197 mutants, all killed.** Two of those mutants only die because
+suite noticed. **203 mutants, all killed.** Two of those mutants only die because
 of tests written specifically after an earlier run found them surviving.
 
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 447 automated checks, all passing.
+Current state: 452 automated checks, all passing.
 
 ## Before calling anything done
 

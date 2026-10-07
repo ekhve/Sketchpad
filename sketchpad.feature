@@ -3249,6 +3249,54 @@ Feature: J-6 Explore — what am I playing?
     Then the count-in gives me the tempo, the chord sounding is highlighted in the progression and on its pad
     And changing the tempo while it plays takes effect from the next beat, and Stop silences everything at once
 
+  @D-093 @UC-64 @auto
+  Scenario: A misprinted key is named from the notes it prints
+    Given set 18's E key, labelled E but printed E G B
+    Then its notes are named Em
+    And set 80's "Db7sus", printed with a 9th, is named D♭9sus4
+    And set 3's D♯ key, labelled "D7#9", is named E♭7♯9
+    And two notes alone are not named as a chord
+
+  @D-092 @UC-64 @auto
+  Scenario: Two or three scales are offered to play over the progression
+    Given the progression Cmaj7 Em7 Am7 Fmaj7 B♭7
+    Then C major, C major pentatonic and A minor pentatonic are offered, in that order
+    And both pentatonics lie inside C major
+    And B♭7 is named as the chord where some notes will clash
+    And with nothing kept, no scale is offered
+
+  @D-092 @UC-64 @manual
+  Scenario: Playing along on the piano while the progression plays
+    Given a progression playing, Loop on, and a scale chosen
+    Then the piano shows the scale's notes and lights the chord sounding
+    And I can play a melody on it over the progression without the loop stopping or jumping octave
+
+  @D-091 @UC-64 @auto
+  Scenario: The progression can be taken away as a sheet, with the J-6 keys for each chord
+    Given Cmaj7 Em7 Am7 Fmaj7 kept from set 54 at 100 BPM
+    Then the sheet is titled C major, says 100 bpm and each chord 1 bar
+    And each chord shows the J-6's own voicing and its numeral
+    And it lists where each chord is on the J-6: set 54, KEY 0, keys C, C♯, G, D♯
+    And as text it ends with the same list
+
+  @D-091 @UC-64 @auto
+  Scenario: The sheet shows suggested fingering only when ticked
+    Given the sheet for Cmaj7 Em7 Am7 Fmaj7
+    Then it has no finger numbers
+    When Show suggested fingering is ticked
+    Then each chord has right-hand numbers and each bass note a left-hand 5
+
+  @D-091 @D-092 @UC-64 @auto
+  Scenario: The sheet's scale is the one chosen to play along with
+    Given A minor pentatonic chosen to play along with
+    Then the sheet's scale is A minor pentatonic, A C D E G
+    And with no scale chosen it is the key's major scale
+
+  @D-091 @UC-64 @manual
+  Scenario: A printed J-6 sheet can be played from at a piano
+    Given the sheet printed, or saved as PDF from the print dialogue
+    Then only the sheet prints, legible in black and white, with the J-6 keys listed
+
   @D-089 @UC-64 @manual
   Scenario: Trying chords out never fills the progression by accident
     Given the phone next to the J-6, Rec off
