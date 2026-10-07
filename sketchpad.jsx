@@ -23,7 +23,7 @@ import { parseChordNames, TYPING_CHIPS, typedLabel } from "./core/symbols.mjs";
 import { dictionaryFor, voicingsFor, voiceLeading, arpeggio, smoothestVoicing } from "./core/voicing.mjs";
 import { GUIDE } from "./sketchpad/guide.mjs";
 import { LESSON_TOPICS, buildLesson, lessonsFor, practiceNote, practiceFeedback, practiceHint, hintMethod, chordShape, nextKeyRound } from "./sketchpad/lessons.mjs";
-import { activeChordFor, TAB_IDS, LEVELS, levelIndex, has, tabsAt } from "./sketchpad/model.mjs";
+import { namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, has, tabsAt } from "./sketchpad/model.mjs";
 
 /* ============================================================================
    AUDIO — one instrument behind an interface, always releasable. (D-009, D-017)
@@ -698,6 +698,7 @@ export default function App() {
   const [tension, setTension] = useState(0);
   const [level, setLevel] = useState("start");
   const [baseSystem, setSystem] = useState("letters");
+  const [accidentals, setAccidentals] = useState("sharps");   // D-097: sharps, or the way each key writes them
   const [chordText, setChordText] = useState("");   // D-077: chord names typed in the Progression tab
   /* D-078: finger numbers. null until chosen, so Learn can show the right hand
      by itself while everywhere else stays clean. */
@@ -706,7 +707,7 @@ export default function App() {
   const [sheetFingers, setSheetFingers] = useState(false);
   /* Names are spelled for the key: letters or Do-Re-Mi, with flats where the
      key uses them. Every `system` below is this spelling. (D-019, D-074) */
-  const system = useMemo(() => spelling(baseSystem, tonic, mode), [baseSystem, tonic, mode]);
+  const system = useMemo(() => namingFor({ base: baseSystem, accidentals, tonic, mode }), [baseSystem, accidentals, tonic, mode]);
   const [note, setNote] = useState(null);
   const [tab, setTab] = useState("chords");
   const [setId, setSetId] = useState(null);
@@ -1160,6 +1161,13 @@ export default function App() {
                 {baseSystem === "letters" ? "A B C" : "Do Re Mi"}
               </button>
             )}
+            {can("naming") && (
+              <button onClick={() => setAccidentals(accidentals === "sharps" ? "key" : "sharps")}
+                title={accidentals === "sharps" ? "Every black key is a sharp" : "Each key spelled the way it is written: E♭ in C minor"}
+                className="text-xs px-2 py-1 rounded" style={{ background: T.raised, color: T.ink }}>
+                {accidentals === "sharps" ? "♯" : "♯/♭"}
+              </button>
+            )}
             <div className="flex rounded-md overflow-hidden" style={{ background: T.raised }}>
               {LEVELS.map((l) => (
                 <button key={l.id} onClick={() => { setLevel(l.id); if (!tabsAt(l.id).includes(tab)) setTab("chords"); }}
@@ -1178,7 +1186,7 @@ export default function App() {
               style={{ background: i === tonic ? T.homeDot : T.raised, color: i === tonic ? T.keyWhite : T.ink, fontWeight: i === tonic ? 600 : 400 }}>
               {/* each key is labelled the way it is written in the current mode:
                   E♭ major, but D# minor */}
-              {noteName(i, spelling(baseSystem, i, mode))}
+              {noteName(i, namingFor({ base: baseSystem, accidentals, tonic: i, mode }))}
             </button>
           ))}
         </div>
@@ -1684,7 +1692,7 @@ export default function App() {
                 <div className="flex flex-col gap-1.5">
                   <button onClick={() => setTonic(nextKeyRound(tonic))}
                     className="w-full py-2 rounded-md text-sm font-semibold" style={{ background: T.homeDot, color: T.keyWhite }}>
-                    Again in {noteName(nextKeyRound(tonic), spelling(baseSystem, nextKeyRound(tonic), mode))} — one step round the circle of fifths
+                    Again in {noteName(nextKeyRound(tonic), namingFor({ base: baseSystem, accidentals, tonic: nextKeyRound(tonic), mode }))} — one step round the circle of fifths
                   </button>
                   {lessonNow.loop && (
                     <button onClick={() => { addAll(lessonNow.loop); setTab("prog"); }}
@@ -1963,7 +1971,7 @@ export default function App() {
                         <button key={i} onClick={() => { setTonic(k.tonic); setMode(k.mode); }}
                           className="px-2.5 py-1.5 rounded-md text-xs"
                           style={{ background: k.tonic === tonic && k.mode === mode ? T.homeDot : T.raised, color: k.tonic === tonic && k.mode === mode ? T.keyWhite : T.ink }}>
-                          {noteName(k.tonic, spelling(baseSystem, k.tonic, k.mode))} {k.mode}
+                          {noteName(k.tonic, namingFor({ base: baseSystem, accidentals, tonic: k.tonic, mode: k.mode }))} {k.mode}
                         </button>
                       ))}
                     </div>

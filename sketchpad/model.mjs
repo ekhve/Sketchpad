@@ -1,9 +1,20 @@
 /* sketchpad/model — What the Sketchpad shell shows: the levels and the features each adds, which tabs exist at each level, and which chord is active when none is selected.
-   Layer 0. Depends on: nothing. Pure: no React, no Tone, no DOM, no dates, no randomness.
+   Layer 1. Depends on: core/notes. Pure: no React, no Tone, no DOM, no dates, no randomness.
    Interface, behaviour and requirements: sketchpad/MODULES.md (model).
-   Moved verbatim from the THEORY block of sketchpad.jsx (D-096); behaviour unchanged. */
+   Moved from the THEORY block of sketchpad.jsx (D-096); namingFor added (D-097).
+   Everything else is unchanged. */
+
+import { spelling } from "../core/notes.mjs";
 
 
+
+
+/* How notes are written in Sketchpad: sharps (the default) or the way the key
+   writes them. The plain systems spell every black key as a sharp, so "sharps"
+   is the base system unchanged. (D-097, D-019, D-074) */
+function namingFor({ base = "letters", accidentals = "sharps", tonic = 0, mode = "major" } = {}) {
+  return accidentals === "key" ? spelling(base, tonic, mode) : base;
+}
 
 /* Which chord should the Bass and Theory tabs describe? (D-039)
 
@@ -79,4 +90,4 @@ function tabsAt(levelId) {
    is wrong. These are the features UC-00 actually needs. (D-058) */
 const UC00_NEEDS = ["key", "piano", "sound", "chords", "scales", "loop", "explain"];
 
-export { activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS };
+export { namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS };

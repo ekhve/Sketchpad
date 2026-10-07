@@ -13,7 +13,7 @@ import * as sketchpad from "../sketchpad/index.mjs";
 /* Everything the app's theory offers, from the modules that now hold it (D-096). */
 const th = { ...core, ...sketchpad };
 
-const { pc, noteName, chordLabel, scalePcs, harmonize, explainChord, fitScales, keyRole, keyMarker, SCALES, scaleById } = th;
+const { baseOf, pc, noteName, chordLabel, scalePcs, harmonize, explainChord, fitScales, keyRole, keyMarker, SCALES, scaleById } = th;
 
 /* helpers ---------------------------------------------------------------- */
 const WHITE_PCS_TEST = [0, 2, 4, 5, 7, 9, 11];
@@ -3786,5 +3786,44 @@ describe("Feature: Finger numbers", () => {
     assert.ok(on.bass.every((b) => b.finger === 5), "the left hand's little finger on each bass note");
     assert.match(sheetAsText(on), /fingers 1-3-5/);
     assert.match(sheetAsText(on), /\(L5\)/);
+  });
+});
+
+
+describe("Feature: Sharps, or the key's own spelling", () => {
+  const { namingFor, keyNames } = th;
+  const scaleIn = (tonic, mode, sys) => scalePcs(tonic, mode === "minor" ? "natural-minor" : "major").map((p) => noteName(p, sys)).join(" ");
+
+  test("Sharps are the default spelling", () => {
+    const sys = namingFor({ tonic: PC["D#"], mode: "major" });
+    assert.equal(sys, "letters");
+    assert.equal(noteName(PC["D#"], sys), "D#");
+    assert.equal(scaleIn(PC["D#"], "major", sys), "D# F G G# A# C D");
+    for (let t = 0; t < 12; t++) for (const mode of ["major", "minor"]) {
+      const n = namingFor({ tonic: t, mode });
+      for (let p = 0; p < 12; p++) assert.ok(!noteName(p, n).includes("♭"), `${t} ${mode} ${p}`);
+    }
+    assert.equal(namingFor(), "letters", "with nothing said, letters and sharps");
+    assert.equal(namingFor({ base: "solfege" }), "solfege");
+  });
+
+  test("The key's own spelling can be chosen", () => {
+    const sys = namingFor({ accidentals: "key", tonic: PC["D#"], mode: "major" });
+    assert.equal(noteName(PC["D#"], sys), "E♭");
+    assert.equal(scaleIn(PC["D#"], "major", sys), "E♭ F G A♭ B♭ C D");
+    assert.equal(scaleIn(PC.C, "minor", namingFor({ accidentals: "key", tonic: PC.C, mode: "minor" })), "C D E♭ F G A♭ B♭");
+  });
+
+  test("Accidentals change the names and nothing else", () => {
+    for (const base of ["letters", "solfege"]) for (let t = 0; t < 12; t++) for (const mode of ["major", "minor"]) {
+      const sharp = namingFor({ base, tonic: t, mode }), key = namingFor({ base, accidentals: "key", tonic: t, mode });
+      assert.equal(baseOf(sharp), base); assert.equal(baseOf(key), base, "Do-Re-Mi follows the same choice");
+      for (let p = 0; p < 12; p++) {
+        const a = noteName(p, sharp), b = noteName(p, key);
+        // the same pitch either way: a sharp name and a flat name for one key differ by at most the accidental
+        if (a !== b) assert.ok(a.includes("#") && b.includes("♭"), `${base} ${t} ${mode} ${p}: ${a} / ${b}`);
+      }
+    }
+    assert.equal(th.chordLabel(PC["D#"], "m7", namingFor({ tonic: PC["D#"], mode: "major" })), "D#m7");
   });
 });

@@ -22,11 +22,11 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 
 ## sketchpad/model
 
-**Layer** 0 · **Depends on** nothing · **Used by** sketchpad
+**Layer** 1 · **Depends on** core/notes · **Used by** sketchpad
 
 **Purpose.** Sketchpad's feature levels and tabs: which features a level unlocks, which tabs it shows, and which chord is the one in focus.
 
-**Behaviour.** Three levels (Start, Produce, Study) each add features to the one before, so nothing a user has found ever moves or disappears; tabs follow from features, in a fixed order. `UC00_NEEDS` lists what the main scenario needs, which the Start level must cover. When no chord is selected, `activeChordFor` falls back to the one playing, then the first of the loop, then the home chord. Product-specific, so it lives with the product (CD-001); it traces to D-058 and D-039.
+**Behaviour.** Three levels (Start, Produce, Study) each add features to the one before, so nothing a user has found ever moves or disappears; tabs follow from features, in a fixed order. `UC00_NEEDS` lists what the main scenario needs, which the Start level must cover. `namingFor` chooses the naming system from the base system and the *accidentals* setting: sharps (the owner's choice, and the default) leaves the plain system, which spells every black key as a sharp; "key" gives the key's own spelling (`core/notes`). Lessons ignore it and always spell for their own key, because they teach what a score shows (D-074). When no chord is selected, `activeChordFor` falls back to the one playing, then the first of the loop, then the home chord. Product-specific, so it lives with the product (CD-001); it traces to D-058 and D-039.
 
 **Requirements.** Product-level: the decisions cited in the module's header, and the requirements in the product's `REQUIREMENTS.md` that cite them. Verified by the product's tests (`tests/theory.test.mjs`, `tests/traceability.test.mjs`) and by mutation (`tools/mutate.mjs`).
 
@@ -42,6 +42,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 | `featuresAt` | function | `(levelId)` | Every feature available at a level and below. |
 | `has` | function | `(levelId, feature)` | Whether a level has a feature. |
 | `levelIndex` | function | `(id)` | A level's position, 0 for an unknown id. |
+| `namingFor` | function | `({ base = "letters", accidentals = "sharps", tonic = 0, mode = "major" } = {})` | How notes are written: sharps (the default) or each key's own spelling; Do-Re-Mi follows the same choice (D-097). |
 | `tabsAt` | function | `(levelId)` | The tabs a level shows, in a fixed order. |
 
 ## sketchpad/lessons

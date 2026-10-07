@@ -8,7 +8,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/notes
 
-**Layer** 0 · **Depends on** nothing · **Used by** core/bass, core/chords, core/chordsets, core/explain, core/figures, core/fingering, core/harmony, core/keyboard, core/melody, core/scales, core/sheet, core/symbols, core/voicing, j6, sketchpad, sketchpad/lessons
+**Layer** 0 · **Depends on** nothing · **Used by** core/bass, core/chords, core/chordsets, core/explain, core/figures, core/fingering, core/harmony, core/keyboard, core/melody, core/scales, core/sheet, core/symbols, core/voicing, j6, sketchpad, sketchpad/lessons, sketchpad/model
 
 **Purpose.** Names for the twelve pitch classes and the arithmetic that goes with them: wrapping any note into one octave, which keys are white, and how a key spells its notes. Everything else in the asset base builds on it.
 

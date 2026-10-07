@@ -758,6 +758,15 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Consequence.** A new app, or a new idea such as a MIDI writer or a melody generator, starts from tested parts with documented interfaces. A change to an asset is checked once, where it lives, and every product benefits.
 
+
+### D-097 — Sharps by default, with the key's own spelling as a choice
+
+**Context.** `D-074` made Sketchpad spell every key the way a score does, so the key buttons read C D♭ D E♭ E F F♯ G A♭ A B♭ B: five flats and one sharp. The owner wanted to work in sharps and had not been asked; the spelling arrived with the original app and was never offered as a choice.
+
+**Decision.** A setting, **♯ / ♯♭** beside the naming button, decides it. **Sharps** is the default: every black key is a sharp, which is the plain naming system and what `D-006` and `D-019` described. **♯/♭** gives the key's own spelling of `D-074`. It applies to the key buttons, chord names, explanations and Find. `namingFor` in `sketchpad/model.mjs` is the one place that decides. *Lessons are not affected:* each is spelled for its own key, because a lesson teaches what a score will show (`D-074`), and a lesson that said D# for the third of B would be teaching the wrong name. The J-6 Explorer is not affected either; it spells by musician's rule (`D-079`).
+
+**Consequence.** The `D-074` machinery stays, tested and available, and is no longer imposed. If lessons should follow the setting too, that is a one-line change and a different decision.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -860,6 +869,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | J-6 manual read (KEY, chord sets, menus): the panel names the key a set plays in at the current KEY, with its relative minor; I, IV, V and vi are marked on the pads; KEY is labelled as a transposition; Find's steps are the manual's (`D-094`, `D-081` updated). Fixed: a tied key was broken from C rather than from the first chord, so it didn't move with KEY |
 | 2026-10-07 | J-6 panel compacted after the owner's photo of the hardware: the set display is the size of the J-6's own four digits, and the set's key has a line of its own. The photo confirms KEY is the A key's second function and the 8th white key a high C (`D-094`, `D-083`) |
 | 2026-10-07 | **Reusable assets.** The theory moves out of `sketchpad.jsx` into `core/` (18 modules) and `sketchpad/` (3), each with requirements, interface, decisions and tests of its own; both apps import them (`D-096`). `D-020` and `D-032` replaced; the extraction is gone. New gates C1–C4 and a G0 for a single copy; the checks are shown to catch a planted fault. Behaviour is unchanged, shown by identical results, screen transcripts and build sizes |
+| 2026-10-07 | Sharps are Sketchpad's default spelling again, with the key's own spelling as a setting beside the naming button; lessons keep spelling for their own key (`D-097`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

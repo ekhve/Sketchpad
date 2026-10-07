@@ -601,6 +601,14 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-404 | Each architecture and traceability check is shown to fail when a fault is planted. | D-096 | A | *(`core/tests/architecture.test.mjs`)* |
 | R-405 | Moving the theory out of the app changed no behaviour: the same checks pass, scripted runs of both apps give identical screen transcripts, and the builds are the same size. | D-096 | I | `D-096`, recorded once; `tools/smoke.mjs` reruns it |
 
+## 10zb. Sharps or the key's spelling
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-406 | Sketchpad writes every black key as a sharp by default, in the key buttons, chord names and explanations. | D-097, D-019 | A | Sharps are the default spelling |
+| R-407 | The user can choose to have each key written the way it is on a score (E♭ in C minor); Do-Re-Mi follows the same choice. | D-097, D-074 | A | The key's own spelling can be chosen |
+| R-408 | The choice changes the names only: the same twelve pitches, the same chords and scales. Lessons keep spelling for their own key. | D-097, D-073 | A | Accidentals change the names and nothing else |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

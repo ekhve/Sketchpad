@@ -2708,6 +2708,28 @@ Feature: Notes are spelled the way the key writes them
     Then the key buttons, the piano labels, the chord names and the explanations all use flats
     And in G major everything uses sharps
 
+
+Feature: Sharps, or the key's own spelling
+  Sketchpad writes every black key as a sharp unless asked to write each key the
+  way a score would. The choice is the owner's: the key buttons read C# D D# …
+  and not D♭ E♭ … (D-097, D-019, D-074)
+
+  @D-097 @auto
+  Scenario: Sharps are the default spelling
+    Given the key of D# major and the default accidentals
+    Then the key is written D#, the scale reads D# F G G# A# C D, and no name has a flat
+
+  @D-097 @auto
+  Scenario: The key's own spelling can be chosen
+    Given the key of D# major and the accidentals set to the key's own
+    Then the key is written E♭, and the scale reads E♭ F G A♭ B♭ C D
+
+  @D-097 @auto
+  Scenario: Accidentals change the names and nothing else
+    Given any key, any mode and either naming system
+    Then the sharps spelling and the key's own spelling name the same twelve pitches
+    And Do-Re-Mi follows the same choice
+
 Feature: Feedback teaches a way of finding the note
   A wrong note is a chance to learn how to find the right one. The app says why
   it was wrong in terms you can reuse: count keys from the root, take every other

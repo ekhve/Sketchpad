@@ -32,6 +32,8 @@ const MUTANTS = [
   ["voices are never reaped",           'for (const v of voices) (v.until <= now ? expired : keep).push(v);', 'for (const v of voices) keep.push(v);'],
   ["the budget is ignored",             'return Math.max(0, Math.min(requested, max - liveCount));', 'return requested;'],
   ["voices are cut off before they finish", 'return Math.max(0.1, seconds) + release + margin;', 'return Math.max(0.1, seconds);'],
+  ["sharps stop being the default spelling", 'function namingFor({ base = "letters", accidentals = "sharps"', 'function namingFor({ base = "letters", accidentals = "key"'],
+  ["the sharps choice is ignored",      'return accidentals === "key" ? spelling(base, tonic, mode) : base;', 'return spelling(base, tonic, mode);'],
   ["tabs demand an explicit selection", 'if (progression.length) return progression[0];', ''],
   ["a playing bar is ignored",          'if (playingIndex >= 0 && progression[playingIndex]) return progression[playingIndex];', ''],
   ["echo leaks when switched off",      'if (!on) return { wet: 0, feedback: 0, time: 0.25 };', 'if (!on) return { wet: 0.2, feedback: 0.2, time: 0.25 };'],
