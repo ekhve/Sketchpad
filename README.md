@@ -53,7 +53,7 @@ legibility. Those cannot be asserted here and are checked by hand on a phone.
 
 Passing tests prove nothing until you've seen them fail. `tools/mutate.mjs`
 breaks the theory on purpose — one change at a time — and reports whether the
-suite noticed. **224 mutants, all killed.** Two of those mutants only die because
+suite noticed. **223 mutants, all killed.** Two of those mutants only die because
 of tests written specifically after an earlier run found them surviving.
 
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone

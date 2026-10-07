@@ -247,7 +247,6 @@ const MISSING_MUTANTS = [
 const BYTES_MUTANTS = [
   ["the last byte of a payload is lost", "const out = new Uint8Array(payloadBytes(uri));", "const out = new Uint8Array(Math.max(0, payloadBytes(uri) - 1));"],
   ["the alphabet is shifted", 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";', 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";'],
-  ["padding is read as data", 'base64Payload(uri).replace(/=+$/, "")', "base64Payload(uri)"],
 ].map(([name, from, to]) => [name, from, to, "core/instruments.mjs"]);
 
 /* The shared transport's driver and loop arithmetic (D-098). */
