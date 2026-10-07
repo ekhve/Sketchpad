@@ -706,6 +706,8 @@ export default function J6App() {
         <Button onClick={stopAll}>Stop sound</Button>
       </footer>
 
+      <p aria-label="sound status" style={{ fontSize: 11.5, color: J.inkSoft, marginTop: 8 }}>{audio.status} · {audio.detail}</p>
+
       {/* what only the hardware can confirm stays visible until it has (D-081, D-083) */}
       <p style={{ fontSize: 11.5, color: J.inkSoft, marginTop: 14, lineHeight: 1.45 }}>
         KEY is SHIFT + [A (KEY)] on the J-6: it transposes the keyboard. Not yet checked on a J-6: its range (the manual doesn't give one; the app assumes −6 to +5), that + goes up, and that the high C pad plays the C chord.

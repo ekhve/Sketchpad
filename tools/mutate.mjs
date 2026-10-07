@@ -243,6 +243,13 @@ const MISSING_MUTANTS = [
   ["a note outside the chord is allowed", "if (!rel.every((x) => tones.includes(x))) return;", "if (!rel.some((x) => tones.includes(x))) return;"],
 ].map(([name, from, to]) => [name, from, to, "core/chords.mjs"]);
 
+/* Decoding the embedded piano by hand (D-100). */
+const BYTES_MUTANTS = [
+  ["the last byte of a payload is lost", "const out = new Uint8Array(payloadBytes(uri));", "const out = new Uint8Array(Math.max(0, payloadBytes(uri) - 1));"],
+  ["the alphabet is shifted", 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";', 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";'],
+  ["padding is read as data", 'base64Payload(uri).replace(/=+$/, "")', "base64Payload(uri)"],
+].map(([name, from, to]) => [name, from, to, "core/instruments.mjs"]);
+
 /* The shared transport's driver and loop arithmetic (D-098). */
 const TRANSPORT_MUTANTS = [
   ["the first unit starts late",              "({ nextBarAt: now + lead, barIndex: 0 })", "({ nextBarAt: now + lead + 5, barIndex: 0 })"],
@@ -277,7 +284,7 @@ const J6_SHEET_MUTANTS = [
 const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
 const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
 
-const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...BYTES_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

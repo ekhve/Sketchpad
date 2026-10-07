@@ -3827,3 +3827,18 @@ describe("Feature: Sharps, or the key's own spelling", () => {
     assert.equal(th.chordLabel(PC["D#"], "m7", namingFor({ tonic: PC["D#"], mode: "major" })), "D#m7");
   });
 });
+
+
+describe("Feature: The first note is the piano, at once", () => {
+  const { PIANO_SAMPLES, payloadToBytes } = th;
+  test("An embedded recording is turned into the bytes it holds", () => {
+    assert.equal(Object.keys(PIANO_SAMPLES).length, 13);
+    for (const [name, uri] of Object.entries(PIANO_SAMPLES)) {
+      const want = Buffer.from(uri.slice(uri.indexOf(",") + 1), "base64");
+      const got = payloadToBytes(uri);
+      assert.ok(got instanceof Uint8Array); assert.equal(got.length, want.length, name);
+      assert.ok(Buffer.from(got).equals(want), `${name} decodes to the same bytes`);
+      assert.deepEqual([...got.slice(0, 3)], [0x49, 0x44, 0x33], `${name} starts with the ID3 tag of an mp3`);
+    }
+  });
+});

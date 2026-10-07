@@ -1,7 +1,7 @@
 /* core/instruments + core/piano-samples — unit tests, one per requirement in core/REQUIREMENTS.md (CR-INSTRUMENTS-nn, CR-PIANOSAMPLES-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
+import { payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
 import { PIANO_SAMPLES } from "../piano-samples.mjs";
 
 test("CR-PIANOSAMPLES-01 the built-in piano holds thirteen recordings, every six semitones from C1 to C7, each an embedded audio data URI", () => {
@@ -85,4 +85,16 @@ test("CR-INSTRUMENTS-09 an embedded audio payload is read back to its size witho
   assert.equal(payloadBytes("data:x;base64,QUJD"), 3); assert.equal(payloadBytes("data:x;base64,QUI="), 2); assert.equal(payloadBytes("data:x;base64,QQ=="), 1);
   assert.equal(payloadBytes("data:x;base64,"), 0); assert.equal(payloadBytes("junk"), 0);
   for (const [n, uri] of Object.entries(PIANO_SAMPLES)) assert.equal(payloadBytes(uri), Buffer.from(base64Payload(uri), "base64").length, n);
+});
+
+test("CR-INSTRUMENTS-10 payloadToBytes turns an embedded payload into the bytes it holds, whatever its padding, with no browser function", () => {
+  const bytes = (s) => [...payloadToBytes(`data:x;base64,${s}`)];
+  assert.deepEqual(bytes("QUJD"), [65, 66, 67]); assert.deepEqual(bytes("QUI="), [65, 66]); assert.deepEqual(bytes("QQ=="), [65]);
+  assert.deepEqual(bytes(""), []); assert.deepEqual([...payloadToBytes("junk")], []);
+  for (let n = 0; n < 40; n++) {
+    const raw = Buffer.from(Array.from({ length: n }, (_, i) => (i * 37 + n * 11) & 255));
+    assert.deepEqual(bytes(raw.toString("base64")), [...raw], `${n} bytes`);
+  }
+  assert.deepEqual(bytes("+/+/"), [0xfb, 0xff, 0xbf], "the last two characters of the alphabet");
+  assert.equal(payloadToBytes(PIANO_SAMPLES.C4).length, payloadBytes(PIANO_SAMPLES.C4));
 });

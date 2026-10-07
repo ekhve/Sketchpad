@@ -132,7 +132,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Behaviour.** Five presets; each says how to build it (`kind`, `options`), how long it rings (`release`, which feeds the voice budget) and whether it wants echo. The keyboard's range is checked against the recordings' coverage: no note is farther than three semitones from one (CD-007 records why this check exists).
 
-**Requirements.** CR-INSTRUMENTS-01 … CR-INSTRUMENTS-09 (9) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
+**Requirements.** CR-INSTRUMENTS-01 … CR-INSTRUMENTS-10 (10) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
 
 ### Interface
 
@@ -147,6 +147,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `delaySettings` | function | `(instrumentId, on)` | Echo settings for an instrument, on or off. |
 | `instrumentById` | function | `(id)` | A preset by id, the first as fallback. |
 | `payloadBytes` | function | `(uri)` | The size of an embedded payload, without decoding it. |
+| `payloadToBytes` | function | `(uri)` | An embedded payload as the bytes it holds, ready for the audio decoder. |
 | `reverbSettings` | function | `(spaceId)` | Reverb settings for a space. |
 | `sampleAnchors` | function | `(samples = PIANO_SAMPLES)` | The notes the recordings are at, ascending. |
 | `sampleMidi` | function | `(name)` | A recording's note name as a MIDI number. |

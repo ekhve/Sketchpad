@@ -787,6 +787,17 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Consequence.** The ranking rule lives once, in `core/chords`, with its tests (`CR-CHORDS-13` to `15`) and four mutants. Sketchpad's Find tab could now offer "part of a chord" readings as well; that is a feature, not done here.
 
+
+### D-100 — The audio is made ready at load, so the first note is the piano and on time
+
+**Context.** The owner heard it in both apps: the first note after opening is late, and does not sound like the piano. Reproduced headless: touching a chord for the first time showed the sound line read "running · preparing Grand piano…" for the better part of a quarter of a second on a fast machine, and a phone is several times slower. The cause was the order of work. Nothing was prepared until the first touch; then that touch had to start the audio, build the effects chain, decode thirteen recordings *one after another*, and in the meantime play the note through the stand-in (`D-064`), which itself builds a pool of 24 synths on first use.
+
+**Decision.** Everything that does not need a touch is done at load. `useInstrument` builds the audio graph and starts decoding the piano as soon as the page mounts (a suspended audio context can be built and can decode; only *starting* it needs a touch). The recordings now decode in parallel, and the bytes come from a pure function in core (`payloadToBytes`) rather than a browser one. The first touch only starts the audio (`Tone.start()`). The stand-in remains as the safety net for a touch that beats the decoding, and for a network or browser that cannot decode. Both apps share the hook, so both change; the J-6 page also gains a small sound-status line, which Sketchpad already had, so a late or stand-in sound can be diagnosed on a phone.
+
+**Checked.** Headless, with the page open for 2.5 s and then with a touch at once after load: the sound line reads "running · Grand piano" from the first touch (73 ms in the first case) in both apps; before the change Sketchpad passed through "preparing Grand piano…". `tools/startup-check.mjs` repeats it. A unit test checks the byte conversion against Node's own decoder on all thirteen recordings, and three mutants cover it. **What no test here can hear:** whether the note feels on time on a phone. That is a manual scenario, and the first line of Part 3 in `PLAYTEST.md`.
+
+**Not changed.** The fallback voices (`D-064`) and the voice pool (`D-066`) are as they were.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -893,6 +904,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | One transport for both apps (`core/transport`): the J-6's playback model plus the look-ahead loop both apps wrote by hand, as a driver over an injected clock and timer, tested with a fake one (`D-098`) |
 | 2026-10-07 | One function names notes as a chord: `identifyChord` with a `missing` mode replaces the J-6's own `nameFromNotes` rule; the J-6 names exactly what it did (`D-099`) |
 | 2026-10-07 | Cleanups: the flat 9, sharp 9 and sharp 11 have degree names (a formula reads …♭7 – ♭9, not 13); Sketchpad's own modules (levels and tabs, guide, lessons) have unit tests and requirements of their own (`SR-` ids, `sketchpad/REQUIREMENTS.md`), held by the same checks as core's |
+| 2026-10-07 | The first note of both apps is the piano and on time: the audio graph is built and the piano decoded at load, in parallel, and the first touch only starts the audio. Reproduced and re-measured headless; the J-6 shows the sound status (`D-100`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

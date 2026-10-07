@@ -180,4 +180,20 @@ function payloadBytes(uri) {
   return Math.max(0, Math.floor(b64.length * 3 / 4) - padding);
 }
 
-export { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };
+/* The recording's bytes, ready to hand to the audio decoder. Done here, by hand,
+   so it needs no browser function and can be checked against a known decoder.
+   Decoding the audio itself stays with the app. (D-070, D-100) */
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function payloadToBytes(uri) {
+  const b64 = base64Payload(uri).replace(/=+$/, "");
+  const out = new Uint8Array(payloadBytes(uri));
+  let bits = 0, acc = 0, n = 0;
+  for (const ch of b64) {
+    acc = (acc << 6) | B64.indexOf(ch);
+    bits += 6;
+    if (bits >= 8) { bits -= 8; out[n++] = (acc >> bits) & 0xff; }
+  }
+  return out;
+}
+
+export { payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };

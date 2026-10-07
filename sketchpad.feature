@@ -2341,6 +2341,25 @@ Feature: Recorded sound is optional, not assumed
     Then the app still opens with a working instrument
     And the grand piano is offered but not assumed
 
+
+Feature: The first note is the piano, at once
+  The audio is built and the piano is decoded while the page loads; only starting
+  the audio waits for a touch, because the browser insists on one. Doing it all on
+  the first touch made that note late and played it through a stand-in. (D-100)
+
+  @D-100 @auto
+  Scenario: An embedded recording is turned into the bytes it holds
+    Given any of the piano's thirteen embedded recordings
+    Then it becomes exactly the bytes a standard decoder reads from it
+
+  @D-100 @manual
+  Scenario: The first note after opening is the piano and is not late
+    Given the app has just opened, in either app, on a phone
+    When I touch a key or a chord for the first time
+    Then it sounds at once
+    And it sounds like the piano, not like the stand-in
+    And the sound line reads "running · Grand piano" and never "preparing"
+
 Feature: Rolling a chord
   Six notes struck together are one sound. Spread them slightly and every note
   is audible, while the chord still arrives as a chord.

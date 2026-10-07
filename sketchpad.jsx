@@ -11,7 +11,7 @@ import { explainChord, explainProgression, describeChange } from "./core/explain
 import { rng, STYLES, patternsFor, place, renderProgressionFigure, explainFigure, planBar } from "./core/figures.mjs";
 import { HAND_REACH, DEFAULT_REACH, FINGER_HANDS, effectiveFingerHand, FINGER_COPY, fingerChord, stepFingering, litLessonFingers } from "./core/fingering.mjs";
 import { harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, chordsAtTension } from "./core/harmony.mjs";
-import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings } from "./core/instruments.mjs";
+import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, SPACES, reverbSettings } from "./core/instruments.mjs";
 import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyAtPosition } from "./core/keyboard.mjs";
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
@@ -40,6 +40,7 @@ function useInstrument() {
   const [detail, setDetail] = useState("not started");
   const [voiceCount, setVoiceCount] = useState(0);
   const muted = useRef(false);
+  const started = useRef(false);       // has the browser let the audio start? (it needs a touch first)
 
   const refresh = useCallback(() => {
     try { setStatus(Tone.getContext().state === "running" ? "running" : "suspended"); }
@@ -71,35 +72,9 @@ function useInstrument() {
     setVoiceCount(keep.length);
   }, []);
 
-  const init = useCallback(async () => {
-    if (ref.current) { await resume(); return; }
-    /* An instrument should sound with the iPhone's silent switch on, as
-       GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
-       property does not exist and nothing changes. (D-076) */
-    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
-    try { await Tone.start(); }
-    catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
-    try {
-      /* One delay in the chain, always present, wet at zero when off. Adding
-         and removing a node while notes are in flight is a good way to lose
-         them; changing one number is not. (D-041) */
-      /* voice → delay → reverb → out. Both always present, both at zero when
-         off, because swapping nodes while notes are in flight loses them. */
-      const reverb = new Tone.Reverb({ decay: 1.1, wet: 0 }).toDestination();
-      const delay = new Tone.FeedbackDelay({ delayTime: 0.28, feedback: 0, wet: 0 }).connect(reverb);
-      ref.current = { out: delay, delay, reverb, samplers: {} };
-      setReady(true);
-      setDetail(preset.current.name);
-      refresh();
-    } catch (e) {
-      try { ref.current = { out: Tone.getDestination(), delay: null, reverb: null, samplers: {} }; setReady(true); setDetail("no effects"); }
-      catch (e2) { setStatus("error"); setDetail(`audio failed: ${e.message}`); }
-    }
-  }, [resume, refresh]);
-
   useEffect(() => {
-    const onVisible = () => { if (document.visibilityState === "visible" && ref.current) resume(); };
-    const timer = setInterval(() => { if (ref.current) { reap(); refresh(); } }, 1000);
+    const onVisible = () => { if (document.visibilityState === "visible" && started.current) resume(); };
+    const timer = setInterval(() => { if (started.current) { reap(); refresh(); } }, 1000);
     document.addEventListener("visibilitychange", onVisible);
     return () => { document.removeEventListener("visibilitychange", onVisible); clearInterval(timer); };
   }, [resume, refresh, reap]);
@@ -120,15 +95,10 @@ function useInstrument() {
      restricts where requests may go blocks that as readily as any website —
      which is why the embedded piano still reported "did not arrive". (D-070) */
   const decodeSamples = useCallback(async (preset) => {
-    const out = {};
-    for (const [note, uri] of Object.entries(preset.samples.urls)) {
-      const b64 = uri.slice(uri.indexOf(",") + 1);
-      const bin = atob(b64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      out[note] = await Tone.getContext().decodeAudioData(bytes.buffer);
-    }
-    return out;
+    const ctx = Tone.getContext();
+    const entries = await Promise.all(Object.entries(preset.samples.urls).map(async ([note, uri]) =>
+      [note, await ctx.decodeAudioData(payloadToBytes(uri).buffer)]));
+    return Object.fromEntries(entries);
   }, []);
 
   const samplerFor = useCallback((preset) => {
@@ -168,6 +138,44 @@ function useInstrument() {
     setDetail(preset.current.name);
     if (preset.current.kind === "sampler" && ref.current) samplerFor(preset.current);
   }, [samplerFor]);
+
+  /* Everything that can be done before a finger touches the screen is done at
+     load: the audio graph is built and the piano is decoded, so the first note
+     is the piano, at once. Only starting the audio has to wait for a touch,
+     because the browser insists on it. Doing the lot on the first touch made
+     that note late, and played it through the stand-in while the recordings
+     were still being prepared. (D-100) */
+  const build = useCallback(() => {
+    if (ref.current) return;
+    /* An instrument should sound with the iPhone's silent switch on, as
+       GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
+       property does not exist and nothing changes. (D-076) */
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    try {
+      /* One delay in the chain, always present, wet at zero when off. Adding
+         and removing a node while notes are in flight is a good way to lose
+         them; changing one number is not. (D-041) voice → delay → reverb → out. */
+      const reverb = new Tone.Reverb({ decay: 1.1, wet: 0 }).toDestination();
+      const delay = new Tone.FeedbackDelay({ delayTime: 0.28, feedback: 0, wet: 0 }).connect(reverb);
+      ref.current = { out: delay, delay, reverb, samplers: {} };
+      setReady(true);
+      setDetail(preset.current.name);
+    } catch (e) {
+      try { ref.current = { out: Tone.getDestination(), delay: null, reverb: null, samplers: {} }; setReady(true); setDetail("no effects"); }
+      catch (e2) { setStatus("error"); setDetail(`audio failed: ${e.message}`); return; }
+    }
+    if (preset.current.kind === "sampler") samplerFor(preset.current);
+  }, [samplerFor]);
+
+  const init = useCallback(async () => {
+    if (started.current) { await resume(); return; }
+    try { await Tone.start(); started.current = true; }
+    catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
+    build();
+    refresh();
+  }, [resume, refresh, build]);
+
+  useEffect(() => { build(); }, [build]);
 
   const setSpace = useCallback(async (spaceId) => {
     const r = ref.current?.reverb;

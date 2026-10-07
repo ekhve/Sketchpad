@@ -214,6 +214,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-INSTRUMENTS-07 | Delay is silent when off, and when on is wetter and slower on the pad than on anything else. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-08 | The spaces run from dry to cave, each longer and wetter than the last, and reverb falls back to dry. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-09 | An embedded audio payload is read back to its size without decoding it. | D-070 | A | `core/tests/instruments.test.mjs` |
+| CR-INSTRUMENTS-10 | payloadToBytes turns an embedded payload into the bytes it holds, whatever its padding, with no browser function. | D-070, D-100 | A | `core/tests/instruments.test.mjs` |
 
 ## core/piano-samples
 

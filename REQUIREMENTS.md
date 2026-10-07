@@ -624,6 +624,13 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-411 | One function names a set of notes as a chord, exactly or with tones missing, and returns the same reading either way. | D-099, D-047 | A | *(`core/tests/chords.test.mjs`)* |
 | R-412 | A misprinted J-6 key is named from its printed notes exactly as before the functions were joined. | D-099, D-093 | A | A misprinted key is named from the notes it prints |
 
+## 10ze. The first note
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-414 | The audio graph is built and the piano decoded while the page loads; only starting the audio waits for the first touch. | D-100, D-070 | M | The first note after opening is the piano and is not late |
+| R-415 | An embedded recording is converted to the bytes it holds, without a browser function. | D-100, D-070 | A | An embedded recording is turned into the bytes it holds |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

@@ -97,14 +97,14 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
-| Assets defined once, apps import them | always | 170 exports in 22 modules, none redefined | G0 |
-| Asset requirements with a test, and tests with a requirement | 100% | 201/201 | C1 |
+| Assets defined once, apps import them | always | 171 exports in 22 modules, none redefined | G0 |
+| Asset requirements with a test, and tests with a requirement | 100% | 202/202 | C1 |
 | Module interfaces documented, nothing documented missing | 100% | 158 exports | C2 |
 | Architecture: acyclic, layered, pure, core independent | holds | 22 modules, 5 layers | C3 |
 | Core requirements traced to a source that exists; core decisions used | 100% | 14 decisions | C4 |
-| Automated checks passing | 100% | 659/659 | G1 |
+| Automated checks passing | 100% | 661/661 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
-| Mutation score | ≥ 90% | 221/221 (100%) | G2 |
+| Mutation score | ≥ 90% | 224/224 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |
 | Requirements traced to a decision or use case | 100% | 405/405 | G5 |
@@ -153,6 +153,7 @@ Record it in the table below with a date, the gate, the reason, and what would h
 | 2026-09-05 | DoD-19 | ~~`R-132` (no ambient randomness) rests on review~~ **Closed:** `check-done` G7 already rejects `Math.random` in the theory layer | — | Closed |
 | 2026-09-05 | DoD-19 | `R-121` (a visual role is added to the token set before it is used) rests on review | Lintable, but the check would need to read the component layer | A static check reads the fill roles and confirms each has a treatment |
 | 2026-09-23 | DoD-22 (the shell) | The Learn tab's shell behaviour was checked headless (21 checks in Chromium) but that run is not yet a gate, so a shell regression would not fail the build. *2026-10-07:* the J-6 page has been checked the same way at every change, and that run, not the suite, caught a crash on load (`D-093`) and 87 keys too wide for a phone (`D-089`). The case for making it a gate grows | It needs esbuild, React, Tone and Playwright, which the project does not install | The headless run is added to `tools/` and `check-done` as a gate |
+| 2026-10-07 | DoD-3 (headless checks) | `tools/startup-check.mjs`, like `tools/smoke.mjs`, needs a browser the project does not install, so neither is a gate | The suite cannot hear or time a real device; both are run by hand when audio or screens change | The project installs a browser in CI, or the manual gates cover it on every change |
 | 2026-09-05 | DoD-13 | No mutants for the mute toggle, key colours, note durations, instrument presets or the piano's scroll and hold | The mutator operates on the theory layer; those changes live in the audio and view layers, which it cannot reach | Either the mutator is extended to the view layer, or these stay covered by manual scenarios only |
 
 ---
