@@ -10,11 +10,10 @@ import React, { useState, useMemo, useCallback, useEffect, useReducer, useRef } 
 import * as Tone from "tone";
 import { T, Piano, Diagram, PRINT_CSS, useInstrument } from "../sketchpad.jsx";
 import { spelling, pc } from "../core/notes.mjs";
-import { barsToSchedule } from "../core/playback.mjs";
 import { scalePcs } from "../core/scales.mjs";
 import * as j from "./j6.mjs";
 import * as pr from "./progression.mjs";
-import * as pb from "./playback.mjs";
+import * as pb from "../core/transport.mjs";
 import { j6Sheet, j6SheetText } from "./sheet.mjs";
 
 /* ============================================================================
@@ -217,11 +216,11 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts, 
   const [held, setHeld] = useState([]);
 
   /* Playback (D-090): Sketchpad's look-ahead scheduler (D-043) asks which beats fall in the
-     next half second; playback.mjs says what each beat holds. Options and the progression
+     next half second; core/transport says what each beat holds. Options and the progression
      are read through refs, so a change while playing takes effect from the next beat. */
   const [sounding, setSounding] = useState(null);      // index of the chord sounding, while playing
   const [running, setRunning] = useState(false);
-  const clock = useRef(null), cursor = useRef(null), timers = useRef([]), clickSynth = useRef(null);
+  const driver = useRef(pb.createDriver({ now: () => Tone.now(), every: (fn, ms) => setInterval(fn, ms), cancel: (h) => clearInterval(h) })), timers = useRef([]), clickSynth = useRef(null);
   const optsRef = useRef(opts); optsRef.current = opts;
   const itemsRef = useRef(state.items); itemsRef.current = state.items;
   const at = (time, fn) => {
@@ -229,8 +228,7 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts, 
     timers.current.push(id);
   };
   const halt = () => {
-    if (clock.current) clearInterval(clock.current);
-    clock.current = null;
+    driver.current.stop();
     timers.current.forEach(clearTimeout); timers.current = [];
     setSounding(null); setRunning(false);
   };
@@ -245,27 +243,23 @@ function Explore({ audio, state, dispatch, set, setSet, t, setT, opts, setOpts, 
   const play = async () => {
     if (running || !state.items.length) return;
     await audio.init(); await audio.resume();
-    cursor.current = { nextBarAt: Tone.now() + 0.15, barIndex: 0 };
-    const tick = () => {
-      const o = optsRef.current, items = itemsRef.current;
-      const { bars: beats, state: next } = barsToSchedule(cursor.current, Tone.now(), 0.5, pb.beatSeconds(o.bpm));
-      cursor.current = next;
-      for (const b of beats) {
+    driver.current.start({
+      unitSeconds: () => pb.beatSeconds(optsRef.current.bpm),
+      onUnit: (b) => {
+        const o = optsRef.current, items = itemsRef.current;
         const e = pb.beatAt(b.index, items.length, o);
-        if (e.end) { clearInterval(clock.current); clock.current = null; at(b.at, halt); return; }
+        if (e.end) { at(b.at, halt); return "end"; }
         if (e.click) click(b.at, e.click === "accent");
         if (e.chord !== null) {
           const idx = e.chord;
           audio.play(pr.resolve(items[idx]).midi, pb.chordSeconds(o), b.at, 0.75);
           at(b.at, () => setSounding(idx));
         }
-      }
-    };
-    tick();
-    clock.current = setInterval(tick, 100);
+      },
+    });
     setRunning(true);
   };
-  useEffect(() => () => { if (clock.current) clearInterval(clock.current); timers.current.forEach(clearTimeout); }, []);
+  useEffect(() => () => { driver.current.stop(); timers.current.forEach(clearTimeout); }, []);
 
   const chords = state.items.map(pr.resolve);
   const keys = j.likelyKeys(pr.keyFocus(state).map(pr.resolve).map((c) => c.chord).filter(Boolean));

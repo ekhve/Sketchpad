@@ -50,7 +50,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/playback
 
-**Layer** 0 · **Depends on** nothing · **Used by** j6, sketchpad
+**Layer** 0 · **Depends on** nothing · **Used by** core/transport, sketchpad
 
 **Purpose.** The arithmetic of playing sound, with no audio library: the look-ahead scheduler, bar length from tempo, the voice budget and its reaping, and rolling a chord.
 
@@ -218,6 +218,32 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `scaleById` | function | `(id)` | A scale by id, or nothing. |
 | `scalePcs` | function | `(tonic, id)` | A scale's pitch classes from a tonic. |
 | `scalesContaining` | function | `(midis, limit = 6)` | Scales, in any key, that hold all the notes, tightest fit first. |
+
+## core/transport
+
+**Layer** 1 · **Depends on** core/playback · **Used by** j6, sketchpad
+
+**Purpose.** Playing a progression over time, for any app that loops: tempo, bars per chord, loop, a click with a count-in, and the driver that keeps asking the look-ahead scheduler what is due. Not a sequencer.
+
+**Behaviour.** `beatAt` says what each beat of a play-through holds: which chord starts, whether the click sounds and how strongly, or that a single pass is over; with the click on, one bar is counted in first. `createDriver` is the loop both apps used to write by hand: it ticks at once and then on a timer, hands each due unit (a bar or a beat) to the app once and in order, reads the unit length on every tick so a tempo change takes effect on the next unit, and stops when the app returns `"end"`. The clock and the timer are *arguments* (`now`, `every`, `cancel`), so the module touches nothing itself (CD-002) and a test steps time by hand (CD-013). The driver is stateful; its contract is checked with a fake clock rather than by the same-input rule.
+
+**Requirements.** CR-TRANSPORT-01 … CR-TRANSPORT-15 (15) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/transport.test.mjs`.
+
+### Interface
+
+| Name | Kind | Signature | What it is |
+|---|---|---|---|
+| `LENGTHS` | data | — | Half a bar, one bar, two bars per chord. |
+| `OPTIONS` | data | — | The default options: 90 BPM, one bar, loop on, click off. |
+| `TEMPO` | data | — | 60–160 BPM in steps of 5, starting at 90. |
+| `advance` | function | `(cursor, now, lookahead, unitSeconds)` | The units due inside the look-ahead window, and the cursor after them. |
+| `beatAt` | function | `(n, count, { bars, loop, click })` | What beat n of a play-through holds. |
+| `beatSeconds` | function | `(bpm)` | A beat's length in seconds. |
+| `chordSeconds` | function | `({ bpm, bars })` | How long a chord sounds: its length less a breath. |
+| `createDriver` | function | `({ now, every, cancel })` | A look-ahead loop over an injected clock and timer. |
+| `loopIndex` | function | `(unit, length)` | Which chord a unit lands on, round and round. |
+| `setTempo` | function | `(bpm)` | Bring a tempo into range and to a whole number. |
+| `startCursor` | function | `(now, lead = 0.15)` | Where a play-through starts: a little ahead of now. |
 
 ## core/bass
 

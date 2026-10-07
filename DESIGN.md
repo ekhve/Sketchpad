@@ -767,6 +767,17 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Consequence.** The `D-074` machinery stays, tested and available, and is no longer imposed. If lessons should follow the setting too, that is a one-line change and a different decision.
 
+
+### D-098 — One transport for both apps: `core/transport`
+
+**Context.** Sketchpad's loop and the J-6's playback each carried a look-ahead loop written by hand (`D-043`): start the cursor a little ahead, ask `barsToSchedule` what falls in the next half second, hand each unit to the app, repeat on a timer, clear it on stop. The owner asked for the shared version, with a sequencer to be built around it later (`D-090` says not yet).
+
+**Decision.** `core/transport` holds three things. The J-6's playback model moves in as it was (tempo 60–160, half, one or two bars a chord, loop, click with a one-bar count-in, `beatAt`, `chordSeconds`). A small pure layer round the scheduler (`startCursor`, `advance`, `loopIndex`). And `createDriver`, the loop itself, taking the clock and the timer as arguments (`CD-013`) so that it is tested with a fake pair. Both apps now start, tick and stop through it; `j6/playback.mjs` is gone. Behaviour is meant to be unchanged: the same look-ahead (0.6 s at 120 ms for Sketchpad, 0.5 s at 100 ms for the J-6), the same first-unit lead of 0.15 s.
+
+**Not done.** Sketchpad does not yet get the J-6's loop switch, tempo steps or count-in; it plays bars as before. That is a feature, for when it is wanted. The progression state (the J-6's add, remove, undo, rec) is not shared yet; it is the next item on the roadmap.
+
+**Consequence.** The timing loop exists once and is tested without a browser (`CR-TRANSPORT-09` to `15`). A sequencer, a metronome or a MIDI player can use the same driver.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -870,6 +881,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | J-6 panel compacted after the owner's photo of the hardware: the set display is the size of the J-6's own four digits, and the set's key has a line of its own. The photo confirms KEY is the A key's second function and the 8th white key a high C (`D-094`, `D-083`) |
 | 2026-10-07 | **Reusable assets.** The theory moves out of `sketchpad.jsx` into `core/` (18 modules) and `sketchpad/` (3), each with requirements, interface, decisions and tests of its own; both apps import them (`D-096`). `D-020` and `D-032` replaced; the extraction is gone. New gates C1–C4 and a G0 for a single copy; the checks are shown to catch a planted fault. Behaviour is unchanged, shown by identical results, screen transcripts and build sizes |
 | 2026-10-07 | Sharps are Sketchpad's default spelling again, with the key's own spelling as a setting beside the naming button; lessons keep spelling for their own key (`D-097`) |
+| 2026-10-07 | One transport for both apps (`core/transport`): the J-6's playback model plus the look-ahead loop both apps wrote by hand, as a driver over an injected clock and timer, tested with a fake one (`D-098`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

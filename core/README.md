@@ -8,7 +8,7 @@ Each module has a stated purpose, requirements, an interface and tests of its ow
 
 | Read | For |
 |---|---|
-| [`DESIGN.md`](DESIGN.md) | The architecture: layers, structure, data shapes, variation points, the decisions `CD-001`…`CD-012`, the roadmap |
+| [`DESIGN.md`](DESIGN.md) | The architecture: layers, structure, data shapes, variation points, the decisions `CD-001`…`CD-013`, the roadmap |
 | [`MODULES.md`](MODULES.md) | One section per module: purpose, behaviour, interface, layer, dependencies, consumers |
 | [`REQUIREMENTS.md`](REQUIREMENTS.md) | Every requirement, its source and its test |
 | [`VERIFICATION.md`](VERIFICATION.md) | How the assets are shown to hold, level by level, and what is *not* shown |

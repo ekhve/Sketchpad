@@ -609,6 +609,13 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-407 | The user can choose to have each key written the way it is on a score (E♭ in C minor); Do-Re-Mi follows the same choice. | D-097, D-074 | A | The key's own spelling can be chosen |
 | R-408 | The choice changes the names only: the same twelve pitches, the same chords and scales. Lessons keep spelling for their own key. | D-097, D-073 | A | Accidentals change the names and nothing else |
 
+## 10zc. One transport
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-409 | Both apps start, tick and stop their loop through one driver, which is given its clock and timer and touches nothing else. | D-098, D-043 | A | *(`core/tests/transport.test.mjs`, and `check-done` G0)* |
+| R-410 | The J-6's playback behaviour is unchanged by the move: tempo, bars per chord, loop, click and count-in. | D-098, D-090 | A | Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5 |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

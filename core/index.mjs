@@ -17,4 +17,5 @@ export * from "./scales.mjs";
 export * from "./sheet.mjs";
 export * from "./styles.mjs";
 export * from "./symbols.mjs";
+export * from "./transport.mjs";
 export * from "./voicing.mjs";

@@ -21,7 +21,7 @@ product logic  sketchpad/*     j6/*
                          ▼
 core/        layer 3   chordsets   harmony   sheet
              layer 2   bass  explain  fingering  styles  symbols  voicing
-             layer 1   chords  figures  instruments  keyboard  melody  scales
+             layer 1   chords  figures  instruments  keyboard  melody  scales  transport
              layer 0   notes   piano-samples   playback
 ```
 
@@ -49,6 +49,7 @@ core/        layer 3   chordsets   harmony   sheet
 | Sheet | `sheet` | 3 | A progression as a printable sheet and as text |
 | Keyboard logic | `keyboard` | 1 | Key roles, held notes, sliding fingers, hit-testing |
 | Playback arithmetic | `playback` | 0 | Look-ahead scheduling, tempo, voice budget, rolling |
+| **Looping a progression** | `transport` | 1 | What each beat holds (loop, click, count-in), and the **driver** both apps use to play |
 | Instruments | `instruments`, `piano-samples` | 1, 0 | Presets as data, effects, the built-in piano |
 
 ## 3. Interfaces
@@ -183,6 +184,14 @@ Where a product needs behaviour an asset does not offer, it adds it *in the prod
 
 **Decision.** The first step was a *verbatim* move, shown by line-for-line comparison and by identical screen transcripts before and after (`D-096`). Improvements follow, each as its own change with its own requirement.
 
+### CD-013 — A stateful part takes its effects as arguments, and is verified with a fake of them
+
+**Context.** Both apps ran the same loop by hand: note the clock, ask the scheduler what is due, hand it over, ask again on a timer. Two copies of a timing loop is where two apps drift, and neither could be tested without a browser.
+
+**Decision.** `core/transport` holds the loop as `createDriver({ now, every, cancel })`. It keeps a timer and a cursor, which makes it stateful; but it reaches the world only through the three functions it is given. The app passes Tone's clock and the browser's timer; a test passes a clock it steps by hand. Stateful assets are allowed on those terms and are verified by driving them, not by the same-input rule that covers the pure functions.
+
+**Consequence.** The timing loop is tested without audio or a screen (`CR-TRANSPORT-09` to `15`), and a change to it reaches both apps. The contract table lists `createDriver` as stateful.
+
 ## 6. Roadmap
 
 Not built; listed so the shape is deliberate. Each item arrives as a module with requirements and tests before an app uses it.
@@ -191,7 +200,7 @@ Not built; listed so the shape is deliberate. Each item arrives as a module with
 |---|---|---|
 | **Events to MIDI** | A module turning events (§3) into a Standard MIDI File, in bytes | Events are already instrument-free (CD-003); it is a pure function of events and a tempo |
 | **One name for notes** | `identifyChord` (any notes, ranked readings) and the J-6's `nameFromNotes` (a key's printed notes) are two answers to one question | One function with a parameter for what the caller knows, and one test |
-| **Shared progression and transport** | The J-6's pure progression reducer and playback model, and Sketchpad's loop code, as one asset (`useTransport` in the apps) | Both apps loop a progression; the J-6's version is the cleaner |
+| **Shared progression state** | The J-6's pure progression reducer (add, remove, undo, rec), which Sketchpad's loop could use | The transport is shared (`D-098`); the reducer is next |
 | **Melody from harmony** | Motifs and phrases over a progression, seeded, using `melody` and `figures` | The patterns and the rules already generate notes; this arranges them |
 | **Degree names** | Names for 13, 15 and 18 semitones | Closes a CD-007 limit |
 

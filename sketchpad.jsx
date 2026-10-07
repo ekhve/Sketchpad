@@ -15,7 +15,8 @@ import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrum
 import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyAtPosition } from "./core/keyboard.mjs";
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
-import { MAX_VOICES, voiceLifetime, reapVoices, barsToSchedule, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
+import { createDriver, loopIndex } from "./core/transport.mjs";
+import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
 import { scaleById, scalePcs, fitScales, keysContaining, scalesContaining, customScaleFrom, customScalePcs, activeScalePcs } from "./core/scales.mjs";
 import { diagramKeys, sheetData, sheetAsText } from "./core/sheet.mjs";
 import { scalesForStyle } from "./core/styles.mjs";
@@ -1013,7 +1014,7 @@ export default function App() {
 
 
   const stop = () => {
-    if (clock.current) { clearInterval(clock.current); clock.current = null; }
+    driver.current.stop();
     clearTimers();
     inst.panic();
     setPlaying(false); setStep(-1); setSounding(new Set()); setBassLit([]);
@@ -1021,14 +1022,13 @@ export default function App() {
 
   /* Our own scheduler. The library transport failed silently twice — once on a
      moved API, once for a reason I never identified — and I cannot test it.
-     A lookahead loop over `barsToSchedule` is arithmetic I can. (D-043) */
-  const clock = useRef(null);
-  const cursor = useRef({ nextBarAt: 0, barIndex: 0 });
+     A lookahead loop over `barsToSchedule` (now core/transport's driver) is arithmetic I can. (D-043, D-098) */
+  const driver = useRef(createDriver({ now: () => Tone.now(), every: (fn, ms) => setInterval(fn, ms), cancel: (h) => clearInterval(h) }));
 
   const emitBar = (index, at) => {
     const p = progRef.current;
     if (!p.length) return;
-    const idx = index % p.length;
+    const idx = loopIndex(index, p.length);
     const c = p[idx];
     const { bass, riff, playRiff: rOn } = figRef.current;
     const secs = barSecondsAt(bpmRef.current);
@@ -1055,22 +1055,14 @@ export default function App() {
     if (!prog.length || playing) return;
     await inst.init(); await inst.resume();
     try {
-      cursor.current = { nextBarAt: Tone.now() + 0.15, barIndex: 0 };
-      const tick = () => {
-        const secs = barSecondsAt(bpmRef.current);
-        const { bars, state } = barsToSchedule(cursor.current, Tone.now(), 0.6, secs);
-        cursor.current = state;
-        for (const b of bars) emitBar(b.index, b.at);
-      };
-      tick();
-      clock.current = setInterval(tick, 120);
+      driver.current.start({ unitSeconds: () => barSecondsAt(bpmRef.current), lookahead: 0.6, interval: 120, onUnit: (b) => emitBar(b.index, b.at) });
       setPlaying(true);
     } catch (e) {
       setNote({ head: "The loop could not start", plain: String(e.message ?? e) });
     }
   };
 
-  useEffect(() => () => { if (clock.current) clearInterval(clock.current); }, []);
+  useEffect(() => () => driver.current.stop(), []);
 
   const playScale = (dir) => {
     const iv = scaleById(scaleId).iv;

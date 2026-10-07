@@ -164,6 +164,26 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-BASS-05 | BassTransitions offers a direct move, a scale walk where there is a gap, a fifth approach and a chromatic slide, all ending on the next chord's root. | UC-20, D-023 | A | `core/tests/bass.test.mjs` |
 | CR-BASS-06 | The transitions are the figures the bass would play: direct is two notes, fifth approach drops to the next chord's fifth, chromatic comes from a semitone below. | UC-20, D-023 | A | `core/tests/bass.test.mjs` |
 
+## core/transport
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| CR-TRANSPORT-01 | Tempo runs from 60 to 160 BPM in steps of 5, starting at 90, and any value is brought into range. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-02 | A beat lasts sixty over the tempo seconds. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-03 | Each chord lasts half a bar, one bar or two, and each starts on its own beat. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-04 | With Loop on the progression repeats for ever, and with it off it plays once and ends. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-05 | The click counts in one bar, then marks every beat with the first of each bar stronger. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-06 | A chord sounds for its length less a breath before the next. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-07 | LoopIndex says which chord a unit lands on, round and round, and nothing for an empty loop. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-08 | A play-through starts a little ahead of now, and the units due are the scheduler's, each once across calls. | D-043 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-09 | A driver ticks at once and then on its timer, handing each unit to the app once and in order. | D-043, D-098, CD-013 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-10 | Each unit carries the time it starts, which is a unit length after the one before. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-11 | A tempo change takes effect on the next unit, because the length is asked for on every tick. | D-090, CD-013 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-12 | Stopping cancels the timer and no more units arrive; a stopped driver can start again from the clock. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-13 | Starting a driver that is running changes nothing. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-14 | An app can end the play-through from its unit callback: the driver stops, and the rest of that tick is dropped. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-15 | The driver reaches the world only through the clock and timer it is given. | CD-002, CD-013 | A | `core/tests/transport.test.mjs` |
+
 ## core/playback
 
 | ID | Requirement | Source | Mode | Verified by |

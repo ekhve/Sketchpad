@@ -33,7 +33,7 @@ if (!feature || !requirements || !design || !useCases || !app) {
    directly, so the tests cannot be checking anything but what ships. (D-096) */
 const core = await checkCore(".");
 const moduleSource = core.modules.map((m) => m.source).join("\n");
-const appFiles = ["sketchpad.jsx", ...(existsSync("j6") ? ["j6/app.jsx", "j6/j6.mjs", "j6/playback.mjs", "j6/progression.mjs", "j6/sheet.mjs", "j6/labels.mjs"] : [])].filter(existsSync);
+const appFiles = ["sketchpad.jsx", ...(existsSync("j6") ? ["j6/app.jsx", "j6/j6.mjs", "j6/progression.mjs", "j6/sheet.mjs", "j6/labels.mjs"] : [])].filter(existsSync);
 
 /* ---------- G0: one copy of the theory ----------
    Nothing an asset exports may also be defined in an app: a second copy is

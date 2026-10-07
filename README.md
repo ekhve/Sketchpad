@@ -8,7 +8,7 @@ built into one self-contained HTML page, installable to the home screen.
 | Where | What |
 |---|---|
 | `sketchpad.jsx` | The app: the screens and the sound. The music logic is imported from the modules below |
-| `core/` | The **reusable assets**: 18 pure modules (naming chords from notes, voicing, harmony, bass, figures, fingering, the sheet, playback arithmetic …), each with its own requirements, interface and tests; start at `core/README.md` (`D-096`) |
+| `core/` | The **reusable assets**: 19 pure modules (naming chords from notes, voicing, harmony, bass, figures, fingering, the sheet, playback arithmetic …), each with its own requirements, interface and tests; start at `core/README.md` (`D-096`) |
 | `sketchpad/` | The three modules that belong to Sketchpad alone: levels and tabs, the guide, the lessons |
 | `sketchpad.feature` | Every behaviour as a Gherkin scenario, tagged `@auto` or `@manual` |
 | `DESIGN.md`, `REQUIREMENTS.md`, `USE_CASES.md` | Why, what and for whom; decisions are `D-nnn` |

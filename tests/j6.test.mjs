@@ -267,7 +267,7 @@ test("A search result can be added to the progression in one tap", () => {
 });
 
 /* ---------- playing the progression back (D-090) ---------- */
-import * as pb from "../j6/playback.mjs";
+import * as pb from "../core/transport.mjs";
 const starts = (count, opts, beats) => Array.from({ length: beats }, (_, n) => pb.beatAt(n, count, opts))
   .map((b, n) => (b.chord !== null ? `${n}:${b.chord}` : null)).filter(Boolean);
 

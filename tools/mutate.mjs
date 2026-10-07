@@ -233,7 +233,18 @@ const J6_PLAYBACK_MUTANTS = [
   ["the strong click follows the chord, not the bar", "click: click ? (k % BEATS_PER_BAR === 0 ? \"accent\" : \"beat\") : null,", "click: click ? (k % perChord === 0 ? \"accent\" : \"beat\") : null,"],
   ["every length is one bar",                "const perChord = bars * BEATS_PER_BAR;", "const perChord = BEATS_PER_BAR;"],
   ["chords ring into the next",              "bars * BEATS_PER_BAR * beatSeconds(bpm) * 0.92", "bars * BEATS_PER_BAR * beatSeconds(bpm) * 1.2"],
-].map(([name, from, to]) => [name, from, to, "j6/playback.mjs"]);
+].map(([name, from, to]) => [name, from, to, "core/transport.mjs"]);
+
+/* The shared transport's driver and loop arithmetic (D-098). */
+const TRANSPORT_MUTANTS = [
+  ["the first unit starts late",              "({ nextBarAt: now + lead, barIndex: 0 })", "({ nextBarAt: now + lead + 5, barIndex: 0 })"],
+  ["a tempo change is not heard",             "advance(cursor, now(), lookahead, unitSeconds())", "advance(cursor, now(), lookahead, 0.5)"],
+  ["stopping leaves the timer running",       "if (timer !== null) cancel(timer); timer = null;", "timer = null;"],
+  ["ending does not stop the driver",         'if (onUnit(u) === "end") { ended = true; stop(); return; }', 'if (onUnit(u) === "end") { return; }'],
+  ["a second start restarts the loop",        "if (timer !== null) return false;\n      cursor", "cursor"],
+  ["an empty loop has a chord",               "(length > 0 ? unit % length : null)", "unit % length"],
+  ["the driver ticks only once",              "if (!ended) timer = every(tick, interval);", "if (!ended) timer = 1;"],
+].map(([name, from, to]) => [name, from, to, "core/transport.mjs"]);
 
 /* Naming a misprint, scales to play along with, the sheet (D-091–D-093). */
 const J6_ALONG_MUTANTS = [
@@ -259,7 +270,7 @@ const J6_SHEET_MUTANTS = [
 const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
 const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
 
-const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

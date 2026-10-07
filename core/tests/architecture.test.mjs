@@ -128,6 +128,8 @@ const CONTRACT = {
   "core/melody": { melodyRole: [[60, [0, 4, 7], major]], melodyGuide: [[C, major]], changedNotes: [[[60, 64], [60, 65]]] },
   "core/chordsets": { buildSet: [[CHORD_SETS[0], 2]], setsFor: [["major"]] },
   "core/figures": { rng: [[7]], patternsFor: [["bass", "funk"]], place: [[7, 40]], renderFigure: [[bassPattern, C, G7, major, 1, 40]], renderProgressionFigure: [[bassPattern, triads, major, 3, 40]], explainFigure: [[bassPattern, fig]], planBar: [[{ chordNotes: [60, 64], bassFigure: fig, riffFigure: [], sixteenth: 0.1, barSeconds: 1.6 }]], planIsClean: [[planBar({ bassFigure: fig, sixteenth: 0.1, barSeconds: 1.6 }), 1.6]] },
+  "core/transport": { setTempo: [[200], [94.6]], beatSeconds: [[120]], beatAt: [[4, 2, { bars: 1, loop: true, click: true }]], chordSeconds: [[{ bpm: 90, bars: 2 }]], loopIndex: [[5, 3]], startCursor: [[10]], advance: [[{ nextBarAt: 10, barIndex: 0 }, 10, 1, 0.5]],
+    createDriver: [] /* stateful: it holds a timer, so it is verified with a fake clock instead, CR-TRANSPORT-09 to 15 */ },
   "core/bass": { bassOptions: [[G7, major]], bassTransitions: [[C, G7, major]] },
   "core/playback": { voiceLifetime: [[1]], reapVoices: [[[{ until: 1 }, { until: 5 }], 2]], allocatable: [[20, 6]], barsToSchedule: [[{ nextBarAt: 0, barIndex: 0 }, 0, 2, 1]], barSecondsAt: [[90]], pickVoiceIndex: [[[3, 1, 2], 0]], rollStyleById: [["roll"]], rollOffsets: [[6, 0.11]] },
   "core/instruments": { sampleMidi: [["F#2"]], sampleAnchors: [[]], stretchAt: [[27]], worstStretch: [[]], instrumentById: [["rhodes"]], delaySettings: [["pad", true]], reverbSettings: [["hall"]], base64Payload: [["data:x;base64,QUJD"]], payloadBytes: [["data:x;base64,QUJD"]] },
