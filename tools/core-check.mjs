@@ -8,7 +8,7 @@
    core/tests/architecture.test.mjs, and as gates C1–C4 in tools/check-done.mjs.
 
    What is checked, and why it is checked by a program rather than by a reader:
-     C1  every asset requirement (core/REQUIREMENTS.md) is verified by a test that exists, and
+     C1  every asset requirement (core/REQUIREMENTS.md, sketchpad/REQUIREMENTS.md) is verified by a test that exists, and
          every test in core/tests names the requirement it verifies;
      C2  every export of every module is documented in its MODULES.md, and nothing documented
          is missing: an interface that is not written down is not an interface;
@@ -109,21 +109,25 @@ export function parseModuleDocs(root = ".") {
   return docs;
 }
 
-/** core/REQUIREMENTS.md: | CR-NOTES-01 | text | Source | Mode | Verified by | */
+/** core/REQUIREMENTS.md and sketchpad/REQUIREMENTS.md: | CR-NOTES-01 | text | Source | Mode | Verified by | (SR- for Sketchpad's own) */
 export function parseRequirements(root = ".") {
-  const p = join(root, "core", "REQUIREMENTS.md");
-  if (!existsSync(p)) return [];
-  return [...read(p).matchAll(/^\|\s*(CR-[A-Z]+-\d+)\s*\|([^|]+)\|([^|]+)\|\s*([AIM])\s*\|([^|]+)\|\s*$/gm)]
-    .map((m) => ({ id: m[1], text: m[2].trim(), source: m[3].trim(), mode: m[4], verifiedBy: m[5].trim() }));
+  return DIRS.flatMap((dir) => {
+    const p = join(root, dir, "REQUIREMENTS.md");
+    if (!existsSync(p)) return [];
+    return [...read(p).matchAll(/^\|\s*((?:CR|SR)-[A-Z]+-\d+)\s*\|([^|]+)\|([^|]+)\|\s*([AIM])\s*\|([^|]+)\|\s*$/gm)]
+      .map((m) => ({ id: m[1], text: m[2].trim(), source: m[3].trim(), mode: m[4], verifiedBy: m[5].trim() }));
+  });
 }
 
-/** Test titles in core/tests that begin with a requirement id. */
+/** Test titles in core/tests and sketchpad/tests that begin with a requirement id. */
 export function loadAssetTests(root = ".") {
-  const dir = join(root, "core", "tests");
-  if (!existsSync(dir)) return [];
   const tests = [];
-  for (const f of readdirSync(dir).filter((x) => x.endsWith(".test.mjs")).sort())
-    for (const m of read(join(dir, f)).matchAll(/^\s*test\(\s*(["'`])(.+?)\1/gm)) tests.push({ file: `core/tests/${f}`, title: m[2], id: m[2].match(/^(CR-[A-Z]+-\d+)\b/)?.[1] ?? null });
+  for (const d of DIRS) {
+    const dir = join(root, d, "tests");
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir).filter((x) => x.endsWith(".test.mjs")).sort())
+      for (const m of read(join(dir, f)).matchAll(/^\s*test\(\s*(["'`])(.+?)\1/gm)) tests.push({ file: `${d}/tests/${f}`, title: m[2], id: m[2].match(/^((?:CR|SR)-[A-Z]+-\d+)\b/)?.[1] ?? null });
+  }
   return tests;
 }
 
@@ -159,7 +163,7 @@ export async function checkCore(root = ".") {
       if (!t.id) p.push(`test "${t.title}" (${t.file}) names no requirement`);
       else if (!reqIds.has(t.id)) p.push(`test "${t.title}" names ${t.id}, which is not a requirement`);
     }
-    gate("C1", "Every core requirement has a test, and every core test a requirement", p, `${reqs.length} requirements, ${tests.length} tests`);
+    gate("C1", "Every asset requirement has a test, and every asset test a requirement", p, `${reqs.length} requirements, ${tests.length} tests`);
   }
 
   /* C2 — interfaces written down */
@@ -243,7 +247,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       console.log(`layer ${layers.get(m.id)}  ${m.id.padEnd(22)} imports [${[...new Set(m.imports.map((i) => i.id))].join(", ")}]   used by [${[...used.get(m.id)].sort().join(", ")}]`);
   } else if (process.argv.includes("--report")) {
     for (const m of modules) {
-      const mine = reqs.filter((r) => r.id.startsWith("CR-" + m.name.replace(/-/g, "").toUpperCase() + "-"));
+      const mine = reqs.filter((r) => r.id.startsWith((m.dir === "core" ? "CR-" : "SR-") + m.name.replace(/-/g, "").toUpperCase() + "-"));
       console.log(`\n${m.id}  (${m.exports.length} exports, ${mine.length} requirements)`);
       for (const r of mine) { const t = tests.filter((x) => x.id === r.id); console.log(`  ${r.id}  ${r.mode}  ${t.length ? t.length + " test" + (t.length > 1 ? "s" : "") : "NO TEST"}  ${r.text.slice(0, 90)}`); }
     }

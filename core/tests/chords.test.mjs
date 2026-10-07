@@ -47,11 +47,11 @@ test("CR-CHORDS-03 the dictionary lists each chord type once, with its intervals
   }
 });
 
-test("CR-CHORDS-04 the common intervals have a degree name, and an interval without one is shown as its semitone count", () => {
-  for (const d of DICTIONARY) for (const i of d.iv) if (i < 12 || [14, 17, 21].includes(i)) assert.ok(DEGREE_NAMES[i], `${d.q}: ${i} semitones`);
-  // known limit, recorded in core/DESIGN.md: 13, 15 and 18 (flat 9, sharp 9, sharp 11) have no degree name yet
-  for (const i of [13, 15, 18]) assert.equal(DEGREE_NAMES[i], undefined);
+test("CR-CHORDS-04 every interval a chord uses has a degree name, the flat 9, sharp 9 and sharp 11 included", () => {
+  for (const d of DICTIONARY) for (const i of d.iv) assert.ok(DEGREE_NAMES[i], `${d.q}: ${i} semitones`);
   assert.equal(DEGREE_NAMES[0], "1"); assert.equal(DEGREE_NAMES[10], "♭7"); assert.equal(DEGREE_NAMES[14], "9");
+  assert.deepEqual([13, 15, 18].map((i) => DEGREE_NAMES[i]), ["♭9", "♯9", "♯11"]);
+  for (let i = 0; i < 12; i++) assert.ok(DEGREE_NAMES[i], `${i} within the octave`);
 });
 
 test("CR-CHORDS-05 SIGNATURES names every signature either table can name, the quality table first", () => {

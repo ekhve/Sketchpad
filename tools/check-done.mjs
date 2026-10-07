@@ -50,7 +50,7 @@ gate("G0", "Each asset is defined once, and the apps import it", duplicated.leng
 /* ---------- G1: the suite passes ---------- */
 let testOut = "";
 try {
-  testOut = execSync("node --test tests/*.test.mjs core/tests/*.test.mjs 2>&1", { encoding: "utf8" });
+  testOut = execSync("node --test tests/*.test.mjs core/tests/*.test.mjs sketchpad/tests/*.test.mjs 2>&1", { encoding: "utf8" });
 } catch (e) {
   testOut = e.stdout || "";
 }

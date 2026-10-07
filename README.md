@@ -39,11 +39,12 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 
 | Suite | Checks | What it protects |
 |---|---|---|
-| `theory.test.mjs` | 402 | Scales, chords, analysis, figures, key roles, naming, lessons, typed chord names |
+| `theory.test.mjs` | 405 | Scales, chords, analysis, figures, key roles, naming, lessons, typed chord names |
 | `j6.test.mjs` | 39 | J-6 Explorer: all 100 sets and the manual's spellings, data validation and its pinned errors, spelling, numerals, key, transpose, search |
 | `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
-| `core/tests/*.test.mjs` | 164 | The reusable assets, one test per requirement in `core/REQUIREMENTS.md`, plus the architecture and contract tests (`D-096`) |
+| `core/tests/*.test.mjs` | 182 | The reusable assets, one test per requirement in `core/REQUIREMENTS.md`, plus the architecture and contract tests (`D-096`) |
+| `sketchpad/tests/*.test.mjs` | 19 | Sketchpad's own modules: levels and tabs, the guide, the lessons |
 
 Scenarios tagged `@manual` in `sketchpad.feature` cover sound, timing and
 legibility. Those cannot be asserted here and are checked by hand on a phone.
@@ -58,7 +59,7 @@ of tests written specifically after an earlier run found them surviving.
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 619 automated checks, all passing.
+Current state: 659 automated checks, all passing.
 
 ## Before calling anything done
 

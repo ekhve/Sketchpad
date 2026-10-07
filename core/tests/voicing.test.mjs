@@ -39,7 +39,7 @@ test("CR-VOICING-03 dictionaryFor lists every dictionary chord on a root, with i
   }
   assert.equal(chordOf(0, "").formula, "1 – 3 – 5");
   assert.equal(chordOf(0, "m7").formula, "1 – ♭3 – 5 – ♭7");
-  assert.equal(chordOf(0, "7♭9").formula, "1 – 3 – 5 – ♭7 – 13", "an interval with no degree name shows its semitone count");
+  assert.equal(chordOf(0, "7♭9").formula, "1 – 3 – 5 – ♭7 – ♭9");
   assert.deepEqual(dictionaryFor(0), dictionaryFor(0, DEFAULT_BASE), "the default octave is C3");
 });
 

@@ -892,6 +892,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | Sharps are Sketchpad's default spelling again, with the key's own spelling as a setting beside the naming button; lessons keep spelling for their own key (`D-097`) |
 | 2026-10-07 | One transport for both apps (`core/transport`): the J-6's playback model plus the look-ahead loop both apps wrote by hand, as a driver over an injected clock and timer, tested with a fake one (`D-098`) |
 | 2026-10-07 | One function names notes as a chord: `identifyChord` with a `missing` mode replaces the J-6's own `nameFromNotes` rule; the J-6 names exactly what it did (`D-099`) |
+| 2026-10-07 | Cleanups: the flat 9, sharp 9 and sharp 11 have degree names (a formula reads …♭7 – ♭9, not 13); Sketchpad's own modules (levels and tabs, guide, lessons) have unit tests and requirements of their own (`SR-` ids, `sketchpad/REQUIREMENTS.md`), held by the same checks as core's |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

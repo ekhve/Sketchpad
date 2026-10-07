@@ -10,7 +10,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 
 **Behaviour.** A section has a title, a lead and points, and belongs to a tab or to none. `sentenceCount` is what the tests use to hold explanations to the two-sentence cap (D-051). Product-specific (CD-001).
 
-**Requirements.** Product-level: the decisions cited in the module's header, and the requirements in the product's `REQUIREMENTS.md` that cite them. Verified by the product's tests (`tests/theory.test.mjs`, `tests/traceability.test.mjs`) and by mutation (`tools/mutate.mjs`).
+**Requirements.** SR-GUIDE-01 … SR-GUIDE-04 (4) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `sketchpad/tests/guide.test.mjs`.
 
 ### Interface
 
@@ -28,7 +28,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 
 **Behaviour.** Three levels (Start, Produce, Study) each add features to the one before, so nothing a user has found ever moves or disappears; tabs follow from features, in a fixed order. `UC00_NEEDS` lists what the main scenario needs, which the Start level must cover. `namingFor` chooses the naming system from the base system and the *accidentals* setting: sharps (the owner's choice, and the default) leaves the plain system, which spells every black key as a sharp; "key" gives the key's own spelling (`core/notes`). Lessons ignore it and always spell for their own key, because they teach what a score shows (D-074). When no chord is selected, `activeChordFor` falls back to the one playing, then the first of the loop, then the home chord. Product-specific, so it lives with the product (CD-001); it traces to D-058 and D-039.
 
-**Requirements.** Product-level: the decisions cited in the module's header, and the requirements in the product's `REQUIREMENTS.md` that cite them. Verified by the product's tests (`tests/theory.test.mjs`, `tests/traceability.test.mjs`) and by mutation (`tools/mutate.mjs`).
+**Requirements.** SR-MODEL-01 … SR-MODEL-07 (7) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `sketchpad/tests/model.test.mjs`.
 
 ### Interface
 
@@ -53,7 +53,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 
 **Behaviour.** A lesson is data built for a root and a naming system, so each can be practised in all twelve keys. A step's target is a *set* (every pitch class, any order, any octave) or a *sequence* (in order, optionally each higher or lower than the last). A slip costs nothing: the wrong note is named and the step carries on. The reason why appears only after the sound, which keeps D-011. Product-specific: it uses core for the music and adds the teaching (CD-001).
 
-**Requirements.** Product-level: the decisions cited in the module's header, and the requirements in the product's `REQUIREMENTS.md` that cite them. Verified by the product's tests (`tests/theory.test.mjs`, `tests/traceability.test.mjs`) and by mutation (`tools/mutate.mjs`).
+**Requirements.** SR-LESSONS-01 … SR-LESSONS-08 (8) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `sketchpad/tests/lessons.test.mjs`.
 
 ### Interface
 

@@ -227,7 +227,7 @@ Not in the original plan. Each earned its place.
 | A shared transport (progression and loop) for both apps | **Open** | The J-6's is the cleaner; `core/DESIGN.md` §6 |
 | One function for naming notes as chords | **Open** | `identifyChord` and the J-6's `nameFromNotes` answer one question twice |
 | Events to a MIDI file | **Open** | Events are already instrument-free (`CD-003`); a pure function away |
-| Names for the flat 9, sharp 9 and sharp 11 | **Open** | A recorded limit (`CD-007`) |
+| Names for the flat 9, sharp 9 and sharp 11 | **Done** | A formula reads 1 – 3 – 5 – ♭7 – ♭9, not 13 (`CD-007` limit closed) |
 
 ## Known gaps and rough edges
 

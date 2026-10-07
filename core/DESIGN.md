@@ -149,7 +149,6 @@ Where a product needs behaviour an asset does not offer, it adds it *in the prod
 | Limit | Where | Why it stands |
 |---|---|---|
 | Key signatures that would need E♯ (F♯ major, D♯ minor) use six letters | `notes` — `CR-NOTES-07` | A seventh letter would be E♯, which no chart prints (`D-074`) |
-| The flat 9, sharp 9 and sharp 11 have no degree name; a formula shows their semitone count | `chords` — `CR-CHORDS-04` | Naming them needs a decision on how to write them; not made yet |
 | `C#5` reads as C♯ with an unknown `5`, so the alias `#5` cannot be reached | `symbols` — `CR-SYMBOLS-02` | A sharp root and a sharp-five are indistinguishable in that text |
 | A note shorter than 50 ms can overlap the next when a bar is half a second (480 BPM) | `figures` — `CR-FIGURES-12` | Far beyond any tempo the apps offer |
 | The built-in piano is at most three semitones from a recording, never more | `instruments` — `CR-INSTRUMENTS-04` | The check exists because it once failed silently (`D-071`) |
@@ -209,7 +208,6 @@ Not built; listed so the shape is deliberate. Each item arrives as a module with
 | **Events to MIDI** | A module turning events (§3) into a Standard MIDI File, in bytes | Events are already instrument-free (CD-003); it is a pure function of events and a tempo |
 | **Shared progression state** | The J-6's pure progression reducer (add, remove, undo, rec), which Sketchpad's loop could use | The transport is shared (`D-098`); the reducer is next |
 | **Melody from harmony** | Motifs and phrases over a progression, seeded, using `melody` and `figures` | The patterns and the rules already generate notes; this arranges them |
-| **Degree names** | Names for 13, 15 and 18 semitones | Closes a CD-007 limit |
 
 ## 7. Adding an asset
 

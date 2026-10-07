@@ -599,6 +599,7 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-402 | Every export of every module is described in the module's document, and nothing described is missing. | D-096 | A | *(`core-check` C2)* |
 | R-403 | Every exported function gives the same answer for the same input, leaves its arguments alone, and returns plain data. | D-096 | A | *(`core/tests/architecture.test.mjs`)* |
 | R-404 | Each architecture and traceability check is shown to fail when a fault is planted. | D-096 | A | *(`core/tests/architecture.test.mjs`)* |
+| R-413 | Sketchpad's own modules have requirements and tests of their own, held to the same traceability as core's. | D-096 | A | *(`core-check` C1, `sketchpad/tests/`)* |
 | R-405 | Moving the theory out of the app changed no behaviour: the same checks pass, scripted runs of both apps give identical screen transcripts, and the builds are the same size. | D-096 | I | `D-096`, recorded once; `tools/smoke.mjs` reruns it |
 
 ## 10zb. Sharps or the key's spelling

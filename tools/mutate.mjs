@@ -288,7 +288,7 @@ for (const [name, from, to, file] of ALL) {
   writeFileSync(file, orig.replace(from, to));
   let caught = false, failing = "";
   try {
-    execSync("node --test tests/*.test.mjs core/tests/*.test.mjs 2>&1", { encoding: "utf8" });
+    execSync("node --test tests/*.test.mjs core/tests/*.test.mjs sketchpad/tests/*.test.mjs 2>&1", { encoding: "utf8" });
   } catch (e) {
     caught = true;
     failing = (e.stdout.match(/^# fail (\d+)/m) || [, "?"])[1];
