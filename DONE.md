@@ -7,7 +7,7 @@
 A change is **done** when all three of the following are true. Not one. Not two.
 
 1. Every gate below either passes or has a recorded, dated exception.
-2. `node tools/check-done.mjs` reports every automated gate passing (19 as of 2026-10-07).
+2. `node tools/check-done.mjs` reports every automated gate passing (20 as of 2026-10-08).
 3. A person has run the manual gates that the change touches.
 
 Anything less is in progress, however well it works on a phone.
@@ -62,6 +62,7 @@ A requirement that cannot be stated as true-or-false is not a requirement; it is
 | **DoD-18** | The asset modules load standalone, and nothing an asset exports is defined a second time in an app (`D-096`). | `check-done` G6 and G0 |
 | **DoD-18c** | A change to a core module updates, in the same pass, its requirement in `core/REQUIREMENTS.md` (with a source), its test (named by the requirement), and its section in `core/MODULES.md`. Core never imports a product; the layers in the header and the document are the imports. | `check-done` C1–C4 |
 | **DoD-18b** | No hook depends on a value defined later in the file. The app renders nothing at all when this is wrong, and no behavioural test here can see it (`D-063`). | `check-done` G12 |
+| **DoD-18d** | Sound comes out in both apps under a phone's touch rules: a key, a pad, a second note, and the banner when nothing else can start it (`D-103`). | `check-done` G15 |
 | **DoD-19** | No colour literals in components; every colour comes from a role-named token. | `check-done` G8 |
 | **DoD-20** | A new visual role is added to the token set before it is used. | By hand, at review |
 
@@ -104,6 +105,7 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Core requirements traced to a source that exists; core decisions used | 100% | 14 decisions | C4 |
 | Automated checks passing | 100% | 664/664 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
+| Sound under a phone's touch rules | all cases audible | 6 cases × 4 readings | G15 |
 | Mutation score | ≥ 90% | 228/228 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |
@@ -153,7 +155,7 @@ Record it in the table below with a date, the gate, the reason, and what would h
 | 2026-09-05 | DoD-19 | ~~`R-132` (no ambient randomness) rests on review~~ **Closed:** `check-done` G7 already rejects `Math.random` in the theory layer | — | Closed |
 | 2026-09-05 | DoD-19 | `R-121` (a visual role is added to the token set before it is used) rests on review | Lintable, but the check would need to read the component layer | A static check reads the fill roles and confirms each has a treatment |
 | 2026-09-23 | DoD-22 (the shell) | The Learn tab's shell behaviour was checked headless (21 checks in Chromium) but that run is not yet a gate, so a shell regression would not fail the build. *2026-10-07:* the J-6 page has been checked the same way at every change, and that run, not the suite, caught a crash on load (`D-093`) and 87 keys too wide for a phone (`D-089`). The case for making it a gate grows | It needs esbuild, React, Tone and Playwright, which the project does not install | The headless run is added to `tools/` and `check-done` as a gate |
-| 2026-10-07 | DoD-3 (headless checks) | `tools/startup-check.mjs` and `tools/sound-check.mjs`, like `tools/smoke.mjs`, need a browser the project does not install, so neither is a gate | The suite cannot hear or time a real device; both are run by hand when audio or screens change | The project installs a browser in CI, or the manual gates cover it on every change |
+| 2026-10-07 | DoD-3 (headless checks) | `tools/startup-check.mjs` and `tools/smoke.mjs` need a browser the project does not install, so neither is a gate. *(2026-10-08: `tools/sound-check.mjs` is now gate G15, `D-103`; it fails where no browser is found.)* | The suite cannot hear or time a real device; both are run by hand when audio or screens change | The project installs a browser in CI, or the manual gates cover it on every change |
 | 2026-09-05 | DoD-13 | No mutants for the mute toggle, key colours, note durations, instrument presets or the piano's scroll and hold | The mutator operates on the theory layer; those changes live in the audio and view layers, which it cannot reach | Either the mutator is extended to the view layer, or these stay covered by manual scenarios only |
 
 ---

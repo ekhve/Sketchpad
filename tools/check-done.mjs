@@ -206,6 +206,26 @@ gate("G13", "Every decision referenced has a section or a row", undescribed.leng
    core/tests/architecture.test.mjs shows each check catching a planted fault. */
 for (const r of core.results) gate(r.id, r.name, r.ok, r.ok ? r.detail : r.problems.slice(0, 3).join("; "));
 
+/* ---------- G15: sound comes out, the way it does on a phone ----------
+   Three first-note faults reached a real phone because nothing here could hear: the audio was built too
+   early, a first request to start it was lost and blocked every later one, and piano keys asked to start
+   it on a finger-down, which a phone does not count. tools/sound-check.mjs opens the built apps in a browser
+   whose audio is made to behave like a phone's (suspended until a touch, under four readings of the rule),
+   sends real touches and reads the loudest sample at the speakers. It needs Playwright and a browser; where
+   there is none the gate fails and says why, because a gate that quietly skips is not one. (D-103) */
+{
+  let out = "", code = 0;
+  try {
+    execSync("node tools/build-app.mjs", { encoding: "utf8", stdio: "pipe" });
+    const root = process.env.PLAYWRIGHT || (() => { try { return execSync("npm root -g", { encoding: "utf8" }).trim() + "/playwright"; } catch { return undefined; } })();
+    out = execSync("node tools/sound-check.mjs 2>&1", { encoding: "utf8", env: { ...process.env, ...(root ? { PLAYWRIGHT: root } : {}) }, timeout: 300000 });
+  } catch (e) { out = (e.stdout || "") + (e.stderr || ""); code = e.status ?? 1; }
+  const cases = (out.match(/^\s+ok\s/gm) || []).length, failing = (out.match(/^\s+FAIL\s/gm) || []).length;
+  gate("G15", "Sound comes out under a phone's rules", code === 0 && cases > 0,
+    code === 3 ? "no browser here: run where Playwright is installed (PLAYWRIGHT=/path), or record an exception in DONE.md"
+      : code === 0 ? `${cases} cases, four readings of the touch rule, all audible` : `${failing} failing: ${(out.match(/^\s+FAIL\s.*$/m) || [""])[0].trim().slice(0, 120)}`);
+}
+
 /* ---------- verdict ---------- */
 const width = Math.max(...results.map((r) => r.name.length));
 console.log("\nDEFINITION OF DONE — automated gates\n");

@@ -23,7 +23,8 @@ built into one self-contained HTML page, installable to the home screen.
 node --test tests/*.test.mjs core/tests/*.test.mjs   # run everything (or: npm test)
 node tools/core-check.mjs                            # the asset checks, C1–C4
 node tools/mutate.mjs                                # check the tests themselves
-node tools/check-done.mjs                            # every automated gate
+node tools/check-done.mjs                            # every automated gate (incl. G15, sound: needs Playwright)
+npm run sound                                        # does sound come out, under a phone's touch rules?
 ```
 
 **No build step.** The theory is modules (`core/`, `sketchpad/`) that the app, the

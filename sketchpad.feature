@@ -2360,6 +2360,7 @@ Feature: The first note is the piano, at once
     And it sounds like the piano, not like the stand-in
     And the sound line reads "running · Grand piano · started in …ms" and never "preparing"
     And the second touch sounds too
+    And a piano key, a pad and the J-6 pads all sound whichever kind of touch the phone counts (checked by tools/sound-check.mjs)
 
   @D-101 @auto
   Scenario: The first note waits until the audio can be heard, and never for ever

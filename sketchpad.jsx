@@ -39,9 +39,10 @@ function useInstrument() {
   const [status, setStatus] = useState("idle");
   const [detail, setDetail] = useState("not started");
   const [voiceCount, setVoiceCount] = useState(0);
+  const [asked, setAsked] = useState(false);     // sound was asked for and the browser has not yet allowed it
   const muted = useRef(false);
   const lifted = useRef(new Set());    // keys let go before their note had started
-  const starting = useRef(null);       // the first start, while it is under way, so a second touch waits for it
+  const up = useRef(null);             // the one-time bring-up after the audio has started
   const started = useRef(false);       // has the browser let the audio start? (it needs a touch first)
 
   const refresh = useCallback(() => {
@@ -198,31 +199,68 @@ function useInstrument() {
     }
   }, [instrumentReady]);
 
+  /* Asking the browser to start the audio. A phone honours the request only
+     inside an event that counts as a touch, and a finger going *down* on a piano
+     key is not one; its lifting, or the click after it, is. So this is a plain
+     function that can be called again and again, from every kind of touch, until
+     one of them works. It must never leave a first attempt standing for everything
+     else to wait on: a request made outside a touch can be lost for good, and
+     with it every note after. (D-103) */
+  const unlock = useCallback(() => {
+    if (started.current) return;
+    try {
+      const c = Tone.getContext().rawContext;
+      const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource();
+      src.buffer = b; src.connect(c.destination); src.start(0);       // one silent sample wakes the hardware on iOS
+    } catch (e) {}
+    /* An instrument should sound with the iPhone's silent switch on, as
+       GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
+       property does not exist and nothing changes. (D-076) */
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    try {
+      Tone.start().then(() => { started.current = true; }, (e) => { setStatus("error"); setDetail(`start failed: ${e.message}`); });
+    } catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); }
+  }, []);
+
+  /* Once started: build the graph and wait for the piano, one time. */
+  const bringUp = useCallback(() => {
+    if (!up.current) {
+      up.current = (async () => {
+        build();
+        refresh();
+        const waited = await settle();
+        setDetail(`${preset.current.name} · started in ${waited} ms`);
+        refresh();
+      })();
+    }
+    return up.current;
+  }, [build, refresh, settle]);
+
   const init = useCallback(async () => {
-    if (started.current) { await resume(); return; }
-    if (starting.current) { await starting.current; return; }
-    /* Inside the touch: ask the browser to start, and play one silent sample,
-       which is what wakes the hardware on iOS. */
-    starting.current = (async () => {
-      try {
-        const c = Tone.getContext().rawContext;
-        const b = c.createBuffer(1, 1, 22050), src = c.createBufferSource();
-        src.buffer = b; src.connect(c.destination); src.start(0);
-      } catch (e) {}
-      /* An instrument should sound with the iPhone's silent switch on, as
-         GarageBand does. Safari 16.4+ lets a page ask for that; elsewhere this
-         property does not exist and nothing changes. (D-076) */
-      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
-      try { await Tone.start(); started.current = true; }
-      catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); return; }
-      build();
-      refresh();
-      const waited = await settle();
-      setDetail(`${preset.current.name} · started in ${waited} ms`);
-      refresh();
-    })();
-    try { await starting.current; } finally { starting.current = null; }
-  }, [resume, refresh, build, settle]);
+    if (!started.current) {
+      unlock();
+      /* Wait for a touch that counts. Anything waiting here is let through the
+         moment one arrives; if none does, say so and give up quietly. */
+      setAsked(true);
+      const t0 = performance.now();
+      while (!started.current && performance.now() - t0 < 15000) await new Promise((r) => setTimeout(r, 25));
+      if (!started.current) return;
+    }
+    setAsked(false);
+    await bringUp();
+    await resume();
+  }, [unlock, bringUp, resume]);
+
+  /* Every kind of touch that can count tries to start the audio, until it has
+     started, so the first thing a person does, anywhere, is enough. */
+  useEffect(() => {
+    const kinds = ["pointerup", "touchend", "click", "keydown", "mouseup"];
+    const on = () => unlock();
+    const down = (e) => { if (e.pointerType === "mouse") unlock(); };
+    kinds.forEach((k) => window.addEventListener(k, on, true));
+    window.addEventListener("pointerdown", down, true);
+    return () => { kinds.forEach((k) => window.removeEventListener(k, on, true)); window.removeEventListener("pointerdown", down, true); };
+  }, [unlock]);
 
   useEffect(() => { if (preset.current.kind === "sampler") buffersFor(preset.current).catch(() => {}); }, [buffersFor]);   // decode now; build on the first touch
 
@@ -399,7 +437,7 @@ function useInstrument() {
   }, [reap, refresh]);
 
   return { init, resume, play, panic, test, reset, setInstrument, setEcho, setSpace,
-           holdOn, holdOff, setMuted: setMutedState, ready, status, detail, voiceCount };
+           holdOn, holdOff, setMuted: setMutedState, ready, status, detail, voiceCount, waitingForTouch: asked };
 }
 
 /* ============================================================================
@@ -439,6 +477,19 @@ const T = {
   tension: "#B23A48",   // outside-the-scale emphasis, stop states
   ok: "#3E7D5A",        // compatibility confirmations
 };
+
+/* Shown while sound has been asked for and the browser has not yet allowed it.
+   A tap on this is a click, which every phone counts as a touch. (D-103) */
+function SoundBanner({ audio }) {
+  if (!audio.waitingForTouch) return null;
+  return (
+    <button onClick={() => audio.init()} aria-label="turn the sound on"
+      className="w-full text-sm px-3 py-2 rounded-md mb-2 text-left"
+      style={{ background: T.raised, color: T.ink, border: `1px solid ${T.tension}` }}>
+      The sound is waiting for a tap. Tap here to turn it on.
+    </button>
+  );
+}
 
 function Piano({ startMidi, octaves = 4, chordNotes, chordRootMidi, loopNotes, scaleSet, tonic, sounding, bassLit, picked = [], changed = [], guide = false, system, onDown, onUp, fingers = [], brackets = [] }) {
   const midis = useMemo(() => Array.from({ length: octaves * 12 + 1 }, (_, i) => startMidi + i), [startMidi, octaves]);
@@ -1235,6 +1286,7 @@ export default function App() {
             </div>
           </div>
         </header>
+        <SoundBanner audio={inst} />
 
         <div className="grid grid-cols-6 gap-1 mb-1.5">
           {NAMES.map((_, i) => (
@@ -2340,4 +2392,4 @@ export default function App() {
    colour tokens and the theory from here, imported rather than copied, so
    there is one of each. Its engine's theory import is pointed at this file
    when the page is bundled. (D-086) */
-export { T, Piano, Diagram, PRINT_CSS, useInstrument };
+export { T, Piano, Diagram, PRINT_CSS, useInstrument, SoundBanner };

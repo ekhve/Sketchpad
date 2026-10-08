@@ -632,6 +632,9 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-416 | The first note waits until the audio is running, its clock is moving, the hardware has had time to come up and the instrument is ready, and never for more than a limit. | D-101 | A | The first note waits until the audio can be heard, and never for ever |
 | R-417 | The first note after opening sounds, as the piano, in both apps, and a quick tap on the first key still sounds briefly. | D-101, D-100 | M | The first note after opening is the piano and is not late |
 | R-418 | In both apps the first touch and the second each put sound out. | D-102, D-100 | M | The first note after opening is the piano and is not late |
+| R-419 | The audio starts on the first touch that counts, wherever it lands, and a request to start it that was refused never blocks a later one. | D-103 | A | *(`tools/sound-check.mjs`, gate G15)* |
+| R-420 | If sound is asked for and the browser has not allowed it, the page says so and offers a tap that fixes it. | D-103 | A | *(`tools/sound-check.mjs`, gate G15)* |
+| R-421 | In both apps a piano key, a pad and a second note each put sound out, under every reading of the phone's touch rule that is tested. | D-103, D-102 | A | *(`tools/sound-check.mjs`, gate G15)* |
 | R-415 | An embedded recording is converted to the bytes it holds, without a browser function. | D-100, D-070 | A | An embedded recording is turned into the bytes it holds |
 
 ## 11. Visual system

@@ -7,6 +7,7 @@
     "test": "node --test tests/*.test.mjs core/tests/*.test.mjs sketchpad/tests/*.test.mjs",
     "mutate": "node tools/mutate.mjs",
     "check": "node tools/check-done.mjs",
+    "sound": "node tools/build-app.mjs && node tools/sound-check.mjs",
     "build": "node tools/build-app.mjs",
     "site": "node tools/build-app.mjs && node tools/package-site.mjs build/sketchpad-app.html site/ dist/ && node tools/package-site.mjs build/j6-app.html site/j6/ dist/j6/ j6"
   },

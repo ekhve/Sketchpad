@@ -8,7 +8,7 @@
    The layout follows the agreed screens, proto/j6/explore.svg and find.svg. */
 import React, { useState, useMemo, useCallback, useEffect, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { T, Piano, Diagram, PRINT_CSS, useInstrument } from "../sketchpad.jsx";
+import { T, Piano, Diagram, PRINT_CSS, useInstrument, SoundBanner } from "../sketchpad.jsx";
 import { spelling, pc } from "../core/notes.mjs";
 import { scalePcs } from "../core/scales.mjs";
 import * as j from "./j6.mjs";
@@ -694,6 +694,8 @@ export default function J6App() {
         </div>
         <Segmented label="screen" value={tab} onChange={(id) => { stopAll(); setTab(id); }} options={[["explore", "Explore"], ["find", "Find"]]} />
       </header>
+
+      <SoundBanner audio={audio} />
 
       {tab === "explore"
         ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} opts={opts} setOpts={setOpts} along={along} setAlong={setAlong} />
