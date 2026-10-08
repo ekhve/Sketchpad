@@ -11,12 +11,12 @@ import { explainChord, explainProgression, describeChange } from "./core/explain
 import { rng, STYLES, patternsFor, place, renderProgressionFigure, explainFigure, planBar } from "./core/figures.mjs";
 import { HAND_REACH, DEFAULT_REACH, FINGER_HANDS, effectiveFingerHand, FINGER_COPY, fingerChord, stepFingering, litLessonFingers } from "./core/fingering.mjs";
 import { harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, chordsAtTension } from "./core/harmony.mjs";
-import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, SPACES, reverbSettings } from "./core/instruments.mjs";
+import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, reverbSettings } from "./core/instruments.mjs";
 import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyAtPosition } from "./core/keyboard.mjs";
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
 import { createDriver, loopIndex } from "./core/transport.mjs";
-import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
+import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, rollStyleById, rollOffsets } from "./core/playback.mjs";
 import { scaleById, scalePcs, fitScales, keysContaining, scalesContaining, customScaleFrom, customScalePcs, activeScalePcs } from "./core/scales.mjs";
 import { diagramKeys, sheetData, sheetAsText } from "./core/sheet.mjs";
 import { scalesForStyle } from "./core/styles.mjs";
@@ -24,7 +24,7 @@ import { parseChordNames, TYPING_CHIPS, typedLabel } from "./core/symbols.mjs";
 import { dictionaryFor, voicingsFor, voiceLeading, arpeggio, smoothestVoicing } from "./core/voicing.mjs";
 import { GUIDE } from "./sketchpad/guide.mjs";
 import { LESSON_TOPICS, buildLesson, lessonsFor, practiceNote, practiceFeedback, practiceHint, hintMethod, chordShape, nextKeyRound } from "./sketchpad/lessons.mjs";
-import { namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, has, tabsAt } from "./sketchpad/model.mjs";
+import { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, has, tabsAt } from "./sketchpad/model.mjs";
 
 /* ============================================================================
    AUDIO — one instrument behind an interface, always releasable. (D-009, D-017)
@@ -770,6 +770,7 @@ export default function App() {
   const [echo, setEchoOn] = useState(true);
   const [space, setSpace] = useState("room");
   const [roll, setRoll] = useState("block");
+  const [soundOpen, setSoundOpen] = useState(false);    // D-105: the sound options are folded away until asked for
   const [voicingId, setVoicingId] = useState("close");
   const [lesson, setLesson] = useState({ degree: 0, step: -1 });
   const [picked, setPicked] = useState([]);
@@ -1298,6 +1299,17 @@ export default function App() {
           {/* In a lesson the piano shows only what the lesson is about: the
               answer when asked for, the notes already right, and the home dot.
               Scale dots would give a scale step away before it was played. (D-073) */}
+          <div className="flex items-center justify-end mb-1">
+            <div className="flex items-center rounded-md overflow-hidden" style={{ background: T.raised }}>
+              <button onClick={() => setStartMidi(Math.max(PIANO_RANGE.lowest, startMidi - 12))} aria-label="Octave down"
+                disabled={startMidi <= PIANO_RANGE.lowest}
+                className="px-2.5 py-1 text-sm disabled:opacity-40" style={{ color: T.ink }}>‹</button>
+              <span className="text-[11px] px-1 tabular-nums" style={{ color: T.inkSoft }}>Oct {Math.floor(startMidi / 12) - 1}</span>
+              <button onClick={() => setStartMidi(Math.min(HIGHEST_START_MIDI, startMidi + 12))} aria-label="Octave up"
+                disabled={startMidi >= HIGHEST_START_MIDI}
+                className="px-2.5 py-1 text-sm disabled:opacity-40" style={{ color: T.ink }}>›</button>
+            </div>
+          </div>
           <Piano startMidi={startMidi}
             chordNotes={tab === "learn" && lessonNow ? (practice.shown.length ? practice.shown : practice.hint !== null ? [practice.hint] : []) : chordNotes}
             chordRootMidi={tab === "learn" && lessonNow ? -1 : chord?.notes?.[0] ?? -1}
@@ -1334,15 +1346,11 @@ export default function App() {
           )}
 
           <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center rounded-md overflow-hidden" style={{ background: T.raised }}>
-              <button onClick={() => setStartMidi(Math.max(PIANO_RANGE.lowest, startMidi - 12))} aria-label="Octave down"
-                disabled={startMidi <= PIANO_RANGE.lowest}
-                className="px-2.5 py-1 text-sm disabled:opacity-40" style={{ color: T.ink }}>‹</button>
-              <span className="text-[11px] px-1 tabular-nums" style={{ color: T.inkSoft }}>Oct {Math.floor(startMidi / 12) - 1}</span>
-              <button onClick={() => setStartMidi(Math.min(HIGHEST_START_MIDI, startMidi + 12))} aria-label="Octave up"
-                disabled={startMidi >= HIGHEST_START_MIDI}
-                className="px-2.5 py-1 text-sm disabled:opacity-40" style={{ color: T.ink }}>›</button>
-            </div>
+            <button onClick={() => setSoundOpen(!soundOpen)} aria-expanded={soundOpen} aria-controls="sound-options"
+              className="text-xs px-2.5 py-1 rounded-md"
+              style={{ background: soundOpen ? T.ink : T.raised, color: soundOpen ? T.keyWhite : T.ink, fontWeight: soundOpen ? 600 : 400 }}>
+              Sound options {soundOpen ? "▴" : "▾"}
+            </button>
             <button onClick={() => setMuted(!muted)} aria-pressed={muted}
               aria-label={muted ? "Turn sound on" : "Turn sound off"}
               className="ml-auto flex items-center gap-1.5 text-xs px-2 py-1 rounded"
@@ -1352,53 +1360,37 @@ export default function App() {
             <button onClick={panic} className="text-xs px-2 py-1 rounded" style={{ background: T.raised, color: T.tension, fontWeight: 600 }}>silence</button>
           </div>
 
-          <div className="flex items-center gap-1 mt-2 -mx-1 px-1 overflow-x-auto">
-            {INSTRUMENTS.map((ins) => (
-              <button key={ins.id} onClick={() => setInstId(ins.id)} title={ins.note}
-                className="px-2.5 py-1 rounded-md text-xs whitespace-nowrap"
-                style={{ background: instId === ins.id ? T.ink : T.raised, color: instId === ins.id ? T.keyWhite : T.inkSoft, fontWeight: instId === ins.id ? 600 : 400 }}>
-                {ins.name}
-              </button>
-            ))}
-            <button onClick={() => setEchoOn(!echo)} aria-pressed={echo}
-              className="px-2.5 py-1 rounded-md text-xs whitespace-nowrap"
-              style={{ background: echo ? T.bass : T.raised, color: echo ? T.keyWhite : T.inkSoft, fontWeight: echo ? 600 : 400 }}>
-              echo {echo ? "on" : "off"}
-            </button>
-            {ROLL_STYLES.map((r) => (
-              <button key={r.id} onClick={() => setRoll(r.id)} title={r.note}
-                className="px-2.5 py-1 rounded-md text-xs whitespace-nowrap"
-                style={{ background: roll === r.id ? T.chordW : T.raised, color: roll === r.id ? T.keyWhite : T.inkSoft, fontWeight: roll === r.id ? 600 : 400 }}>
-                {r.name}
-              </button>
-            ))}
-            {SPACES.map((sp) => (
-              <button key={sp.id} onClick={() => setSpace(sp.id)} title={sp.note}
-                className="px-2.5 py-1 rounded-md text-xs whitespace-nowrap"
-                style={{ background: space === sp.id ? T.homeDot : T.raised, color: space === sp.id ? T.keyWhite : T.inkSoft, fontWeight: space === sp.id ? 600 : 400 }}>
-                {sp.name}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            <button onClick={inst.test} className="text-xs px-2.5 py-1 rounded font-semibold"
-              style={{ background: T.homeDot, color: T.keyWhite }}>test sound</button>
-            <span className="text-[10px] px-2 py-1 rounded"
-              style={{ background: T.raised, color: inst.status === "running" ? T.ok : inst.status === "error" ? T.tension : T.inkSoft }}>
-              {inst.status} · {inst.detail}
-            </span>
-            <span className="text-[10px] px-2 py-1 rounded" style={{ background: T.raised, color: T.inkSoft }}>
-              {inst.voiceCount}/24 voices
-            </span>
-            {instrumentById(instId).credit && (
-              <span className="text-[10px] px-2 py-1 rounded" style={{ background: T.raised, color: T.inkSoft }}>
-                {instrumentById(instId).credit}
-              </span>
-            )}
-            <button onClick={inst.reset} className="text-[10px] px-2 py-1 rounded ml-auto"
-              style={{ background: T.raised, color: T.tension }}>reset audio</button>
-          </div>
+          {soundOpen && (
+            <div id="sound-options" className="mt-2 rounded-md p-2 flex flex-col gap-2" style={{ background: T.surface }}>
+              {soundSections().map((sec) => {
+                const chosen = { instrument: instId, played: roll, room: space, echo: echo ? "on" : "off" }[sec.id];
+                const choose = { instrument: setInstId, played: setRoll, room: setSpace, echo: (v) => setEchoOn(v === "on") }[sec.id];
+                return (
+                  <div key={sec.id} role="group" aria-label={sec.label} className="flex items-center gap-1.5">
+                    <span className="text-[10px] w-14 shrink-0" style={{ color: T.inkSoft }}>{sec.label}</span>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {sec.options.map((o) => (
+                        <button key={o.id} onClick={() => choose(o.id)} title={o.note} aria-pressed={chosen === o.id}
+                          className="px-2.5 py-1 rounded-md text-xs whitespace-nowrap"
+                          style={{ background: chosen === o.id ? T.ink : T.raised, color: chosen === o.id ? T.keyWhite : T.inkSoft, fontWeight: chosen === o.id ? 600 : 400 }}>
+                          {o.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="flex items-center gap-1.5 flex-wrap pt-1" style={{ borderTop: `1px solid ${T.edge}` }}>
+                <button onClick={inst.test} className="text-xs px-2.5 py-1 rounded font-semibold"
+                  style={{ background: T.homeDot, color: T.keyWhite }}>test sound</button>
+                <button onClick={inst.reset} className="text-[11px] px-2 py-1 rounded"
+                  style={{ background: T.raised, color: T.tension }}>reset audio</button>
+                {instrumentById(instId).credit && (
+                  <span className="text-[10px] w-full" style={{ color: T.inkSoft }}>{instrumentById(instId).credit}</span>
+                )}
+              </div>
+            </div>
+          )}
           {inst.status === "suspended" && (
             <button onClick={() => inst.resume()} className="w-full text-xs py-1.5 mt-2 rounded"
               style={{ background: T.tension, color: T.keyWhite, fontWeight: 600 }}>

@@ -7,7 +7,7 @@
 A change is **done** when all three of the following are true. Not one. Not two.
 
 1. Every gate below either passes or has a recorded, dated exception.
-2. `node tools/check-done.mjs` reports every automated gate passing (20 as of 2026-10-08).
+2. `node tools/check-done.mjs` reports every automated gate passing (21 as of 2026-10-08).
 3. A person has run the manual gates that the change touches.
 
 Anything less is in progress, however well it works on a phone.
@@ -63,6 +63,7 @@ A requirement that cannot be stated as true-or-false is not a requirement; it is
 | **DoD-18c** | A change to a core module updates, in the same pass, its requirement in `core/REQUIREMENTS.md` (with a source), its test (named by the requirement), and its section in `core/MODULES.md`. Core never imports a product; the layers in the header and the document are the imports. | `check-done` C1–C4 |
 | **DoD-18b** | No hook depends on a value defined later in the file. The app renders nothing at all when this is wrong, and no behavioural test here can see it (`D-063`). | `check-done` G12 |
 | **DoD-18d** | Sound comes out in both apps under a phone's touch rules: a key, a pad, a second note, and the banner when nothing else can start it (`D-103`). | `check-done` G15 |
+| **DoD-18e** | The screen is laid out as asked at phone widths: what is shown, what is folded, where the controls are, nothing wider than the screen (`D-105`). | `check-done` G16 |
 | **DoD-19** | No colour literals in components; every colour comes from a role-named token. | `check-done` G8 |
 | **DoD-20** | A new visual role is added to the token set before it is used. | By hand, at review |
 
@@ -98,14 +99,15 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
-| Assets defined once, apps import them | always | 171 exports in 22 modules, none redefined | G0 |
-| Asset requirements with a test, and tests with a requirement | 100% | 202/202 | C1 |
+| Assets defined once, apps import them | always | 172 exports in 22 modules, none redefined | G0 |
+| Asset requirements with a test, and tests with a requirement | 100% | 203/203 | C1 |
 | Module interfaces documented, nothing documented missing | 100% | 158 exports | C2 |
 | Architecture: acyclic, layered, pure, core independent | holds | 22 modules, 5 layers | C3 |
 | Core requirements traced to a source that exists; core decisions used | 100% | 14 decisions | C4 |
-| Automated checks passing | 100% | 661/661 | G1 |
+| Automated checks passing | 100% | 662/662 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
 | Sound under a phone's touch rules | all cases audible | 6 cases × 4 readings | G15 |
+| Screen layout at phone widths | all checks | 11 checks × 3 widths | G16 |
 | Mutation score | ≥ 90% | 223/223 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |

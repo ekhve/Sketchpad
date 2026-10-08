@@ -1,8 +1,10 @@
 /* sketchpad/model — unit tests, one per requirement in sketchpad/REQUIREMENTS.md (SR-MODEL-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS } from "../model.mjs";
+import { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS } from "../model.mjs";
 import { noteName } from "../../core/notes.mjs";
+import { INSTRUMENTS, SPACES } from "../../core/instruments.mjs";
+import { ROLL_STYLES } from "../../core/playback.mjs";
 
 test("SR-MODEL-01 there are three levels, Start, Produce and Study, and each one only adds to the one before", () => {
   assert.deepEqual(LEVELS.map((l) => l.id), ["start", "produce", "study"]);
@@ -56,4 +58,15 @@ test("SR-MODEL-07 notes are written as sharps unless the key's own spelling is c
   assert.equal(noteName(3, namingFor({ base: "solfege", accidentals: "key", tonic: 3, mode: "major" })), "Mi♭");
   assert.equal(noteName(3, namingFor({ accidentals: "key", tonic: 11, mode: "major" })), "D#", "a sharp key keeps its sharps");
   assert.equal(namingFor({ accidentals: "anything else" }), "letters", "only \"key\" asks for the key's spelling");
+});
+
+test("SR-MODEL-08 the sound options are four rows, instrument, how a chord is played, reverb and echo, each offering every choice the catalogues have, once", () => {
+  const rows = soundSections();
+  assert.deepEqual(rows.map((r) => r.id), ["instrument", "played", "room", "echo"]);
+  assert.deepEqual(rows.map((r) => r.label), ["Sound", "Played", "Reverb", "Echo"]);
+  const ids = (row) => rows.find((r) => r.id === row).options.map((o) => o.id);
+  assert.deepEqual(ids("instrument"), INSTRUMENTS.map((i) => i.id)); assert.deepEqual(ids("played"), ROLL_STYLES.map((r) => r.id));
+  assert.deepEqual(ids("room"), SPACES.map((s) => s.id)); assert.deepEqual(ids("echo"), ["on", "off"]);
+  for (const row of rows) { assert.equal(new Set(ids(row.id)).size, row.options.length, `${row.id}: a choice once`); for (const o of row.options) assert.ok(o.name && o.note, `${row.id}/${o.id} is named and explained`); }
+  assert.deepEqual(soundSections(), soundSections(), "the same each time");
 });

@@ -636,6 +636,15 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-421 | In both apps a piano key, a pad and a second note each put sound out, under every reading of the phone's touch rule that is tested. | D-103, D-102 | A | *(`tools/sound-check.mjs`, gate G15)* |
 | R-415 | An embedded recording is converted to the bytes it holds, without a browser function. | D-100, D-070 | A | An embedded recording is turned into the bytes it holds |
 
+## 10zf. The sound options
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-422 | The sound choices (instrument, how a chord is played, reverb, echo) are in one section that is folded away until asked for, and every choice the catalogues hold is offered once. | D-105 | A | The sound options are folded away and offer every choice |
+| R-423 | No engine text (status, detail, voice count) is shown; the recordings' credit stays on show with the options. | D-105, D-062 | A | The sound options are folded away and offer every choice |
+| R-424 | The octave control is above the piano. | D-105 | A | The octave control sits above the piano |
+| R-425 | Nothing on the screen is wider than a phone, with the options shut or open. | D-105, D-002 | A | The sound options are folded away and offer every choice |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

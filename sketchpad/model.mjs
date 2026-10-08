@@ -1,10 +1,12 @@
 /* sketchpad/model — What the Sketchpad shell shows: the levels and the features each adds, which tabs exist at each level, and which chord is active when none is selected.
-   Layer 1. Depends on: core/notes. Pure: no React, no Tone, no DOM, no dates, no randomness.
+   Layer 2. Depends on: core/instruments, core/notes, core/playback. Pure: no React, no Tone, no DOM, no dates, no randomness.
    Interface, behaviour and requirements: sketchpad/MODULES.md (model).
    Moved from the THEORY block of sketchpad.jsx (D-096); namingFor added (D-097).
    Everything else is unchanged. */
 
 import { spelling } from "../core/notes.mjs";
+import { INSTRUMENTS, SPACES } from "../core/instruments.mjs";
+import { ROLL_STYLES } from "../core/playback.mjs";
 
 
 
@@ -14,6 +16,19 @@ import { spelling } from "../core/notes.mjs";
    is the base system unchanged. (D-097, D-019, D-074) */
 function namingFor({ base = "letters", accidentals = "sharps", tonic = 0, mode = "major" } = {}) {
   return accidentals === "key" ? spelling(base, tonic, mode) : base;
+}
+
+/* The sound options, as the panel offers them: what the notes sound like, how a chord is
+   struck, how much reverb, and echo. Built from the catalogues, so a new instrument or
+   room appears without the panel being touched. Each is a choice of one. (D-105) */
+function soundSections() {
+  const from = (list) => list.map((x) => ({ id: x.id, name: x.name, note: x.note }));
+  return [
+    { id: "instrument", label: "Sound", options: from(INSTRUMENTS) },
+    { id: "played", label: "Played", options: from(ROLL_STYLES) },
+    { id: "room", label: "Reverb", options: from(SPACES) },
+    { id: "echo", label: "Echo", options: [{ id: "on", name: "On", note: "A soft repeat after each note." }, { id: "off", name: "Off", note: "No repeat." }] },
+  ];
 }
 
 /* Which chord should the Bass and Theory tabs describe? (D-039)
@@ -90,4 +105,4 @@ function tabsAt(levelId) {
    is wrong. These are the features UC-00 actually needs. (D-058) */
 const UC00_NEEDS = ["key", "piano", "sound", "chords", "scales", "loop", "explain"];
 
-export { namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS };
+export { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS };

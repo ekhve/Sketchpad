@@ -226,6 +226,22 @@ for (const r of core.results) gate(r.id, r.name, r.ok, r.ok ? r.detail : r.probl
       : code === 0 ? `${cases} cases, four readings of the touch rule, all audible` : `${failing} failing: ${(out.match(/^\s+FAIL\s.*$/m) || [""])[0].trim().slice(0, 120)}`);
 }
 
+/* ---------- G16: the screen is laid out as asked ----------
+   The owner's layout requests (no engine text, the sound options folded away, the octave control above the
+   piano, nothing wider than a phone) are checked headless by tools/layout-check.mjs at three phone widths.
+   Same rule as G15: it needs a browser, and fails with the reason where there is none. (D-105) */
+{
+  let out = "", code = 0;
+  try {
+    const root = process.env.PLAYWRIGHT || (() => { try { return execSync("npm root -g", { encoding: "utf8" }).trim() + "/playwright"; } catch { return undefined; } })();
+    out = execSync("node tools/layout-check.mjs 2>&1", { encoding: "utf8", env: { ...process.env, ...(root ? { PLAYWRIGHT: root } : {}) }, timeout: 300000 });
+  } catch (e) { out = (e.stdout || "") + (e.stderr || ""); code = e.status ?? 1; }
+  const passed = (out.match(/^ok\s/gm) || []).length, failing = (out.match(/^FAIL\s/gm) || []).length;
+  gate("G16", "The screen is laid out as asked", code === 0 && passed > 0,
+    code === 3 ? "no browser here: run where Playwright is installed (PLAYWRIGHT=/path), or record an exception in DONE.md"
+      : code === 0 ? `${passed} layout checks at three phone widths` : `${failing} failing: ${(out.match(/^FAIL\s.*$/m) || [""])[0].slice(0, 120)}`);
+}
+
 /* ---------- verdict ---------- */
 const width = Math.max(...results.map((r) => r.name.length));
 console.log("\nDEFINITION OF DONE — automated gates\n");

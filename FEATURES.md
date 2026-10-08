@@ -229,6 +229,16 @@ Not in the original plan. Each earned its place.
 | Events to a MIDI file | **Open** | Events are already instrument-free (`CD-003`); a pure function away |
 | Names for the flat 9, sharp 9 and sharp 11 | **Done** | A formula reads 1 – 3 – 5 – ♭7 – ♭9, not 13 (`CD-007` limit closed) |
 
+## Tidying the screen (`D-105`)
+
+| Feature | Status | Notes |
+|---|---|---|
+| Sound options folded into one section (sound, how a chord is played, reverb, echo) | **Done** | Shut at first; "sound" and "silence" stay out |
+| Engine text removed | **Done** | The status line and voice count are gone; the licence credit stays inside the options |
+| Octave control above the piano | **Done** | |
+| Rolling a chord and playing a scale as one arpeggiator | **Open** | Together/roll/slow roll and up/down/mix are the same idea (`D-105`, noted) |
+| The rest of the screen tidied | **Open** | Next: chosen with the owner |
+
 ## Known gaps and rough edges
 
 | Gap | Impact | Plan |

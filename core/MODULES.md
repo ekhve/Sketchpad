@@ -50,7 +50,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/playback
 
-**Layer** 0 · **Depends on** nothing · **Used by** core/transport, sketchpad
+**Layer** 0 · **Depends on** nothing · **Used by** core/transport, sketchpad, sketchpad/model
 
 **Purpose.** The arithmetic of playing sound, with no audio library: the look-ahead scheduler, bar length from tempo, the voice budget and its reaping, and rolling a chord.
 
@@ -126,7 +126,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/instruments
 
-**Layer** 1 · **Depends on** core/piano-samples · **Used by** sketchpad
+**Layer** 1 · **Depends on** core/piano-samples · **Used by** sketchpad, sketchpad/model
 
 **Purpose.** Instrument presets as data, delay and reverb settings, and the built-in piano's range and sample coverage, so an audio layer builds from data and holds no opinions.
 

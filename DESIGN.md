@@ -849,6 +849,22 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Risk, stated.** If an iPhone really does lose a note struck in the first ~100 ms after the audio starts, the first note will be lost again. The phone test says; if it does, the wait comes back in a smaller form (a short delay on the first note only), not a return to the old shape.
 
+
+### D-105 — Sketchpad's sound controls fold away, and the octave goes on top of the piano
+
+**Context.** The owner: the screen under the piano had become a long row of buttons and chips (five instruments, echo, three ways of rolling a chord, four rooms, then "test sound", an engine line reading "running · Grand piano", a voice count, the recordings' credit, "reset audio"), and the octave control sat below the keys. Asked for: a togglable sound section holding the sound, how it is played, reverb and echo; the engine text gone; the octave on top of the piano. (First step of tidying the screen. The parallel between rolling a chord and playing a scale up, down or mixed is noted below, not built.)
+
+**Decision.**
+1. **A "Sound options" toggle** under the piano, shut at first, beside "sound" (mute) and "silence", which stay out because they are used mid-playing. Open, it holds four labelled rows built from the catalogues by `soundSections` in `sketchpad/model`: **Sound** (the instruments), **Played** (together, roll, slow roll), **Reverb** (dry, room, hall, cave), **Echo** (on, off). Each is a choice of one, shown as pressed. A new instrument or room appears without the panel being edited.
+2. **The engine text is gone**: the "running · Grand piano" line, the "n/24 voices" chip. What the owner needs to see when sound is wrong is the existing paused-by-the-browser bar and the tap-to-start bar (`D-103`), which stay.
+3. **Kept, inside the options**: "test sound" and "reset audio", for when something sounds wrong, and the recordings' credit, which the licence (CC-BY 3.0) requires to stay on show wherever the grand piano is on offer.
+4. **The octave control sits above the piano**, right-aligned, where the hand is.
+5. The guide's "Sound controls" section describes the new place.
+
+**Checked.** `tools/layout-check.mjs` (gate G16) opens the built app at 360, 375 and 414 px and checks all of it: no engine text, folded at first, four rows with every choice, the credit kept, the octave control above the keys, pressed state, folds away again with the choice kept, no sideways overflow open or shut, no script errors. It fails on the previous build. What it cannot judge is whether the screen *looks* tidy; that is for the owner.
+
+**Noted for later.** Rolling a chord (together, roll, slow roll) and playing a scale (up, down, mixed) are the same kind of thing: an arpeggiator, a pattern for turning a set of notes into notes in time. `core/voicing.arpeggio` and `core/playback.rollOffsets` are the two halves today. One asset with a pattern parameter would serve both, and later a sequencer; not designed here.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -960,6 +976,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | Sketchpad was silent on the phone after the early-build change; the audio graph is built on the first touch again and only the piano's decoding is early. `tools/sound-check.mjs` taps the audio output headless. Diagnosed from the difference between the apps, not reproduced (`D-102`) |
 | 2026-10-08 | Single piano notes were silent on the phone: they asked the browser to start the audio on a finger-down, which a phone does not count, and a lost first request blocked all later ones. Any counting touch now asks again; a visible "tap to turn the sound on" bar is the fallback. Reproduced in a browser made to behave like a phone, and that check is now gate G15 (`D-103`) |
 | 2026-10-08 | The first-note wait of `D-101` is removed at the owner's request: no settle time, no waiting for the piano, no start-time line; the touch that starts the audio plays the note (`D-104`) |
+| 2026-10-08 | Sketchpad's sound controls fold into a "Sound options" section (instrument, how a chord is played, reverb, echo), the engine text is gone, and the octave control sits above the piano; the layout is checked at phone widths (`D-105`, gate G16) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

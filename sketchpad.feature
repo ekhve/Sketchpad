@@ -2369,6 +2369,27 @@ Feature: The first note is the piano, at once
     When I tap a key so quickly that I lift my finger before the sound has started
     Then it sounds briefly, and it does not stay on
 
+
+Feature: The sound options
+  The choices that shape the sound are in one folded section, and the octave control
+  sits above the piano. (D-105)
+
+  @D-105 @manual
+  # checked headless at three phone widths by tools/layout-check.mjs (gate G16); judging whether it looks tidy is for a person
+  Scenario: The sound options are folded away and offer every choice
+    Given Sketchpad on a phone
+    Then the sound options are folded away at first, with no engine text on the screen
+    And opening them shows the rows Sound, Played, Reverb and Echo
+    And each offers every instrument, roll style, room and echo choice the app has, once
+    And the credit for the recordings is inside them
+    And nothing is wider than the screen, open or shut
+
+  @D-105 @manual
+  # checked by tools/layout-check.mjs (gate G16)
+  Scenario: The octave control sits above the piano
+    Given Sketchpad on a phone
+    Then the octave control is above the keys
+
 Feature: Rolling a chord
   Six notes struck together are one sound. Spread them slightly and every note
   is audible, while the chord still arrives as a chord.

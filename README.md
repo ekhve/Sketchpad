@@ -25,6 +25,7 @@ node tools/core-check.mjs                            # the asset checks, C1–C4
 node tools/mutate.mjs                                # check the tests themselves
 node tools/check-done.mjs                            # every automated gate (incl. G15, sound: needs Playwright)
 npm run sound                                        # does sound come out, under a phone's touch rules?
+node tools/layout-check.mjs                          # is the screen laid out as asked? (gate G16)
 ```
 
 **No build step.** The theory is modules (`core/`, `sketchpad/`) that the app, the
@@ -45,7 +46,7 @@ Keep helpers out of the runner's path and pass the glob explicitly.
 | `site.test.mjs` | 8 | The installable site: manifest, iOS tags, offline cache, updates, and the J-6 app beside it (`D-076`, `D-087`) |
 | `traceability.test.mjs` | 6 | That the feature file and the tests still describe the same product |
 | `core/tests/*.test.mjs` | 183 | The reusable assets, one test per requirement in `core/REQUIREMENTS.md`, plus the architecture and contract tests (`D-096`) |
-| `sketchpad/tests/*.test.mjs` | 19 | Sketchpad's own modules: levels and tabs, the guide, the lessons |
+| `sketchpad/tests/*.test.mjs` | 20 | Sketchpad's own modules: levels and tabs, the guide, the lessons |
 
 Scenarios tagged `@manual` in `sketchpad.feature` cover sound, timing and
 legibility. Those cannot be asserted here and are checked by hand on a phone.
@@ -60,7 +61,7 @@ of tests written specifically after an earlier run found them surviving.
 Add a mutant whenever you add a feature. A mutant that reports `SKIP` has gone
 stale against refactored code and needs rewriting, not deleting.
 
-Current state: 661 automated checks, all passing.
+Current state: 662 automated checks, all passing.
 
 ## Before calling anything done
 
