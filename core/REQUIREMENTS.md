@@ -200,8 +200,6 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-PLAYBACK-07 | pickVoiceIndex takes the first free voice, and otherwise the one finishing soonest. | D-043, D-038, D-066 | A | `core/tests/playback.test.mjs` |
 | CR-PLAYBACK-08 | Rolling has three styles, from all at once to a slow roll, found by id with the first as the fallback. | D-068, UC-57 | A | `core/tests/playback.test.mjs` |
 | CR-PLAYBACK-09 | rollOffsets starts the notes low to high, one spread apart, and fits any chord inside half a second. | D-068, UC-57 | A | `core/tests/playback.test.mjs` |
-| CR-PLAYBACK-10 | The first note waits until the audio is running, its clock is moving, it has settled and the instrument is ready. | D-101, D-100 | A | `core/tests/playback.test.mjs` |
-| CR-PLAYBACK-11 | The first note never waits for ever: after the longest wait it plays with what there is. | D-101, CD-005 | A | `core/tests/playback.test.mjs` |
 
 ## core/instruments
 

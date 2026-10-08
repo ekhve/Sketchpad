@@ -799,7 +799,7 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 **Not changed.** The fallback voices (`D-064`) and the voice pool (`D-066`) are as they were.
 
 
-### D-101 — The first note waits until the audio can be heard
+### D-101 — The first note waits until the audio can be heard *(the wait itself was removed by `D-104`; the rest stands)*
 
 **Context.** `D-100` made the piano ready at load, and the owner's phone then showed two different faults. In Sketchpad the first note did not sound at all, and the second did; the sound line went from "idle" to "running". In the J-6 the first sound began like the pad, cut, and then the piano sounded. Neither could be reproduced headless, where the audio starts at once; both fit what is known of iOS: the context reports "running" before its clock moves, the hardware needs a fraction of a second to come up (a note struck in that window is clipped or lost), and a piano that is not yet decoded when the touch arrives is replaced by the stand-in, which is then cut when the piano arrives.
 
@@ -839,6 +839,15 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 **The test the owner asked for.** `tools/sound-check.mjs` opens each built app in a browser whose audio behaves like a phone's (`tools/lib/audio-probe.mjs`): contexts start suspended, and `resume()` is honoured only inside a counting event, under four readings of the rule that a phone might apply (finger-up counts or only click does; a request refused outside a touch is kept until the next one or lost). It sends real touch input, reads the loudest sample at the speakers, and requires sound for: a piano key (quick tap, long press, straight after load, second key), a chord pad then a key, a J-6 pad straight after load, and, where no tap on a key can start the audio, the banner and then a key. It **fails on the previous build** (8 cases silent, the user's report exactly) and passes on this one. It is gate **G15** of `check-done`: it needs a browser, and where there is none the gate fails and says why, instead of skipping. `npm run sound` runs it.
 
 **What it cannot do.** It cannot tell which reading a given iPhone applies, so it passes only if all four work; it cannot hear tone or judge timing; it cannot reproduce the hardware's warm-up. The `PLAYTEST.md` check of the first touch stays, but should now be a confirmation and not the test.
+
+
+### D-104 — No waiting before the first note
+
+**Context.** `D-101` added a wait before the first note: until the audio was running, its clock moving, 120 ms had passed (a guess at iPhone hardware warm-up) and the piano was decoded. The real fault turned out to be `D-103` (piano keys asked the browser to start the audio at an event a phone does not count), and the wait was never shown to be needed. The owner asked to try without any delay.
+
+**Decision.** Removed: the wait, its rule (`startupStep` in `core/playback`, with its tests, mutants, requirement and scenario), and the "started in … ms" line. The first touch that counts starts the audio and the note plays at once: the graph is built, and the piano, already decoded at load, is used if it is ready, otherwise the stand-in plays that one note (`D-064`). Kept: the audio is asked to start on every kind of touch that can count (`D-103`), the silent sample played in the touch (it costs nothing), a note's start time read just before it is struck, the quick-tap guard, and the bar that offers a tap when nothing else can start the audio.
+
+**Risk, stated.** If an iPhone really does lose a note struck in the first ~100 ms after the audio starts, the first note will be lost again. The phone test says; if it does, the wait comes back in a smaller form (a short delay on the first note only), not a return to the old shape.
 
 ## 5. What this project has taught, so far
 
@@ -950,6 +959,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-07 | First-note faults on the phone (a silent first note in Sketchpad; a pad-like start cut by the piano in the J-6): the first note now waits until the audio is running, its clock is moving, the hardware has settled and the piano is ready, with a silent unlock sample, late start times and a quick-tap guard; the sound line reports the start time. Diagnosed from the symptoms, not reproduced (`D-101`) |
 | 2026-10-07 | Sketchpad was silent on the phone after the early-build change; the audio graph is built on the first touch again and only the piano's decoding is early. `tools/sound-check.mjs` taps the audio output headless. Diagnosed from the difference between the apps, not reproduced (`D-102`) |
 | 2026-10-08 | Single piano notes were silent on the phone: they asked the browser to start the audio on a finger-down, which a phone does not count, and a lost first request blocked all later ones. Any counting touch now asks again; a visible "tap to turn the sound on" bar is the fallback. Reproduced in a browser made to behave like a phone, and that check is now gate G15 (`D-103`) |
+| 2026-10-08 | The first-note wait of `D-101` is removed at the owner's request: no settle time, no waiting for the piano, no start-time line; the touch that starts the audio plays the note (`D-104`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

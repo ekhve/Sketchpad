@@ -99,28 +99,4 @@ function rollOffsets(count, spread, maxTotal = 0.5) {
   return Array.from({ length: count }, (_, i) => i * step);
 }
 
-/* ============================================================================
-   STARTING THE AUDIO — when is it safe to play the first note? (D-101)
-
-   A browser starts audio only after a touch, and even then the first moments are
-   unreliable: the context reports itself running before its clock moves, and a
-   phone's audio hardware takes a fraction of a second to come up, during which a
-   note is clipped or lost. The first note was reported missing in one app and
-   wrong in the other. This decides, from what has been observed, whether to
-   play now or look again a moment later. The app reads the clock and the state;
-   this only decides.
-   ========================================================================== */
-
-/** observed: { state, contextTime, runningForMs, ready, waitedMs } — the context's state and clock,
- *  how long it has been running, whether the instrument is ready, and how long we have waited.
- *  → { go: boolean, reason }. Gives up waiting after `maxWaitMs` and plays with what there is. */
-function startupStep({ state, contextTime, runningForMs, ready, waitedMs }, { settleMs = 120, maxWaitMs = 1500 } = {}) {
-  if (waitedMs >= maxWaitMs) return { go: true, reason: "waited long enough" };
-  if (state !== "running") return { go: false, reason: "the audio is starting" };
-  if (!(contextTime > 0)) return { go: false, reason: "the audio clock has not moved yet" };
-  if (runningForMs < settleMs) return { go: false, reason: "the audio is settling" };
-  if (!ready) return { go: false, reason: "the instrument is being prepared" };
-  return { go: true, reason: "ready" };
-}
-
-export { startupStep, MAX_VOICES, voiceLifetime, reapVoices, allocatable, barsToSchedule, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets };
+export { MAX_VOICES, voiceLifetime, reapVoices, allocatable, barsToSchedule, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets };

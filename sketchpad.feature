@@ -2358,15 +2358,10 @@ Feature: The first note is the piano, at once
     When I touch a key or a chord for the first time
     Then it sounds at once
     And it sounds like the piano, not like the stand-in
-    And the sound line reads "running · Grand piano · started in …ms" and never "preparing"
+    And the sound line reads "running · Grand piano"
     And the second touch sounds too
     And a piano key, a pad and the J-6 pads all sound whichever kind of touch the phone counts (checked by tools/sound-check.mjs)
 
-  @D-101 @auto
-  Scenario: The first note waits until the audio can be heard, and never for ever
-    Given the audio has been started by a touch
-    Then the first note waits for the audio to run, its clock to move, the hardware to settle and the piano to be ready
-    And after the longest wait it plays with what there is
 
   @D-101 @manual
   Scenario: A quick tap on the very first key still sounds

@@ -97,7 +97,7 @@ This is `UC-00`, the thing the app exists for. Do it as if you meant it.
 
 | # | Do | Expect | Watch for |
 |---|---|---|---|
-| 3.0 | (Gate G15 now checks the sound under a phone's touch rules; this confirms it on your phone.) Open the app fresh (close it first) and touch a chord at once | It sounds at once, **in both apps, and the second touch sounds too**, and it is the piano, not a thin stand-in; the line at the foot reads `running · Grand piano · started in … ms` (the number is worth reporting). Do the same in the J-6 Explorer | A silent first note, a late one, or one that starts thin and then changes to the piano. Also tap the very first key as fast as you can: it should sound briefly and not stay on |
+| 3.0 | (Gate G15 now checks the sound under a phone's touch rules; this confirms it on your phone.) Open the app fresh (close it first) and touch a chord at once | It sounds at once, **in both apps, and the second touch sounds too**, and it is the piano, not a thin stand-in;, and the line at the foot reads `running · Grand piano`. Do the same in the J-6 Explorer | A silent first note, a late one, or one that starts thin and then changes to the piano. Also tap the very first key as fast as you can: it should sound briefly and not stay on |
 | 3.1 | Try each instrument on the same chord | Clearly different sounds | Which would you actually use? |
 | 3.2 | Toggle **echo** on the Rhodes and the pad | Obvious, and not muddy | Too much? Too little? |
 | 3.3 | Tap a chord, then quickly another | The first stops; they don't pile up | |

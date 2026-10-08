@@ -98,15 +98,15 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 
 | Metric | Threshold | Current | Gate |
 |---|---|---|---|
-| Assets defined once, apps import them | always | 172 exports in 22 modules, none redefined | G0 |
-| Asset requirements with a test, and tests with a requirement | 100% | 204/204 | C1 |
+| Assets defined once, apps import them | always | 171 exports in 22 modules, none redefined | G0 |
+| Asset requirements with a test, and tests with a requirement | 100% | 202/202 | C1 |
 | Module interfaces documented, nothing documented missing | 100% | 158 exports | C2 |
 | Architecture: acyclic, layered, pure, core independent | holds | 22 modules, 5 layers | C3 |
 | Core requirements traced to a source that exists; core decisions used | 100% | 14 decisions | C4 |
-| Automated checks passing | 100% | 664/664 | G1 |
+| Automated checks passing | 100% | 661/661 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
 | Sound under a phone's touch rules | all cases audible | 6 cases × 4 readings | G15 |
-| Mutation score | ≥ 90% | 228/228 (100%) | G2 |
+| Mutation score | ≥ 90% | 223/223 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |
 | Requirements traced to a decision or use case | 100% | 405/405 | G5 |

@@ -16,7 +16,7 @@ import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyA
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
 import { createDriver, loopIndex } from "./core/transport.mjs";
-import { startupStep, MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
+import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, ROLL_STYLES, rollStyleById, rollOffsets } from "./core/playback.mjs";
 import { scaleById, scalePcs, fitScales, keysContaining, scalesContaining, customScaleFrom, customScalePcs, activeScalePcs } from "./core/scales.mjs";
 import { diagramKeys, sheetData, sheetAsText } from "./core/sheet.mjs";
 import { scalesForStyle } from "./core/styles.mjs";
@@ -175,30 +175,6 @@ function useInstrument() {
     if (preset.current.kind === "sampler") samplerFor(preset.current);
   }, [samplerFor]);
 
-  /* Is the instrument ready to play? A synth always is; a recording is once it has
-     been decoded, or has failed to be. */
-  const instrumentReady = useCallback(() => {
-    if (preset.current.kind !== "sampler") return true;
-    const e = ref.current?.samplers?.[preset.current.id];
-    return !!e && (e.loaded || e.failed);
-  }, []);
-
-  /* The first touch starts the audio, and then waits a moment: until the audio is
-     running, its clock is moving, the hardware has come up and the piano is ready,
-     or a limit is reached. Playing the instant the browser says "running" lost the
-     first note on a phone, or played it through the stand-in. (D-101) */
-  const settle = useCallback(async () => {
-    const t0 = performance.now();
-    let upSince = null;
-    for (;;) {
-      const c = Tone.getContext(), at = performance.now();
-      if (c.state === "running" && upSince === null) upSince = at;
-      const step = startupStep({ state: c.state, contextTime: c.currentTime, runningForMs: upSince === null ? 0 : at - upSince, ready: instrumentReady(), waitedMs: at - t0 });
-      if (step.go) return Math.round(at - t0);
-      await new Promise((r) => setTimeout(r, 25));
-    }
-  }, [instrumentReady]);
-
   /* Asking the browser to start the audio. A phone honours the request only
      inside an event that counts as a touch, and a finger going *down* on a piano
      key is not one; its lifting, or the click after it, is. So this is a plain
@@ -222,19 +198,11 @@ function useInstrument() {
     } catch (e) { setStatus("error"); setDetail(`start failed: ${e.message}`); }
   }, []);
 
-  /* Once started: build the graph and wait for the piano, one time. */
+  /* Once started: build the graph, one time. Nothing waits for the piano: if a
+     touch beats its decoding, that note uses the stand-in. (D-104) */
   const bringUp = useCallback(() => {
-    if (!up.current) {
-      up.current = (async () => {
-        build();
-        refresh();
-        const waited = await settle();
-        setDetail(`${preset.current.name} · started in ${waited} ms`);
-        refresh();
-      })();
-    }
-    return up.current;
-  }, [build, refresh, settle]);
+    if (!up.current) { build(); refresh(); up.current = true; }
+  }, [build, refresh]);
 
   const init = useCallback(async () => {
     if (!started.current) {
@@ -247,7 +215,7 @@ function useInstrument() {
       if (!started.current) return;
     }
     setAsked(false);
-    await bringUp();
+    bringUp();
     await resume();
   }, [unlock, bringUp, resume]);
 
