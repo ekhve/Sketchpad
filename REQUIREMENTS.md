@@ -629,7 +629,7 @@ The music logic is a set of modules the products share. Their own requirements a
 | ID | Requirement | Source | Mode | Verified by |
 |---|---|---|---|---|
 | R-414 | The piano is decoded while the page loads; the audio graph is built on the first touch, after the browser has started the audio (`D-102`). | D-100, D-070 | M | The first note after opening is the piano and is not late |
-| R-417 | The first note after opening sounds, as the piano, in both apps, and a quick tap on the first key still sounds briefly. | D-101, D-100 | M | The first note after opening is the piano and is not late |
+| R-417 | The first note after opening sounds, in both apps, with no waiting before it, and a quick tap on the first key still sounds briefly. | D-101, D-100, D-104 | M | The first note after opening is the piano and is not late |
 | R-418 | In both apps the first touch and the second each put sound out. | D-102, D-100 | M | The first note after opening is the piano and is not late |
 | R-419 | The audio starts on the first touch that counts, wherever it lands, and a request to start it that was refused never blocks a later one. | D-103 | A | *(`tools/sound-check.mjs`, gate G15)* |
 | R-420 | If sound is asked for and the browser has not allowed it, the page says so and offers a tap that fixes it. | D-103 | A | *(`tools/sound-check.mjs`, gate G15)* |

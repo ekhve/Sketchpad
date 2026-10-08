@@ -2352,7 +2352,7 @@ Feature: The first note is the piano, at once
     Given any of the piano's thirteen embedded recordings
     Then it becomes exactly the bytes a standard decoder reads from it
 
-  @D-100 @manual
+  @D-100 @D-104 @manual
   Scenario: The first note after opening is the piano and is not late
     Given the app has just opened, in either app, on a phone
     When I touch a key or a chord for the first time
