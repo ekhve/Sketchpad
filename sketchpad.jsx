@@ -40,7 +40,6 @@ function useInstrument() {
   const [detail, setDetail] = useState("not started");
   const [voiceCount, setVoiceCount] = useState(0);
   const [asked, setAsked] = useState(false);     // sound was asked for and the browser has not yet allowed it
-  const muted = useRef(false);
   const lifted = useRef(new Set());    // keys let go before their note had started
   const up = useRef(null);             // the one-time bring-up after the audio has started
   const started = useRef(false);       // has the browser let the audio start? (it needs a touch first)
@@ -87,7 +86,6 @@ function useInstrument() {
     try { for (const v of ref.current?.pool?.voices ?? []) { v.synth.triggerRelease(); v.until = 0; } } catch (e) {}
     setVoiceCount(0);
   }, [reap]);
-  const setMutedState = useCallback((on) => { muted.current = on; if (on) panic(); }, [panic]);
 
   /* Changing instrument leaves sounding notes alone: they finish on the old
      voice and are reaped normally. Only the next note is different. */
@@ -208,10 +206,12 @@ function useInstrument() {
     if (!started.current) {
       unlock();
       /* Wait for a touch that counts. Anything waiting here is let through the
-         moment one arrives; if none does, say so and give up quietly. */
-      setAsked(true);
+         moment one arrives. Only if none has come after a good while is the
+         person told, so an ordinary first touch never shows anything. (D-106) */
+      const tell = setTimeout(() => setAsked(true), 1500);
       const t0 = performance.now();
       while (!started.current && performance.now() - t0 < 15000) await new Promise((r) => setTimeout(r, 25));
+      clearTimeout(tell);
       if (!started.current) return;
     }
     setAsked(false);
@@ -275,7 +275,7 @@ function useInstrument() {
   }, []);
 
   const play = useCallback((notes, seconds, time, velocity = 0.8, spread = 0) => {
-    if (!ref.current || muted.current) return;
+    if (!ref.current) return;
     const p = preset.current;
     const list = (Array.isArray(notes) ? notes : [notes]).slice(0, 8);
 
@@ -338,7 +338,7 @@ function useInstrument() {
   const holdOn = useCallback(async (midi) => {
     lifted.current.delete(midi);
     await init(); await resume();
-    if (!ref.current || muted.current || held.current.has(midi)) return;
+    if (!ref.current || held.current.has(midi)) return;
     /* A quick tap can be over before the first start has finished. The note was
        still asked for: sound it briefly rather than hold it for ever or lose it. */
     if (lifted.current.delete(midi)) { play([midi], 0.4, undefined, 0.85); return; }
@@ -382,30 +382,8 @@ function useInstrument() {
     } catch (e) { try { synth.dispose(); } catch (e2) {} }
   }, []);
 
-  const test = useCallback(async () => {
-    await init(); await resume();
-    const before = muted.current;
-    muted.current = false;
-    play([60], 0.6, undefined, 0.9);
-    muted.current = before;
-  }, [init, resume, play]);
-
-  /* Reset really rebuilds: releasing notes does not help when the audio graph
-     itself has become the problem. (D-066) */
-  const reset = useCallback(() => {
-    reap(true);
-    const r = ref.current;
-    if (r?.pool) {
-      for (const v of r.pool.voices) { try { v.synth.dispose(); } catch (e) {} }
-      r.pool = null;
-    }
-    setVoiceCount(0);
-    setDetail(`${preset.current.name} · rebuilt`);
-    refresh();
-  }, [reap, refresh]);
-
-  return { init, resume, play, panic, test, reset, setInstrument, setEcho, setSpace,
-           holdOn, holdOff, setMuted: setMutedState, ready, status, detail, voiceCount, waitingForTouch: asked };
+  return { init, resume, play, panic, setInstrument, setEcho, setSpace,
+           holdOn, holdOff, ready, status, detail, voiceCount, waitingForTouch: asked };
 }
 
 /* ============================================================================
@@ -452,9 +430,9 @@ function SoundBanner({ audio }) {
   if (!audio.waitingForTouch) return null;
   return (
     <button onClick={() => audio.init()} aria-label="turn the sound on"
-      className="w-full text-sm px-3 py-2 rounded-md mb-2 text-left"
-      style={{ background: T.raised, color: T.ink, border: `1px solid ${T.tension}` }}>
-      The sound is waiting for a tap. Tap here to turn it on.
+      className="text-sm px-4 py-2 rounded-full shadow-lg"
+      style={{ position: "fixed", left: "50%", bottom: 16, transform: "translateX(-50%)", zIndex: 50, background: T.ink, color: T.keyWhite, fontWeight: 600 }}>
+      Tap to turn the sound on
     </button>
   );
 }
@@ -704,24 +682,6 @@ const Legend = () => (
   </div>
 );
 
-const SpeakerIcon = ({ on }) => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
-    {on ? (
-      <>
-        <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-        <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-      </>
-    ) : (
-      <>
-        <line x1="16" y1="9" x2="21" y2="15" />
-        <line x1="21" y1="9" x2="16" y2="15" />
-      </>
-    )}
-  </svg>
-);
-
 const TAB_LABELS = {
   chords: "Chords", find: "Find", scales: "Scales",
   prog: "Progression", bass: "Bass", theory: "Theory", sheet: "Sheet", learn: "Learn", guide: "How to use",
@@ -765,7 +725,6 @@ export default function App() {
   const [startMidi, setStartMidi] = useState(48);
   const [sounding, setSounding] = useState(new Set());
   const [bassLit, setBassLit] = useState([]);
-  const [muted, setMuted] = useState(false);
   const [instId, setInstId] = useState("grand");
   const [echo, setEchoOn] = useState(true);
   const [space, setSpace] = useState("room");
@@ -860,13 +819,11 @@ export default function App() {
 
   const timers = useRef([]);
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
-  const panic = () => { clearTimers(); inst.panic(); setSounding(new Set()); setBassLit([]); };
 
   useEffect(() => {
     if (scaleById(scaleId).mode !== mode) setScaleId(mode === "minor" ? "natural-minor" : "major");
     if (activeSet && activeSet.mode !== mode) setSetId(null);
   }, [mode]); // eslint-disable-line
-  useEffect(() => { inst.setMuted(muted); }, [muted]); // eslint-disable-line
   /* Leaving a tab with a finger down used to leave the note sounding for ever,
      because the key that would have released it is no longer on screen. */
   useEffect(() => { inst.panic(); setSounding(new Set()); }, [tab]); // eslint-disable-line
@@ -1227,6 +1184,7 @@ export default function App() {
 
       {/* ---- key ---- */}
       <style>{PRINT_CSS}</style>
+      <SoundBanner audio={inst} />
       <div className="max-w-2xl mx-auto px-4 pt-3">
         <header className="mb-3 flex items-center justify-between">
           <h1 className="text-base font-semibold tracking-tight">Sketchpad</h1>
@@ -1255,7 +1213,6 @@ export default function App() {
             </div>
           </div>
         </header>
-        <SoundBanner audio={inst} />
 
         <div className="grid grid-cols-6 gap-1 mb-1.5">
           {NAMES.map((_, i) => (
@@ -1280,27 +1237,29 @@ export default function App() {
       {/* ---- piano + explanation + tabs, pinned ---- */}
       <div className="sticky top-0 z-10" style={{ background: T.ground, borderBottom: `1px solid ${T.edge}` }}>
         <div className="max-w-2xl mx-auto px-4 pt-2 pb-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Legend />
-            {can("melodyGuide") && <button onClick={() => setGuide(!guide)} aria-pressed={guide}
-              className="text-[10px] px-2 py-0.5 rounded ml-auto"
-              style={{ background: guide ? T.homeDot : T.raised, color: guide ? T.keyWhite : T.inkSoft, fontWeight: guide ? 600 : 400 }}>
-              melody guide
-            </button>}
-          </div>
-          {guide && (
-            <div className="flex items-center gap-3 flex-wrap text-[10px] mb-1.5" style={{ color: T.inkSoft }}>
-              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.homeDot }} /> lands well</span>
-              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.moveDot }} /> moves through</span>
-              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.tensionDot }} /> pulls</span>
-              <span>over {activeChord ? lbl(activeChord) : "the key"}</span>
-            </div>
-          )}
           {/* In a lesson the piano shows only what the lesson is about: the
               answer when asked for, the notes already right, and the home dot.
               Scale dots would give a scale step away before it was played. (D-073) */}
-          <div className="flex items-center justify-end mb-1">
-            <div className="flex items-center rounded-md overflow-hidden" style={{ background: T.raised }}>
+          <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-1 flex-wrap text-[10px]" style={{ color: T.inkSoft }}>
+            <span className="mr-0.5">Fingers</span>
+            {FINGER_HANDS.map((h) => (
+              <button key={h} onClick={() => setFingerChoice(h)} aria-pressed={fingerHand === h}
+                className="px-2 py-0.5 rounded"
+                style={{ background: fingerHand === h ? T.homeDot : T.raised, color: fingerHand === h ? T.keyWhite : T.ink, fontWeight: fingerHand === h ? 600 : 400 }}>{h}</button>
+            ))}
+            {fingerHand !== "off" && (
+              <>
+                <span className="ml-2 mr-0.5">hand reaches</span>
+                {HAND_REACH.map((r) => (
+                  <button key={r.id} onClick={() => setReach(r.keys)} aria-pressed={reach === r.keys}
+                    className="px-1.5 py-0.5 rounded"
+                    style={{ background: reach === r.keys ? T.homeDot : T.raised, color: reach === r.keys ? T.keyWhite : T.ink, fontWeight: reach === r.keys ? 600 : 400 }}>{r.id}</button>
+                ))}
+              </>
+            )}
+          </div>
+                      <div className="flex items-center rounded-md overflow-hidden" style={{ background: T.raised }}>
               <button onClick={() => setStartMidi(Math.max(PIANO_RANGE.lowest, startMidi - 12))} aria-label="Octave down"
                 disabled={startMidi <= PIANO_RANGE.lowest}
                 className="px-2.5 py-1 text-sm disabled:opacity-40" style={{ color: T.ink }}>‹</button>
@@ -1320,44 +1279,34 @@ export default function App() {
             fingers={pianoFingers} brackets={pianoBrackets}
             system={system} onDown={noteDown} onUp={noteUp} octaves={KEYBOARD_OCTAVES} />
 
-          {/* D-078: finger numbers, for either hand or both */}
-          <div className="flex items-center gap-1 flex-wrap mt-1.5 text-[10px]" style={{ color: T.inkSoft }}>
-            <span className="mr-0.5">Fingers</span>
-            {FINGER_HANDS.map((h) => (
-              <button key={h} onClick={() => setFingerChoice(h)} aria-pressed={fingerHand === h}
-                className="px-2 py-0.5 rounded"
-                style={{ background: fingerHand === h ? T.homeDot : T.raised, color: fingerHand === h ? T.keyWhite : T.ink, fontWeight: fingerHand === h ? 600 : 400 }}>{h}</button>
-            ))}
-            {fingerHand !== "off" && (
-              <>
-                <span className="ml-2 mr-0.5">hand reaches</span>
-                {HAND_REACH.map((r) => (
-                  <button key={r.id} onClick={() => setReach(r.keys)} aria-pressed={reach === r.keys}
-                    className="px-1.5 py-0.5 rounded"
-                    style={{ background: reach === r.keys ? T.homeDot : T.raised, color: reach === r.keys ? T.keyWhite : T.ink, fontWeight: reach === r.keys ? 600 : 400 }}>{r.id}</button>
-                ))}
-              </>
-            )}
-          </div>
           {fingerHand !== "off" && !inLesson && chordFingering && (chordFingering.split || chordFingering.tooWide) && (
             <p className="text-[11px] mt-1" style={{ color: chordFingering.tooWide ? T.tension : T.inkSoft }}>
               {FINGER_COPY.suggested}: {(chordFingering.tooWide ? FINGER_COPY.tooWide : FINGER_COPY.split).toLowerCase()}.
             </p>
           )}
 
+          <div className="flex items-center gap-2 flex-wrap mt-1.5">
+            <Legend />
+            {can("melodyGuide") && <button onClick={() => setGuide(!guide)} aria-pressed={guide}
+              className="text-[10px] px-2 py-0.5 rounded ml-auto"
+              style={{ background: guide ? T.homeDot : T.raised, color: guide ? T.keyWhite : T.inkSoft, fontWeight: guide ? 600 : 400 }}>
+              melody guide
+            </button>}
+          </div>
+          {guide && (
+            <div className="flex items-center gap-3 flex-wrap text-[10px] mb-1.5" style={{ color: T.inkSoft }}>
+              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.homeDot }} /> lands well</span>
+              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.moveDot }} /> moves through</span>
+              <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.tensionDot }} /> pulls</span>
+              <span>over {activeChord ? lbl(activeChord) : "the key"}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-2">
             <button onClick={() => setSoundOpen(!soundOpen)} aria-expanded={soundOpen} aria-controls="sound-options"
               className="text-xs px-2.5 py-1 rounded-md"
               style={{ background: soundOpen ? T.ink : T.raised, color: soundOpen ? T.keyWhite : T.ink, fontWeight: soundOpen ? 600 : 400 }}>
               Sound options {soundOpen ? "▴" : "▾"}
             </button>
-            <button onClick={() => setMuted(!muted)} aria-pressed={muted}
-              aria-label={muted ? "Turn sound on" : "Turn sound off"}
-              className="ml-auto flex items-center gap-1.5 text-xs px-2 py-1 rounded"
-              style={{ background: muted ? T.tension : T.raised, color: muted ? T.keyWhite : T.ink, fontWeight: muted ? 600 : 400 }}>
-              <SpeakerIcon on={!muted} />{muted ? "muted" : "sound"}
-            </button>
-            <button onClick={panic} className="text-xs px-2 py-1 rounded" style={{ background: T.raised, color: T.tension, fontWeight: 600 }}>silence</button>
           </div>
 
           {soundOpen && (
@@ -1381,10 +1330,6 @@ export default function App() {
                 );
               })}
               <div className="flex items-center gap-1.5 flex-wrap pt-1" style={{ borderTop: `1px solid ${T.edge}` }}>
-                <button onClick={inst.test} className="text-xs px-2.5 py-1 rounded font-semibold"
-                  style={{ background: T.homeDot, color: T.keyWhite }}>test sound</button>
-                <button onClick={inst.reset} className="text-[11px] px-2 py-1 rounded"
-                  style={{ background: T.raised, color: T.tension }}>reset audio</button>
                 {instrumentById(instId).credit && (
                   <span className="text-[10px] w-full" style={{ color: T.inkSoft }}>{instrumentById(instId).credit}</span>
                 )}

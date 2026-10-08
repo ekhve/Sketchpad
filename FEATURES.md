@@ -233,9 +233,9 @@ Not in the original plan. Each earned its place.
 
 | Feature | Status | Notes |
 |---|---|---|
-| Sound options folded into one section (sound, how a chord is played, reverb, echo) | **Done** | Shut at first; "sound" and "silence" stay out |
+| Sound options folded into one section (sound, how a chord is played, reverb, echo) | **Done** | Shut at first; sound, silence, test sound and reset audio removed (`D-106`) |
 | Engine text removed | **Done** | The status line and voice count are gone; the licence credit stays inside the options |
-| Octave control above the piano | **Done** | |
+| Fingers and octave above the piano, legend under it | **Done** | `D-106` |
 | Rolling a chord and playing a scale as one arpeggiator | **Open** | Together/roll/slow roll and up/down/mix are the same idea (`D-105`, noted) |
 | The rest of the screen tidied | **Open** | Next: chosen with the owner |
 

@@ -5,7 +5,8 @@
    Opens the built Sketchpad at phone width and checks what the owner asked the screen to be:
    no engine text on show (no "running · Grand piano", no "voices"), the sound options folded away
    until asked for and holding the four rows (sound, how a chord is played, reverb, echo), the octave
-   control above the piano and not below it, and nothing wider than the screen, open or shut.
+   and fingers together on a row above the piano, the legend under it, no sound/silence/test/reset buttons,
+   nothing that moves the piano when the first note is played, and nothing wider than the screen, open or shut.
    It needs a browser, so `check-done` runs it as gate G16 and fails, with the reason, where there is none. */
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
@@ -34,11 +35,21 @@ for (const width of [360, 375, 414]) {
   const octave = await page.locator('button[aria-label="Octave down"]').boundingBox();
   const key = await page.locator("[data-midi]").first().boundingBox();
   check(`${w}: the octave control is above the piano`, octave && key && octave.y + octave.height <= key.y, `octave bottom ${Math.round(octave.y + octave.height)}, keys top ${Math.round(key.y)}`);
+  const fingers = await page.locator('button:text-is("both")').first().boundingBox();
+  check(`${w}: fingers and octave are on one row above the piano`, fingers && octave && key && Math.abs(fingers.y - octave.y) < 30 && fingers.y + fingers.height <= key.y, `fingers y ${Math.round(fingers.y)}, octave y ${Math.round(octave.y)}`);
+  const lastKey = await page.locator("[data-midi]").last().boundingBox();
+  const legend = await page.locator("text=in your loop").first().boundingBox();
+  check(`${w}: the legend is under the piano`, legend && lastKey && legend.y >= lastKey.y + lastKey.height - 2, `legend y ${Math.round(legend.y)}, keys bottom ${Math.round(lastKey.y + lastKey.height)}`);
+  const gone = await page.evaluate(() => [...document.querySelectorAll("button")].map((b) => (b.innerText + " " + (b.getAttribute("aria-label") || "")).toLowerCase()).filter((t) => /silence|muted|turn sound|test sound|reset audio/.test(t)));
+  check(`${w}: no sound/silence/test/reset buttons`, gone.length === 0, gone.join("|"));
+  await page.locator("[data-midi]").nth(5).click(); await page.waitForTimeout(400);
+  const after = await page.locator("[data-midi]").first().boundingBox();
+  check(`${w}: playing the first note does not move the piano`, after && Math.abs(after.y - key.y) < 1 && (await page.locator('button[aria-label="turn the sound on"]').count()) === 0, `${Math.round(key.y)} -> ${Math.round(after.y)}`);
 
   await toggle.click(); await page.waitForTimeout(150);
   check(`${w}: opening shows the four rows`, (await toggle.getAttribute("aria-expanded")) === "true" && (await page.locator('#sound-options [role="group"]').evaluateAll((g) => g.map((x) => x.getAttribute("aria-label")))).join() === "Sound,Played,Reverb,Echo");
   const names = await page.locator("#sound-options button").allInnerTexts();
-  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Together", "Roll", "Slow roll", "Dry", "Room", "Hall", "Cave", "On", "Off"].every((n) => names.includes(n)), names.join("|"));
+  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Together", "Roll", "Slow roll", "Dry", "Room", "Hall", "Cave", "On", "Off"].every((n) => names.includes(n)) && !names.some((n) => /test sound|reset audio/.test(n)), names.join("|"));
   check(`${w}: the credit for the recordings is kept, inside the options`, /Salamander Grand Piano.*CC-BY/.test(await page.locator("#sound-options").innerText()));
   check(`${w}: nothing wider than the screen, open`, (await overflow()) <= 0, `${await overflow()}px`);
 

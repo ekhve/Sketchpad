@@ -156,10 +156,10 @@
 |---|---|---|---|---|
 | R-091 | Sound starts on the first user gesture and does not ask twice. | UC-03 | M | Pressing a chord |
 | R-092 | A scheduled note is always shorter than the interval before the next one. | D-017 | M | Notes release between bars |
-| R-093 | Stopping playback releases held voices, not merely the schedule. | D-017 | M | Silencing a stuck note |
-| R-094 | A Silence control is always available and stops sound without destroying selection or loop. | X-14, UC-28 | M | Silencing a stuck note |
+| R-093 | Stopping playback, or changing tab, releases held voices, not merely the schedule. | D-017 | M | Silencing a stuck note |
+| R-094 | ~~A Silence control is always available and stops sound without destroying selection or loop.~~ **Withdrawn 2026-10-08** at the owner's request (`D-106`). | X-14, UC-28, D-106 | I | *(withdrawn)* |
 | R-095 | Sound never accumulates across repeated passes of a loop. | D-017 | M | Notes release between bars |
-| R-096 | Sound can be turned off and on from a labelled control, without altering selection or loop. | D-030 | M | Turning the sound off without losing my work |
+| R-096 | ~~Sound can be turned off and on from a labelled control, without altering selection or loop.~~ **Withdrawn 2026-10-08** at the owner's request (`D-106`). | D-030, D-106 | I | *(withdrawn)* |
 | R-097 | A tapped note decays within about half a second; a tapped chord within about one second; a loop chord before the next bar. | D-030 | M | A tapped note does not ring on |
 | R-098 | The voice has no sustain plateau: a note decays from the moment it is struck. | D-034 | M | The sound is piano-like and notes decay |
 | R-099 | Reverb is short and quiet enough not to read as notes ringing on. | D-034 | M | The sound is piano-like and notes decay |
@@ -178,7 +178,7 @@
 | R-112 | The voice budget can never be exceeded; a full budget drops notes rather than silencing the app. | D-038 | A | The budget is never exceeded, however many notes are asked for |
 | R-113 | Voices do not accumulate across repeated passes of a loop. | D-038 | A | Voices from a finished loop do not accumulate across passes |
 | R-114 | The number of live voices is visible while the app runs. | D-038 | M | A long session does not go quiet |
-| R-115 | Audio can be reset without reloading the page. | D-038 | M | Audio can be reset without reloading |
+| R-115 | ~~Audio can be reset without reloading the page.~~ **Withdrawn 2026-10-08** at the owner's request (`D-106`). | D-038, D-106 | I | *(withdrawn)* |
 | R-116 | Transport and draw scheduling are reached through the accessors, not the deprecated properties. | D-039 | I | Review at each change |
 | R-117 | A loop that cannot start says why, rather than doing nothing. | D-039 | M | The progression loop actually plays |
 | R-118 | Bass and Theory always describe a chord: the selection, the playing bar, the loop's first chord, or home. | D-039 | A | With a loop but nothing selected, the first chord is used |
@@ -642,7 +642,9 @@ The music logic is a set of modules the products share. Their own requirements a
 |---|---|---|---|---|
 | R-422 | The sound choices (instrument, how a chord is played, reverb, echo) are in one section that is folded away until asked for, and every choice the catalogues hold is offered once. | D-105 | A | The sound options are folded away and offer every choice |
 | R-423 | No engine text (status, detail, voice count) is shown; the recordings' credit stays on show with the options. | D-105, D-062 | A | The sound options are folded away and offer every choice |
-| R-424 | The octave control is above the piano. | D-105 | A | The octave control sits above the piano |
+| R-424 | Fingers and the octave control share one row above the piano, and the legend is under it. | D-105, D-106 | A | The octave control sits above the piano |
+| R-426 | The sound, silence, test sound and reset audio buttons are not shown. | D-106 | A | The octave control sits above the piano |
+| R-427 | Nothing on the screen moves when the first note is played; the tap-to-turn-on bar appears only after a long wait and floats. | D-106, D-103 | A | The octave control sits above the piano |
 | R-425 | Nothing on the screen is wider than a phone, with the options shut or open. | D-105, D-002 | A | The sound options are folded away and offer every choice |
 
 ## 11. Visual system

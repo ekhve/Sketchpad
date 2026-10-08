@@ -89,7 +89,7 @@ Recorded once, not worth re-arguing.
 | D-022 | Rhythm is sixteenth-note steps; no swing, no tuplets | Coarse enough to reason about, fine enough for the genres |
 | D-026 | Scenario/test traceability is enforced, not trusted | It rotted within one session when it was not |
 | D-027 | Tests are validated by mutation, not by passing | Two assertions here passed while testing nothing |
-| D-030 | Notes are short by default; mute is a standing state | Silence stops what sounds now; mute is a mode |
+| D-030 | Notes are short by default; ~~mute is a standing state~~ *(the mute and silence buttons were removed, `D-106`)* | Silence stops what sounds now; mute is a mode |
 | D-032 | ~~The build step runs before the tests~~ **Replaced by `D-096`**: there is no generated module to go stale | A stale module once produced 70 green false passes; with none generated, it cannot happen |
 
 ---
@@ -865,6 +865,20 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Noted for later.** Rolling a chord (together, roll, slow roll) and playing a scale (up, down, mixed) are the same kind of thing: an arpeggiator, a pattern for turning a set of notes into notes in time. `core/voicing.arpeggio` and `core/playback.rollOffsets` are the two halves today. One asset with a pattern parameter would serve both, and later a sequencer; not designed here.
 
+
+### D-106 — The screen under and over the piano, second step
+
+**Context.** On seeing `D-105` on the phone the owner asked: remove "sound" and "silence"; remove "test sound", which does not work, and probably "reset audio"; put Fingers and the octave together on top of the piano and the legend under it; and: a big banner appeared on top, unasked, and *moved the whole app*, which was confusing. ("Then I think we can change a bit the sounds too" is noted and not acted on; it needs to be said what to change.)
+
+**Decision.**
+1. **Removed**: the sound/muted toggle, the silence button, "test sound", "reset audio", and the code behind them (`test`, `reset`, `setMuted` and the muted state in the audio hook; the speaker icon). Playback is still stopped by Stop on the loop and by changing tab, which already silence everything. This withdraws `R-094`, `R-096` and `R-115`, and amends `D-030` and `UC-28`.
+2. **Layout, top to bottom:** a row above the piano with **Fingers** (and, when on, the hand's reach) on the left and the **octave** control on the right; the piano; the **legend** (and the melody-guide switch, where the level has one) under it; then **Sound options**, shut at first.
+3. **The tap-to-turn-on bar no longer moves anything.** It was in the page flow at the top, and it appeared on *every* first touch: the request was marked "waiting" the instant a key went down, and cleared a few milliseconds later, so the page jumped. Now it appears only if the browser has still not allowed the sound after **1.5 seconds**, and it floats at the bottom of the screen (fixed, centred), so it can never shift the layout. `D-103`'s reason for it stands: if no touch on a key can start the audio, something a person can see and tap must be there.
+
+**Checked.** `tools/layout-check.mjs` (gate G16) now also checks: Fingers and octave on one row above the keys; the legend below them; none of the removed buttons present; and playing the first note moves nothing and shows no bar. `tools/sound-check.mjs` (G15) waits for the delayed bar. Both fail on the previous build.
+
+**Not done.** "Fingers and scale in the same row": taken, with the owner's own summary ("Fingers and octave on top of the piano"), to mean the octave control; if a scale control was meant, say so.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -977,6 +991,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-08 | Single piano notes were silent on the phone: they asked the browser to start the audio on a finger-down, which a phone does not count, and a lost first request blocked all later ones. Any counting touch now asks again; a visible "tap to turn the sound on" bar is the fallback. Reproduced in a browser made to behave like a phone, and that check is now gate G15 (`D-103`) |
 | 2026-10-08 | The first-note wait of `D-101` is removed at the owner's request: no settle time, no waiting for the piano, no start-time line; the touch that starts the audio plays the note (`D-104`) |
 | 2026-10-08 | Sketchpad's sound controls fold into a "Sound options" section (instrument, how a chord is played, reverb, echo), the engine text is gone, and the octave control sits above the piano; the layout is checked at phone widths (`D-105`, gate G16) |
+| 2026-10-08 | Sound, silence, test sound and reset audio are removed; Fingers and the octave sit on one row above the piano and the legend under it; the tap-to-turn-on bar appears only after 1.5 s and floats, so nothing moves (`D-106`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

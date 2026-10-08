@@ -54,7 +54,7 @@ const CASES0 = [
   ["no tap on a key can start it: banner", SK, 1500, (mode) => !mode.counts.includes("pointerup"), async (page, cdp) => {
     /* the piano's own touches are made to give no click, so only the banner can start the audio */
     await page.evaluate(() => { for (const t of ["touchend", "pointerup"]) document.querySelector("[data-midi]").closest("div[style*='touch-action']")?.addEventListener(t, (e) => e.preventDefault(), true); document.addEventListener("click", (e) => { if (e.target.closest("[data-midi]")) e.stopImmediatePropagation(); }, true); });
-    await touch(page, cdp, key()(page), 30); const silent = await peak(page, 900);
+    await touch(page, cdp, key()(page), 30); const silent = await peak(page, 2200);   // the bar shows only after a good wait (D-106)
     const banner = await page.locator('button[aria-label="turn the sound on"]').count();
     if (banner) await touch(page, cdp, page.locator('button[aria-label="turn the sound on"]').first(), 30);
     await page.waitForTimeout(600);

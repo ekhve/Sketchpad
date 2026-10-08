@@ -140,7 +140,7 @@ Each has scenarios in `sketchpad.feature`.
 | UC-22 | See where the chords come from | Harmonisation explained on the user's own scale |
 | UC-23 | Look up any chord quality on any root | 15-entry dictionary with formulas |
 | UC-24 | Hear inversions | Same notes, different weight |
-| UC-28 | Silence everything | Stops sound without destroying work (`D-017`) |
+| UC-28 | Silence everything | Stopping the loop, or changing tab, stops sound without destroying work (`D-017`); the Silence and Sound buttons were removed (`D-106`) |
 | UC-29 | Suggest a riff or bassline in a style | Ten patterns across six styles, seeded (`D-023`) |
 | UC-30 | Choose how notes are named | Letters or fixed-do, spelled the way the key writes them: E♭ in C minor, F# in G (`D-019`, `D-074`) |
 | UC-32 | A voice worth listening to | Four instruments and a switchable echo (`D-040`, `D-041`) |

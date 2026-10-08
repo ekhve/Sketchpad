@@ -107,7 +107,7 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Automated checks passing | 100% | 662/662 | G1 |
 | Use cases described where referenced | 100% | all, enforced | G11 |
 | Sound under a phone's touch rules | all cases audible | 6 cases × 4 readings | G15 |
-| Screen layout at phone widths | all checks | 11 checks × 3 widths | G16 |
+| Screen layout at phone widths | all checks | 15 checks × 3 widths | G16 |
 | Mutation score | ≥ 90% | 223/223 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |

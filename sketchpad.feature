@@ -240,7 +240,7 @@ Feature: Sound is always controllable
   @UC-28 @D-017 @manual
   Scenario: Silencing a stuck note
     Given something is sounding that I did not expect
-    When I press silence
+    When I stop the loop or change tab
     Then all sound stops immediately
     And my selected chord is still lit
     And my loop is unchanged
@@ -531,21 +531,6 @@ Feature: Invariants the engine must never break
 Feature: Sound control and note length
   Added after real use. Notes rang on too long, and there was no way to keep
   the app open with the sound off.
-
-  @R-115 @manual
-  Scenario: Turning the sound off without losing my work
-    Given I have a selected chord and a loop
-    When I tap the speaker icon
-    Then the icon shows sound is off
-    And nothing sounds, including the loop if it is playing
-    And the chord is still lit and the loop is unchanged
-    And tapping the icon again brings the sound back
-
-  @R-115 @manual
-  Scenario: Mute and silence are different controls
-    Given sound is playing
-    Then "silence" stops what is sounding now but leaves sound enabled
-    And the speaker toggle is a standing state that survives further taps
 
   @R-116 @manual
   Scenario: A tapped note does not ring on
@@ -936,12 +921,6 @@ Feature: The voice budget cannot leak
     When I play more than a hundred notes
     Then sound continues
     And the voice counter returns to a low number between notes
-
-  @D-038 @manual
-  Scenario: Audio can be reset without reloading
-    Given something has gone wrong with the sound
-    When I tap "reset audio"
-    Then every voice is destroyed and the next note sounds
 
 Feature: A tab always has a chord to talk about
   The Bass and Theory tabs required an explicitly selected chord. A loop built
@@ -2341,7 +2320,6 @@ Feature: Recorded sound is optional, not assumed
     Then the app still opens with a working instrument
     And the grand piano is offered but not assumed
 
-
 Feature: The first note is the piano, at once
   The piano is decoded while the page loads, so the first note is not late and not
   played through a stand-in; the audio itself is built on the first touch, after the
@@ -2362,13 +2340,11 @@ Feature: The first note is the piano, at once
     And the second touch sounds too
     And a piano key, a pad and the J-6 pads all sound whichever kind of touch the phone counts (checked by tools/sound-check.mjs)
 
-
   @D-101 @manual
   Scenario: A quick tap on the very first key still sounds
     Given the app has just opened
     When I tap a key so quickly that I lift my finger before the sound has started
     Then it sounds briefly, and it does not stay on
-
 
 Feature: The sound options
   The choices that shape the sound are in one folded section, and the octave control
@@ -2388,7 +2364,10 @@ Feature: The sound options
   # checked by tools/layout-check.mjs (gate G16)
   Scenario: The octave control sits above the piano
     Given Sketchpad on a phone
-    Then the octave control is above the keys
+    Then Fingers and the octave control are on one row above the keys
+    And the legend is under the keys
+    And there are no sound, silence, test sound or reset audio buttons
+    And playing the first note moves nothing, and no bar appears
 
 Feature: Rolling a chord
   Six notes struck together are one sound. Spread them slightly and every note
@@ -2552,7 +2531,6 @@ Feature: The embedded recordings are usable audio
     Then the status line moves from "preparing" to "Grand piano"
     And a chord sounds recorded, with nothing fetched from anywhere
 
-
 Feature: Practising lessons on the piano
   Short lessons on notes, scales and chords. Each step asks for something to be
   played, and every note played is answered. (D-072, D-073, UC-58, UC-61)
@@ -2684,7 +2662,6 @@ Feature: Practising lessons on the piano
     When I work through "Your first chord" and "The major scale"
     Then it feels like playing with someone beside me, not like being tested
 
-
 Feature: Notes are spelled the way the key writes them
   One spelling per key, chosen by scale degree, so a lesson about C minor
   teaches E♭ and not D#. Through the naming layer, in letters and Do-Re-Mi.
@@ -2756,7 +2733,6 @@ Feature: Notes are spelled the way the key writes them
     Given I choose E♭ major, then C minor
     Then the key buttons, the piano labels, the chord names and the explanations all use flats
     And in G major everything uses sharps
-
 
 Feature: Sharps, or the key's own spelling
   Sketchpad writes every black key as a sharp unless asked to write each key the

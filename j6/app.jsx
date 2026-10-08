@@ -695,8 +695,6 @@ export default function J6App() {
         <Segmented label="screen" value={tab} onChange={(id) => { stopAll(); setTab(id); }} options={[["explore", "Explore"], ["find", "Find"]]} />
       </header>
 
-      <SoundBanner audio={audio} />
-
       {tab === "explore"
         ? <Explore audio={audio} state={state} dispatch={dispatch} set={set} setSet={setSet} t={t} setT={setT} opts={opts} setOpts={setOpts} along={along} setAlong={setAlong} />
         : <Find audio={audio} dispatch={dispatch} />}
@@ -715,6 +713,7 @@ export default function J6App() {
         KEY is SHIFT + [A (KEY)] on the J-6: it transposes the keyboard. Not yet checked on a J-6: its range (the manual doesn't give one; the app assumes −6 to +5), that + goes up, and that the high C pad plays the C chord.
         Chord data: the J-6 manual's Chord Set List, all {SET_NUMBERS.length} sets, checked key by key.
       </p>
+      <SoundBanner audio={audio} />
     </main>
   );
 }
