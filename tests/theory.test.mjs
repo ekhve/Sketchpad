@@ -1169,22 +1169,22 @@ describe("Feature: Instrument presets", () => {
 describe("Feature: Echo", () => {
   test("Echo off is silent, not quiet", () => {
     for (const i of INSTRUMENTS) {
-      assert.equal(delaySettings(i.id, false).wet, 0, `${i.id}: echo leaks when off`);
-      assert.equal(delaySettings(i.id, false).feedback, 0);
+      assert.equal(delaySettings(i.id, "off").wet, 0, `${i.id}: echo leaks when off`);
+      assert.equal(delaySettings(i.id, "off").feedback, 0);
     }
   });
 
   test("Echo on stays inside safe bounds", () => {
     for (const i of INSTRUMENTS) {
-      const s = delaySettings(i.id, true);
+      const s = delaySettings(i.id, "long");
       assert.ok(s.wet > 0 && s.wet <= 0.5, `${i.id}: wet ${s.wet} would drown the dry signal`);
       assert.ok(s.feedback > 0 && s.feedback < 0.7, `${i.id}: feedback ${s.feedback} risks runaway`);
       assert.ok(s.time > 0.05 && s.time < 1, `${i.id}: delay time ${s.time} is unmusical`);
     }
   });
 
-  test("The pad gets a wider echo than the struck voices", () => {
-    assert.ok(delaySettings("pad", true).time > delaySettings("rhodes", true).time);
+  test("The pad gets a wider long echo than the struck voices", () => {
+    assert.ok(delaySettings("pad", "long").time > delaySettings("rhodes", "long").time);
   });
 });
 
@@ -3840,5 +3840,21 @@ describe("Feature: The first note is the piano, at once", () => {
       assert.ok(Buffer.from(got).equals(want), `${name} decodes to the same bytes`);
       assert.deepEqual([...got.slice(0, 3)], [0x49, 0x44, 0x33], `${name} starts with the ID3 tag of an mp3`);
     }
+  });
+});
+
+
+describe("Feature: The instruments", () => {
+  const { ECHO_LEVELS, delaySettings, INSTRUMENTS } = th;
+  test("A light echo fades fast", () => {
+    assert.deepEqual(ECHO_LEVELS.map((e) => e.id), ["off", "light", "long"]);
+    for (const i of INSTRUMENTS) {
+      const light = delaySettings(i.id, "light"), long = delaySettings(i.id, "long");
+      assert.ok(light.time < 0.25 && light.feedback ** 3 < 0.01, `${i.id}: light is quick and gone by the third repeat`);
+      assert.ok(light.wet < long.wet || light.wet <= 0.22);
+      assert.ok(long.time >= 0.28 && long.feedback >= 0.3, `${i.id}: long rings on`);
+      assert.equal(delaySettings(i.id, "off").wet, 0);
+    }
+    assert.ok(delaySettings("pad", "long").time > delaySettings("rhodes", "long").time, "wider on the pad");
   });
 });

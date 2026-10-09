@@ -1024,7 +1024,7 @@ Feature: Echo
     And the delay time is musical
 
   @D-041 @auto
-  Scenario: The pad gets a wider echo than the struck voices
+  Scenario: The pad gets a wider long echo than the struck voices
     Then the pad's delay is slower than the Rhodes'
 
   @D-041 @manual
@@ -2368,6 +2368,25 @@ Feature: The sound options
     And the legend is under the keys
     And there are no sound, silence, test sound or reset audio buttons
     And playing the first note moves nothing, and no bar appears
+
+
+Feature: The instruments
+  The instruments are told apart by what comes out, not only by their names. (D-107)
+
+  @D-107 @manual
+  # measured by tools/instrument-check.mjs (gate G17); whether they sound good is for a person
+  Scenario: The instruments sound different from one another
+    Given each instrument playing the same note, with echo off and the room dry
+    Then every pair differs in at least two of attack, decay, what is left after a second, and brightness
+    And they are all about as loud
+    And the pad is wider than the others
+
+  @D-107 @auto
+  Scenario: A light echo fades fast
+    Given the echo set to light
+    Then it repeats quickly and quietly, and is below one per cent by the third repeat
+    And the long echo is slower and rings on, wider on the pad
+    And off is silent
 
 Feature: Rolling a chord
   Six notes struck together are one sound. Spread them slightly and every note

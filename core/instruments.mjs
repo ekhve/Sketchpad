@@ -93,45 +93,47 @@ const INSTRUMENTS = [
 
   /* A Rhodes is a struck tine: the bell is the attack only, and the body that
      follows is nearly a sine. The first attempt kept the bell ringing for the
-     whole note, which is exactly why it sounded like a marimba. (D-062) */
+     whole note, which is exactly why it sounded like a marimba. (D-062)
+     A slow tremolo is what makes it a Rhodes and not a plain electric tone. (D-107) */
   { id: "rhodes", name: "Rhodes", kind: "fm",
-    note: "Struck tine with a bell in the attack. Soul and R&B.",
-    volume: -10, release: 1.1, delay: true,
+    note: "Struck tine with a bell in the attack and a slow shimmer. Soul and R&B.",
+    volume: -1, release: 1.1, delay: true,
+    chain: [{ type: "tremolo", frequency: 4.6, depth: 0.4 }],
     options: {
-      harmonicity: 2.01, modulationIndex: 5.5,
+      harmonicity: 2.01, modulationIndex: 11,
       oscillator: { type: "sine" },
-      envelope: { attack: 0.003, decay: 3.2, sustain: 0.06, release: 1.1 },
+      envelope: { attack: 0.003, decay: 14, sustain: 0.1, release: 1.1 },
       modulation: { type: "sine" },
       modulationEnvelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.1 },
     } },
 
-  { id: "felt", name: "Felt keys", kind: "am",
-    note: "Soft and close, with the hammers muted. Quiet writing sound.",
-    volume: -13, release: 1.0, delay: false,
+  /* Felt keys: a piano with a strip of felt over the strings. Dark, round, and gone
+     quickly; nothing like a Rhodes's ring. (D-107) */
+  { id: "felt", name: "Felt keys", kind: "synth",
+    note: "Soft and close, with the hammers muted. Dark, round, quick to fade.",
+    volume: -14, release: 0.6, delay: false,
+    chain: [{ type: "filter", frequency: 380, q: 0.7 }],
     options: {
-      harmonicity: 1.5,
       oscillator: { type: "triangle" },
-      envelope: { attack: 0.01, decay: 2.4, sustain: 0.04, release: 1.0 },
-      modulation: { type: "sine" },
-      modulationEnvelope: { attack: 0.02, decay: 0.4, sustain: 0, release: 0.4 },
+      envelope: { attack: 0.06, decay: 0.9, sustain: 0.04, release: 0.6 },
     } },
 
-  { id: "pad", name: "Warm pad", kind: "am",
-    note: "Sustains while you look at the keyboard. Chords over anything.",
-    volume: -18, release: 1.4, delay: true,
+  /* A pad is wide and slow. The first one was a sine through a square: thin. Three
+     detuned saws through a filter and a chorus is what a pad is. (D-107) */
+  { id: "pad", name: "Warm pad", kind: "synth",
+    note: "Wide and slow: three detuned voices, filtered and softened. Chords over anything.",
+    volume: -12, release: 1.8, delay: true,
+    chain: [{ type: "filter", frequency: 1500, q: 0.8 }, { type: "chorus", frequency: 1.3, delayTime: 3.5, depth: 0.7 }],
     options: {
-      harmonicity: 2,
-      oscillator: { type: "sine" },
-      envelope: { attack: 0.35, decay: 0.4, sustain: 0.7, release: 1.4 },
-      modulation: { type: "square" },
-      modulationEnvelope: { attack: 0.5, decay: 0.2, sustain: 0.6, release: 1.0 },
+      oscillator: { type: "fatsawtooth", count: 3, spread: 28 },
+      envelope: { attack: 0.55, decay: 0.5, sustain: 0.75, release: 1.8 },
     } },
 
   { id: "pluck", name: "Marimba", kind: "fm",
     note: "Short and wooden. Cuts through a busy beat.",
-    volume: -10, release: 0.3, delay: false,
+    volume: -5, release: 0.3, delay: false,
     options: {
-      harmonicity: 4, modulationIndex: 3,
+      harmonicity: 3.5, modulationIndex: 9,
       oscillator: { type: "sine" },
       envelope: { attack: 0.002, decay: 0.8, sustain: 0, release: 0.3 },
       modulation: { type: "sine" },
@@ -141,11 +143,18 @@ const INSTRUMENTS = [
 
 const instrumentById = (id) => INSTRUMENTS.find((i) => i.id === id) ?? INSTRUMENTS[0];
 
-/* Echo and reverb, each a short list of settings rather than a rack of knobs.
-   The first version had one basic echo and nothing else, which is most of why
-   everything sounded dry and small. (D-041, D-061) */
-function delaySettings(instrumentId, on) {
-  if (!on) return { wet: 0, feedback: 0, time: 0.25 };
+/* Echo has three settings. Light is the default: a quick, quiet repeat or two that is gone
+   almost at once, which gives a sound some air without anyone hearing a delay. Long is the
+   old echo, wider on the pad. (D-041, D-061, D-107) */
+const ECHO_LEVELS = [
+  { id: "off",   name: "Off",   note: "No repeat." },
+  { id: "light", name: "Light", note: "A quick, quiet repeat that is gone almost at once." },
+  { id: "long",  name: "Long",  note: "A slower echo that rings on for a few repeats." },
+];
+
+function delaySettings(instrumentId, level) {
+  if (level === "off" || !level) return { wet: 0, feedback: 0, time: 0.25 };
+  if (level === "light") return { wet: 0.2, feedback: 0.16, time: 0.17 };
   const inst = instrumentById(instrumentId);
   return inst.id === "pad"
     ? { wet: 0.30, feedback: 0.40, time: 0.42 }
@@ -196,4 +205,4 @@ function payloadToBytes(uri) {
   return out;
 }
 
-export { payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };
+export { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };

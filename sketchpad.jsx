@@ -242,15 +242,31 @@ function useInstrument() {
     } catch (e) {}
   }, []);
 
-  const setEcho = useCallback((on) => {
+  const setEcho = useCallback((level) => {
     const d = ref.current?.delay;
     if (!d) return;
-    const s = delaySettings(preset.current.id, on);
+    const s = delaySettings(preset.current.id, level);
     try {
       d.wet.value = s.wet;
       d.feedback.value = s.feedback;
       d.delayTime.value = s.time;
     } catch (e) {}
+  }, []);
+
+  /* An instrument's own effects (a filter, a chorus, a tremolo), built once and shared by
+     its voices, between them and the echo. (D-107) */
+  const chainFor = useCallback((p) => {
+    const r = ref.current;
+    if (!r || !p.chain?.length) return r?.out;
+    r.chains = r.chains ?? {};
+    if (r.chains[p.id]) return r.chains[p.id][0];
+    const nodes = p.chain.map((c) =>
+      c.type === "filter" ? new Tone.Filter({ type: "lowpass", frequency: c.frequency, Q: c.q ?? 1 })
+      : c.type === "chorus" ? new Tone.Chorus({ frequency: c.frequency, delayTime: c.delayTime, depth: c.depth, wet: 1 }).start()
+      : new Tone.Tremolo({ frequency: c.frequency, depth: c.depth, wet: 1 }).start());
+    nodes.forEach((n, i) => n.connect(nodes[i + 1] ?? r.out));
+    r.chains[p.id] = nodes;
+    return nodes[0];
   }, []);
 
   /* A fixed pool per instrument, built once and reused. Nothing is created or
@@ -264,7 +280,7 @@ function useInstrument() {
     const voices = [];
     for (let i = 0; i < MAX_VOICES; i++) {
       try {
-        const synth = new Voice(p.options).connect(r.out);
+        const synth = new Voice(p.options).connect(chainFor(p));
         synth.volume.value = p.volume;
         voices.push({ synth, until: 0 });
       } catch (e) { break; }
@@ -272,7 +288,7 @@ function useInstrument() {
     r.pool = { id: p.id, voices };
     setVoiceCount(0);
     return r.pool;
-  }, []);
+  }, [chainFor]);
 
   const play = useCallback((notes, seconds, time, velocity = 0.8, spread = 0) => {
     if (!ref.current) return;
@@ -360,12 +376,12 @@ function useInstrument() {
 
     try {
       const Voice = q.kind === "fm" ? Tone.FMSynth : q.kind === "am" ? Tone.AMSynth : Tone.Synth;
-      const synth = new Voice(q.options).connect(ref.current.out);
+      const synth = new Voice(q.options).connect(chainFor(q));
       synth.volume.value = q.volume;
       synth.triggerAttack(Tone.Frequency(midi, "midi").toFrequency(), undefined, 0.85);
       held.current.set(midi, synth);
     } catch (e) { setDetail(`hold failed: ${e.message}`); }
-  }, [init, resume, play]);
+  }, [init, resume, play, chainFor]);
 
   const holdOff = useCallback((midi) => {
     const synth = held.current.get(midi);
@@ -726,7 +742,7 @@ export default function App() {
   const [sounding, setSounding] = useState(new Set());
   const [bassLit, setBassLit] = useState([]);
   const [instId, setInstId] = useState("grand");
-  const [echo, setEchoOn] = useState(true);
+  const [echo, setEchoLevel] = useState("light");   // D-107: off, light (the default) or long
   const [space, setSpace] = useState("room");
   const [roll, setRoll] = useState("block");
   const [soundOpen, setSoundOpen] = useState(false);    // D-105: the sound options are folded away until asked for
@@ -1312,8 +1328,8 @@ export default function App() {
           {soundOpen && (
             <div id="sound-options" className="mt-2 rounded-md p-2 flex flex-col gap-2" style={{ background: T.surface }}>
               {soundSections().map((sec) => {
-                const chosen = { instrument: instId, played: roll, room: space, echo: echo ? "on" : "off" }[sec.id];
-                const choose = { instrument: setInstId, played: setRoll, room: setSpace, echo: (v) => setEchoOn(v === "on") }[sec.id];
+                const chosen = { instrument: instId, played: roll, room: space, echo }[sec.id];
+                const choose = { instrument: setInstId, played: setRoll, room: setSpace, echo: setEchoLevel }[sec.id];
                 return (
                   <div key={sec.id} role="group" aria-label={sec.label} className="flex items-center gap-1.5">
                     <span className="text-[10px] w-14 shrink-0" style={{ color: T.inkSoft }}>{sec.label}</span>

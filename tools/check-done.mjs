@@ -242,6 +242,23 @@ for (const r of core.results) gate(r.id, r.name, r.ok, r.ok ? r.detail : r.probl
       : code === 0 ? `${passed} layout checks at three phone widths` : `${failing} failing: ${(out.match(/^FAIL\s.*$/m) || [""])[0].slice(0, 120)}`);
 }
 
+/* ---------- G17: the instruments sound different from one another ----------
+   "Very similar", said the owner, and a measurement agreed: the five instruments differed by 14 dB in loudness
+   and the pad was a thin sine. tools/instrument-check.mjs plays each and measures what comes out; every pair must
+   differ in at least two features, they must be about as loud, and the pad must be the widest. Needs a browser,
+   like G15 and G16. (D-107) */
+{
+  let out = "", code = 0;
+  try {
+    const root = process.env.PLAYWRIGHT || (() => { try { return execSync("npm root -g", { encoding: "utf8" }).trim() + "/playwright"; } catch { return undefined; } })();
+    out = execSync("node tools/instrument-check.mjs 2>&1", { encoding: "utf8", env: { ...process.env, ...(root ? { PLAYWRIGHT: root } : {}) }, timeout: 300000 });
+  } catch (e) { out = (e.stdout || "") + (e.stderr || ""); code = e.status ?? 1; }
+  const passed = (out.match(/^ok\s/gm) || []).length, failing = (out.match(/^FAIL\s/gm) || []).length;
+  gate("G17", "The instruments sound different from one another", code === 0 && passed > 0,
+    code === 3 ? "no browser here: run where Playwright is installed (PLAYWRIGHT=/path), or record an exception in DONE.md"
+      : code === 0 ? `${passed} comparisons: pairs, loudness, a fuller pad` : `${failing} failing: ${(out.match(/^FAIL\s.*$/m) || [""])[0].slice(0, 120)}`);
+}
+
 /* ---------- verdict ---------- */
 const width = Math.max(...results.map((r) => r.name.length));
 console.log("\nDEFINITION OF DONE — automated gates\n");

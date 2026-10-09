@@ -879,6 +879,19 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Not done.** "Fingers and scale in the same row": taken, with the owner's own summary ("Fingers and octave on top of the piano"), to mean the octave control; if a scale control was meant, say so.
 
+
+### D-107 — Instruments that sound different from one another, a fuller pad, and a light echo
+
+**Context.** The owner: the instruments are *very similar*; the pad is *very shallow*; a light delay "that fades fast" would be nice. Measured, the owner was right in a way nobody had looked at: the five instruments differed by 14 dB in loudness (the pad was ten times quieter than the piano, which is much of why it sounded thin and why the quiet ones sounded alike), the pad was a sine through a square (thin by construction), and Felt keys and Rhodes were both short, dark, plain tones.
+
+**Decision.**
+1. **Each instrument gets its own character, by its own effects.** A preset may carry a `chain` of effects shared by its voices: a lowpass filter, a chorus, a tremolo. Rhodes: a brighter bell and a longer ring, with a slow tremolo. Felt keys: a triangle through a low filter (dark, round, quick, a slightly slower attack). Warm pad: three detuned saws (`fatsawtooth`) through a filter and a chorus, a slow attack and a long release; it is no longer a sine. Marimba: a brighter, woodier FM tone. Grand piano: unchanged.
+2. **Loudness is matched.** Each instrument's volume is set so that all five are within about 4 dB of one another, measured at the output (the piano is the reference).
+3. **Echo has three settings: Off, Light, Long.** Light is the default: a repeat after 0.17 s at 16% feedback, which is below 1% by the third repeat, so it gives air and is gone almost at once. Long is the old echo (wider on the pad). Light is the same on every instrument.
+4. **The instrument check is a measurement.** `tools/instrument-check.mjs` plays C4 on each instrument with echo off and the room dry and records what comes out: attack, decay, what is left after a second, brightness (the centre of the spectrum) and width (its spread). Every pair must differ in at least two features by a margin an ear would notice; all five must be within a factor of two in level; and the pad must be wider than the middle of the others. It is gate **G17**, and it fails on the previous presets. It cannot say which sounds *good*; the owner's ear decides that, and the numbers above are where to start from.
+
+**Not done.** More instruments (an organ, a string sound) would widen the choice; the check would carry over to them.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -992,6 +1005,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-08 | The first-note wait of `D-101` is removed at the owner's request: no settle time, no waiting for the piano, no start-time line; the touch that starts the audio plays the note (`D-104`) |
 | 2026-10-08 | Sketchpad's sound controls fold into a "Sound options" section (instrument, how a chord is played, reverb, echo), the engine text is gone, and the octave control sits above the piano; the layout is checked at phone widths (`D-105`, gate G16) |
 | 2026-10-08 | Sound, silence, test sound and reset audio are removed; Fingers and the octave sit on one row above the piano and the legend under it; the tap-to-turn-on bar appears only after 1.5 s and floats, so nothing moves (`D-106`) |
+| 2026-10-09 | The instruments are made to sound different from one another and matched in loudness (the pad was ten times quieter and thin): per-instrument effects, a fuller pad, and echo as Off / Light / Long with a light fast-fading default; measured by `tools/instrument-check.mjs`, gate G17 (`D-107`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

@@ -1,7 +1,7 @@
 /* core/instruments + core/piano-samples — unit tests, one per requirement in core/REQUIREMENTS.md (CR-INSTRUMENTS-nn, CR-PIANOSAMPLES-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
+import { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
 import { PIANO_SAMPLES } from "../piano-samples.mjs";
 
 test("CR-PIANOSAMPLES-01 the built-in piano holds thirteen recordings, every six semitones from C1 to C7, each an embedded audio data URI", () => {
@@ -50,7 +50,7 @@ test("CR-INSTRUMENTS-04 the keyboard never asks the piano for a note farther tha
 test("CR-INSTRUMENTS-05 every instrument preset has what the audio layer needs to build it, and a sampler has a fallback that is itself a synth", () => {
   assert.equal(INSTRUMENTS.length, 5); assert.equal(new Set(INSTRUMENTS.map((i) => i.id)).size, 5);
   for (const i of INSTRUMENTS) {
-    assert.ok(i.name && i.note && ["sampler", "fm", "am"].includes(i.kind), i.id);
+    assert.ok(i.name && i.note && ["sampler", "fm", "am", "synth"].includes(i.kind), i.id);
     assert.ok(typeof i.volume === "number" && i.volume < 0 && i.release > 0 && typeof i.delay === "boolean", i.id);
     assert.ok(i.options, `${i.id} has options`);
     if (i.kind === "sampler") { assert.equal(i.samples.urls, PIANO_SAMPLES); assert.ok(i.credit.includes("CC-BY")); assert.ok(INSTRUMENTS.find((x) => x.id === i.fallback).kind !== "sampler"); }
@@ -58,17 +58,36 @@ test("CR-INSTRUMENTS-05 every instrument preset has what the audio layer needs t
   assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "felt", "pad", "pluck"]);
 });
 
+test("CR-INSTRUMENTS-11 an instrument's own effects are a short list of known kinds, each with the numbers it needs", () => {
+  const need = { filter: ["frequency"], chorus: ["frequency", "delayTime", "depth"], tremolo: ["frequency", "depth"] };
+  for (const i of INSTRUMENTS) for (const fx of i.chain ?? []) {
+    assert.ok(need[fx.type], `${i.id}: ${fx.type}`);
+    for (const k of need[fx.type]) assert.ok(typeof fx[k] === "number" && fx[k] > 0, `${i.id} ${fx.type}.${k}`);
+    if (fx.type !== "filter") assert.ok(fx.depth > 0 && fx.depth <= 1, `${i.id}: depth ${fx.depth}`);
+  }
+  assert.ok(INSTRUMENTS.filter((i) => i.chain?.length).length >= 3, "the instruments are told apart by more than their envelopes");
+  assert.deepEqual(INSTRUMENTS.find((i) => i.id === "pad").options.oscillator.type, "fatsawtooth", "a pad is wide: detuned voices, not a sine");
+});
+
 test("CR-INSTRUMENTS-06 instrumentById finds a preset, and falls back to the first for an id it does not know", () => {
   for (const i of INSTRUMENTS) assert.equal(instrumentById(i.id), i);
   assert.equal(instrumentById("nope"), INSTRUMENTS[0]); assert.equal(instrumentById(undefined), INSTRUMENTS[0]);
 });
 
-test("CR-INSTRUMENTS-07 delay is silent when off, and when on is wetter and slower on the pad than on anything else", () => {
-  for (const i of INSTRUMENTS) assert.deepEqual(delaySettings(i.id, false), { wet: 0, feedback: 0, time: 0.25 });
-  const pad = delaySettings("pad", true), other = delaySettings("rhodes", true);
-  assert.ok(pad.wet > other.wet && pad.time > other.time && pad.feedback > other.feedback);
-  for (const s of [pad, other, delaySettings("nope", true)]) assert.ok(s.wet > 0 && s.wet < 1 && s.feedback > 0 && s.feedback < 1 && s.time > 0);
-  assert.deepEqual(delaySettings("nope", true), other, "an unknown instrument gets the ordinary settings");
+test("CR-INSTRUMENTS-07 echo has three levels, off, light and long; off is silent, light is quieter and quicker than long, and both stay inside safe bounds", () => {
+  assert.deepEqual(ECHO_LEVELS.map((e) => e.id), ["off", "light", "long"]); assert.ok(ECHO_LEVELS.every((e) => e.name && e.note));
+  for (const i of INSTRUMENTS) {
+    assert.deepEqual(delaySettings(i.id, "off"), { wet: 0, feedback: 0, time: 0.25 }, `${i.id}: echo leaks when off`);
+    const light = delaySettings(i.id, "light"), long = delaySettings(i.id, "long");
+    for (const s of [light, long]) { assert.ok(s.wet > 0 && s.wet <= 0.5 && s.feedback > 0 && s.feedback < 0.7 && s.time > 0.05 && s.time < 1, `${i.id}: ${JSON.stringify(s)}`); }
+    assert.ok(light.feedback < long.feedback && light.time < long.time && light.wet <= long.wet, `${i.id}: light fades faster than long`);
+    assert.ok(light.feedback ** 3 < 0.01, "light is inaudible by the third repeat");
+  }
+  const pad = delaySettings("pad", "long"), other = delaySettings("rhodes", "long");
+  assert.ok(pad.wet > other.wet && pad.time > other.time && pad.feedback > other.feedback, "a long echo is wider on the pad");
+  assert.deepEqual(delaySettings("pad", "light"), delaySettings("rhodes", "light"), "light is the same everywhere");
+  assert.deepEqual(delaySettings("nope", "long"), other, "an unknown instrument gets the ordinary settings");
+  assert.deepEqual(delaySettings("pad", undefined), delaySettings("pad", "off"), "no level is off");
 });
 
 test("CR-INSTRUMENTS-08 the spaces run from dry to cave, each longer and wetter than the last, and reverb falls back to dry", () => {

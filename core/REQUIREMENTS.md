@@ -210,8 +210,9 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-INSTRUMENTS-03 | stretchAt is how far a note is from its nearest recording, and zero where it has its own. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-04 | The keyboard never asks the piano for a note farther than three semitones from a recording. | D-071, R-230, CD-007 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-05 | Every instrument preset has what the audio layer needs to build it, and a sampler has a fallback that is itself a synth. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
+| CR-INSTRUMENTS-11 | An instrument's own effects are a short list of known kinds, each with the numbers it needs. | D-107, D-062 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-06 | instrumentById finds a preset, and falls back to the first for an id it does not know. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
-| CR-INSTRUMENTS-07 | Delay is silent when off, and when on is wetter and slower on the pad than on anything else. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
+| CR-INSTRUMENTS-07 | Echo has three levels, off, light and long; off is silent, light is quieter and quicker than long, and both stay inside safe bounds. | D-041, D-107 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-08 | The spaces run from dry to cave, each longer and wetter than the last, and reverb falls back to dry. | D-040, D-041, D-069 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-09 | An embedded audio payload is read back to its size without decoding it. | D-070 | A | `core/tests/instruments.test.mjs` |
 | CR-INSTRUMENTS-10 | payloadToBytes turns an embedded payload into the bytes it holds, whatever its padding, with no browser function. | D-070, D-100 | A | `core/tests/instruments.test.mjs` |

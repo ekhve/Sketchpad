@@ -647,6 +647,15 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-427 | Nothing on the screen moves when the first note is played; the tap-to-turn-on bar appears only after a long wait and floats. | D-106, D-103 | A | The octave control sits above the piano |
 | R-425 | Nothing on the screen is wider than a phone, with the options shut or open. | D-105, D-002 | A | The sound options are folded away and offer every choice |
 
+## 10zg. The instruments
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-428 | Every pair of instruments differs in at least two of: how quickly it speaks, how long it takes to die away, how much is left after a second, how bright it is. | D-107, D-062 | A | The instruments sound different from one another |
+| R-429 | The instruments are about as loud as one another, within a factor of two. | D-107 | A | The instruments sound different from one another |
+| R-430 | The pad is wider in sound than the other instruments. | D-107 | A | The instruments sound different from one another |
+| R-431 | Echo has three levels: off, light and long. Light is the default, and fades below 1% by its third repeat. | D-107, D-041 | A | A light echo fades fast |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

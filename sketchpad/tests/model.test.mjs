@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS } from "../model.mjs";
 import { noteName } from "../../core/notes.mjs";
-import { INSTRUMENTS, SPACES } from "../../core/instruments.mjs";
+import { ECHO_LEVELS, INSTRUMENTS, SPACES } from "../../core/instruments.mjs";
 import { ROLL_STYLES } from "../../core/playback.mjs";
 
 test("SR-MODEL-01 there are three levels, Start, Produce and Study, and each one only adds to the one before", () => {
@@ -66,7 +66,7 @@ test("SR-MODEL-08 the sound options are four rows, instrument, how a chord is pl
   assert.deepEqual(rows.map((r) => r.label), ["Sound", "Played", "Reverb", "Echo"]);
   const ids = (row) => rows.find((r) => r.id === row).options.map((o) => o.id);
   assert.deepEqual(ids("instrument"), INSTRUMENTS.map((i) => i.id)); assert.deepEqual(ids("played"), ROLL_STYLES.map((r) => r.id));
-  assert.deepEqual(ids("room"), SPACES.map((s) => s.id)); assert.deepEqual(ids("echo"), ["on", "off"]);
+  assert.deepEqual(ids("room"), SPACES.map((s) => s.id)); assert.deepEqual(ids("echo"), ECHO_LEVELS.map((e) => e.id)); assert.deepEqual(ids("echo"), ["off", "light", "long"]);
   for (const row of rows) { assert.equal(new Set(ids(row.id)).size, row.options.length, `${row.id}: a choice once`); for (const o of row.options) assert.ok(o.name && o.note, `${row.id}/${o.id} is named and explained`); }
   assert.deepEqual(soundSections(), soundSections(), "the same each time");
 });

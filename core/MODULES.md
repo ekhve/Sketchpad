@@ -130,21 +130,22 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Purpose.** Instrument presets as data, delay and reverb settings, and the built-in piano's range and sample coverage, so an audio layer builds from data and holds no opinions.
 
-**Behaviour.** Five presets; each says how to build it (`kind`, `options`), how long it rings (`release`, which feeds the voice budget) and whether it wants echo. The keyboard's range is checked against the recordings' coverage: no note is farther than three semitones from one (CD-007 records why this check exists).
+**Behaviour.** Five presets; each says how to build it (`kind`, `options`, and an optional `chain` of its own effects: a filter, a chorus, a tremolo), how long it rings (`release`, which feeds the voice budget) and whether it wants echo. Echo has three levels: off, light (a quick, quiet repeat gone almost at once, the default) and long (D-107). The keyboard's range is checked against the recordings' coverage: no note is farther than three semitones from one (CD-007 records why this check exists).
 
-**Requirements.** CR-INSTRUMENTS-01 … CR-INSTRUMENTS-10 (10) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
+**Requirements.** CR-INSTRUMENTS-01 … CR-INSTRUMENTS-10 (11) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
 
 ### Interface
 
 | Name | Kind | Signature | What it is |
 |---|---|---|---|
+| `ECHO_LEVELS` | data | — | Off, Light (the default) and Long. |
 | `HIGHEST_START_MIDI` | data | — | The highest note the keyboard can start from. |
 | `INSTRUMENTS` | data | — | The five presets. |
 | `KEYBOARD_OCTAVES` | data | — | Four octaves on screen. |
 | `PIANO_RANGE` | data | — | The lowest and highest notes the piano plays. |
 | `SPACES` | data | — | Dry, Room, Hall, Cave. |
 | `base64Payload` | function | `(uri)` | The data part of an embedded data URI. |
-| `delaySettings` | function | `(instrumentId, on)` | Echo settings for an instrument, on or off. |
+| `delaySettings` | function | `(instrumentId, level)` | Echo settings for an instrument at a level: off, light or long. |
 | `instrumentById` | function | `(id)` | A preset by id, the first as fallback. |
 | `payloadBytes` | function | `(uri)` | The size of an embedded payload, without decoding it. |
 | `payloadToBytes` | function | `(uri)` | An embedded payload as the bytes it holds, ready for the audio decoder. |

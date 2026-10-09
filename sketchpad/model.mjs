@@ -5,7 +5,7 @@
    Everything else is unchanged. */
 
 import { spelling } from "../core/notes.mjs";
-import { INSTRUMENTS, SPACES } from "../core/instruments.mjs";
+import { ECHO_LEVELS, INSTRUMENTS, SPACES } from "../core/instruments.mjs";
 import { ROLL_STYLES } from "../core/playback.mjs";
 
 
@@ -27,7 +27,7 @@ function soundSections() {
     { id: "instrument", label: "Sound", options: from(INSTRUMENTS) },
     { id: "played", label: "Played", options: from(ROLL_STYLES) },
     { id: "room", label: "Reverb", options: from(SPACES) },
-    { id: "echo", label: "Echo", options: [{ id: "on", name: "On", note: "A soft repeat after each note." }, { id: "off", name: "Off", note: "No repeat." }] },
+    { id: "echo", label: "Echo", options: from(ECHO_LEVELS) },
   ];
 }
 
