@@ -656,6 +656,14 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-430 | The pad is wider in sound than the other instruments. | D-107 | A | The instruments sound different from one another |
 | R-431 | Echo has three levels: off, light and long. Light is the default, and fades below 1% by its third repeat. | D-107, D-041 | A | A light echo fades fast |
 
+## 10zh. Playing notes
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-432 | One setting says how notes are played, for chords and for scales: together, roll, slow roll, up, down, up and down, random. | D-108, D-068 | A | Chords and scales are played the same way |
+| R-433 | A scale can only run: given together, roll or slow roll it plays up; a random scale ends on its top note. | D-108 | A | Chords and scales are played the same way |
+| R-434 | The ways to play are buttons with a picture each, the same buttons in the Played row and, the runs only, in the Scales tab, sharing one state. | D-108 | A | The ways to play are buttons with pictures |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

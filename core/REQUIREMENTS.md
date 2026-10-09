@@ -187,6 +187,19 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-TRANSPORT-14 | An app can end the play-through from its unit callback: the driver stops, and the rest of that tick is dropped. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
 | CR-TRANSPORT-15 | The driver reaches the world only through the clock and timer it is given. | CD-002, CD-013 | A | `core/tests/transport.test.mjs` |
 
+## core/arpeggio
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| CR-ARPEGGIO-01 | There are seven ways to play notes: the three ways to strike a chord, then up, down, up and down, and random. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-02 | A way to play is found by id, an unknown id is the first, and only the four running ones are runs. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-03 | Up and down run through each note once in order, and up and down comes back without repeating the top; each is core/voicing's arpeggio. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-04 | Random plays every note once in an order the seed decides: the same seed gives the same order, and the seeds are not all alike. | D-108, CD-002 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-05 | Striking a chord plays its notes low to high: together at the same moment, rolled a little apart, slowly rolled further apart. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-06 | A run starts its notes one step apart: a chord's steps are quick, a scale's easy. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-07 | A scale can only run: given a way to strike a chord it runs up, and a random run ends on the top note. | D-108, UC-43 | A | `core/tests/arpeggio.test.mjs` |
+| CR-ARPEGGIO-08 | Playing never changes the notes it is given, and gives the same plan for the same input. | D-068, D-108 | A | `core/tests/arpeggio.test.mjs` |
+
 ## core/playback
 
 | ID | Requirement | Source | Mode | Verified by |

@@ -40,7 +40,7 @@ const GUIDE = [
   { id: "sound", tab: null, title: "Sound controls",
     lead: "Under the piano, “Sound options” opens the choices. They work from any tab.",
     points: [
-      "Sound options holds four rows: the instrument, how a chord is played (together, rolled, or slowly rolled), the reverb, and the echo. The grand piano is real recordings, built into the app — nothing is downloaded and it works offline.",
+      "Sound options holds four rows: the instrument, how notes are played, the reverb, and the echo. “Played” is one setting for chords and scales: together, roll, slow roll, up, down, up & down, or random. The Scales tab shows the same buttons, the four that run, and pressing one plays the scale that way. The grand piano is real recordings, built into the app — nothing is downloaded and it works offline.",
       "The recordings are the Salamander Grand Piano by Alexander Holm, used under CC-BY 3.0, shortened and re-encoded to fit in the file. Thirteen notes from C1 to C7 are embedded and everything between them is one of those played faster or slower, never by more than three semitones. If you publish this, keep that credit.",
       "Echo is one switch with a setting chosen to suit each instrument. It flatters the Rhodes and the pad in particular. “test sound” and “reset audio” are in there too, for when something sounds wrong.",
       "Changing tab, or stopping the loop, stops whatever is ringing, and leaves everything you have built.",

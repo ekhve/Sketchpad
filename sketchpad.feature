@@ -2388,6 +2388,27 @@ Feature: The instruments
     And the long echo is slower and rings on, wider on the pad
     And off is silent
 
+
+Feature: Playing notes in time
+  Chords and scales are played the same way: together, rolled, or running up, down,
+  up and down, or at random. (D-108)
+
+  @D-108 @auto
+  Scenario: Chords and scales are played the same way
+    Given the seven ways to play notes
+    Then a chord can be struck together, rolled or slowly rolled, or run up, down, up and down or at random
+    And a scale can only run, so together, roll and slow roll make it run up
+    And a random scale ends on its top note
+    And the same seed gives the same random order
+
+  @D-108 @manual
+  # checked by tools/layout-check.mjs (gate G16) and tools/sound-check.mjs (gate G15)
+  Scenario: The ways to play are buttons with pictures
+    Given the Played row in Sound options and the Scales tab
+    Then each way to play is a button with a picture and its name
+    And the Scales tab offers only the four runs
+    And choosing one in the Scales tab chooses it in the Played row too
+
 Feature: Rolling a chord
   Six notes struck together are one sound. Spread them slightly and every note
   is audible, while the chord still arrives as a chord.

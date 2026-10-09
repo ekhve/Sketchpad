@@ -251,6 +251,16 @@ const BYTES_MUTANTS = [
   ["the alphabet is shifted", 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";', 'const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";'],
 ].map(([name, from, to]) => [name, from, to, "core/instruments.mjs"]);
 
+/* How notes are played, for chords and scales (D-108). */
+const ARPEGGIO_MUTANTS = [
+  ["a scale given a chord style does not run", 'if (p.kind === "run" || kind === "scale") {', 'if (p.kind === "run") {'],
+  ["a random scale does not end on its top note", 'const keep = endOn && asc.length > 1 ? asc.pop() : null;', 'const keep = null;'],
+  ["random is not seeded", "const r = rng(seed);", "const r = rng(1);"],
+  ["a scale steps as quickly as a chord", "const RUN_STEP = { chord: 0.12, scale: 0.26 };", "const RUN_STEP = { chord: 0.12, scale: 0.12 };"],
+  ["down plays up", 'arpeggio(asc, id === "updown" ? "updown" : id === "down" ? "down" : "up")', 'arpeggio(asc, id === "updown" ? "updown" : "up")'],
+  ["a rolled chord starts together", "const offs = rollOffsets(sorted.length, p.spread);", "const offs = rollOffsets(sorted.length, 0);"],
+].map(([name, from, to]) => [name, from, to, "core/arpeggio.mjs"]);
+
 /* The shared transport's driver and loop arithmetic (D-098). */
 const TRANSPORT_MUTANTS = [
   ["the first unit starts late",              "({ nextBarAt: now + lead, barIndex: 0 })", "({ nextBarAt: now + lead + 5, barIndex: 0 })"],
@@ -285,7 +295,7 @@ const J6_SHEET_MUTANTS = [
 const MODULE_FILES = ["core", "sketchpad"].flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".mjs") && f !== "index.mjs").map((f) => `${d}/${f}`));
 const moduleHolding = (code) => MODULE_FILES.find((f) => readFileSync(f, "utf8").includes(code)) ?? "core/*.mjs (not found)";
 
-const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...BYTES_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
+const ALL = [...MUTANTS.map((m) => [...m, moduleHolding(m[1])]), ...OTHER_MUTANTS, ...J6_MUTANTS, ...J6_LABEL_MUTANTS, ...J6_PROGRESSION_MUTANTS, ...J6_PLAYBACK_MUTANTS, ...TRANSPORT_MUTANTS, ...MISSING_MUTANTS, ...ARPEGGIO_MUTANTS, ...BYTES_MUTANTS, ...J6_ALONG_MUTANTS, ...J6_SHEET_MUTANTS];
 let killed = 0, survived = [];
 
 for (const [name, from, to, file] of ALL) {

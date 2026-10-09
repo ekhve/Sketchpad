@@ -3858,3 +3858,16 @@ describe("Feature: The instruments", () => {
     assert.ok(delaySettings("pad", "long").time > delaySettings("rhodes", "long").time, "wider on the pad");
   });
 });
+
+
+describe("Feature: Playing notes in time", () => {
+  const { PLAY_PATTERNS, playPlan, isRun } = th;
+  test("Chords and scales are played the same way", () => {
+    const chord = [60, 64, 67], scale = [60, 62, 64, 65, 67, 69, 71, 72];
+    assert.deepEqual(PLAY_PATTERNS.map((p) => p.id), ["block", "roll", "slow", "up", "down", "updown", "random"]);
+    for (const p of PLAY_PATTERNS) assert.deepEqual([...new Set(playPlan(chord, p.id).map((x) => x.midi))].sort((a, b) => a - b), chord, `${p.id} plays every note of the chord`);
+    for (const id of ["block", "roll", "slow"]) assert.deepEqual(playPlan(scale, id, { kind: "scale" }).map((x) => x.midi), scale, `${id} runs a scale up`);
+    for (const seed of [1, 2, 3]) { const r = playPlan(scale, "random", { kind: "scale", seed }).map((x) => x.midi); assert.equal(r.at(-1), 72); assert.deepEqual(r, playPlan(scale, "random", { kind: "scale", seed }).map((x) => x.midi)); }
+    assert.equal(PLAY_PATTERNS.filter((p) => isRun(p.id)).length, 4);
+  });
+});

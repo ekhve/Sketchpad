@@ -1,5 +1,6 @@
 /* core/index — the public interface of the core asset base in one place, for tests and for apps that want most of it.
    Apps that want a little should import the module they need, so the dependency is visible. (D-096) */
+export * from "./arpeggio.mjs";
 export * from "./bass.mjs";
 export * from "./chords.mjs";
 export * from "./chordsets.mjs";

@@ -1,12 +1,12 @@
 /* sketchpad/model — What the Sketchpad shell shows: the levels and the features each adds, which tabs exist at each level, and which chord is active when none is selected.
-   Layer 2. Depends on: core/instruments, core/notes, core/playback. Pure: no React, no Tone, no DOM, no dates, no randomness.
+   Layer 4. Depends on: core/arpeggio, core/instruments, core/notes. Pure: no React, no Tone, no DOM, no dates, no randomness.
    Interface, behaviour and requirements: sketchpad/MODULES.md (model).
    Moved from the THEORY block of sketchpad.jsx (D-096); namingFor added (D-097).
    Everything else is unchanged. */
 
 import { spelling } from "../core/notes.mjs";
 import { ECHO_LEVELS, INSTRUMENTS, SPACES } from "../core/instruments.mjs";
-import { ROLL_STYLES } from "../core/playback.mjs";
+import { PLAY_PATTERNS } from "../core/arpeggio.mjs";
 
 
 
@@ -25,7 +25,7 @@ function soundSections() {
   const from = (list) => list.map((x) => ({ id: x.id, name: x.name, note: x.note }));
   return [
     { id: "instrument", label: "Sound", options: from(INSTRUMENTS) },
-    { id: "played", label: "Played", options: from(ROLL_STYLES) },
+    { id: "played", label: "Played", options: from(PLAY_PATTERNS) },
     { id: "room", label: "Reverb", options: from(SPACES) },
     { id: "echo", label: "Echo", options: from(ECHO_LEVELS) },
   ];

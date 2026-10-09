@@ -50,7 +50,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/playback
 
-**Layer** 0 · **Depends on** nothing · **Used by** core/transport, sketchpad, sketchpad/model
+**Layer** 0 · **Depends on** nothing · **Used by** core/arpeggio, core/transport, sketchpad
 
 **Purpose.** The arithmetic of playing sound, with no audio library: the look-ahead scheduler, bar length from tempo, the voice budget and its reaping, and rolling a chord.
 
@@ -98,7 +98,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/figures
 
-**Layer** 1 · **Depends on** core/notes · **Used by** core/bass, core/sheet, sketchpad
+**Layer** 1 · **Depends on** core/notes · **Used by** core/arpeggio, core/bass, core/sheet, sketchpad
 
 **Purpose.** Rhythm as authored intent with pitch chosen by rule: bass lines and riffs from patterns, planned bar by bar into events — notes with a start, a length and a velocity. The seam between *what to play* and *any instrument or MIDI file*.
 
@@ -351,7 +351,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/voicing
 
-**Layer** 2 · **Depends on** core/chords, core/notes · **Used by** core/chordsets, core/harmony, sketchpad, sketchpad/lessons
+**Layer** 2 · **Depends on** core/chords, core/notes · **Used by** core/arpeggio, core/chordsets, core/harmony, sketchpad, sketchpad/lessons
 
 **Purpose.** Putting a chord's intervals into actual notes: the octave they sit in, the ways one chord can be arranged, arpeggios, and choosing the arrangement that moves least from the last chord.
 
@@ -371,6 +371,27 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `voice` | function | `(rootPc, intervals, base = DEFAULT_BASE)` | Intervals placed above a root in an octave. |
 | `voiceLeading` | function | `(from, to, system = "letters")` | Which notes stay, which move, how far, how smooth. |
 | `voicingsFor` | function | `(chord)` | The arrangements of a chord: close, signature, open, spread, rootless, shell. |
+
+## core/arpeggio
+
+**Layer** 3 · **Depends on** core/figures, core/playback, core/voicing · **Used by** sketchpad, sketchpad/model
+
+**Purpose.** How a set of notes is played in time: all at once, rolled, or one at a time up, down, up and back, or at random. One setting for chords and for scales, so a pattern is chosen once and means the same everywhere (and, later, in a sequencer).
+
+**Behaviour.** Seven ways to play: the three ways to strike a chord from `core/playback` (together, roll, slow roll) and four runs (up, down, up & down, random). `playPlan` turns notes and a way into `[{ midi, at }]`, seconds from the first note: a chord struck low to high with its roll offsets, or run through at a step of 0.12 s for a chord and 0.26 s for a scale. A scale can only run, so a chord style given to a scale runs up, and a random run of a scale ends on its top note. Random is seeded: the same seed gives the same order (CD-002). Up, down and up-and-down are `core/voicing`'s `arpeggio`; nothing is written twice.
+
+**Requirements.** CR-ARPEGGIO-01 … CR-ARPEGGIO-08 (8) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/arpeggio.test.mjs`.
+
+### Interface
+
+| Name | Kind | Signature | What it is |
+|---|---|---|---|
+| `PLAY_PATTERNS` | data | — | The seven ways to play notes, with a name, a note and a kind (chord or run). |
+| `RUN_STEP` | data | — | Seconds between the notes of a run: 0.12 for a chord, 0.26 for a scale. |
+| `isRun` | function | `(id)` | Whether a way runs through the notes one at a time. |
+| `patternById` | function | `(id)` | A way to play by id, the first as fallback. |
+| `playPlan` | function | `(notes, id, { seed = 1, kind = "chord" } = {})` | When each note starts, for a chord or a scale, in a way. |
+| `runOrder` | function | `(notes, id, { seed = 1, endOn = false } = {})` | The notes in the order a run plays them. |
 
 ## core/chordsets
 

@@ -239,7 +239,8 @@ Not in the original plan. Each earned its place.
 | Rolling a chord and playing a scale as one arpeggiator | **Open** | Together/roll/slow roll and up/down/mix are the same idea (`D-105`, noted) |
 | The instruments told apart, matched in loudness, a fuller pad | **Done** | Measured (`D-107`) |
 | Echo: Off / Light / Long | **Done** | Light, quick and fading, is the default |
-| Arpeggio patterns (up, down, up-and-down, mix) shared by chords and scales | **Open** | Proposed, see `D-105`; the owner's design call |
+| Ways to play notes (together, roll, slow roll, up, down, up & down, random) shared by chords and scales | **Done** | Buttons with pictures in Played and, the runs, in Scales (`D-108`) |
+| A small synth engine, or another sampled instrument, for good sounds | **Open** | Proposed by the owner; see the notes in `D-108`'s thread: options and licences to decide |
 | The rest of the screen tidied | **Open** | Next: chosen with the owner |
 
 ## Known gaps and rough edges

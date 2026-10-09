@@ -13,7 +13,7 @@ Requirements of the three modules that belong to Sketchpad alone (`CD-001`): its
 | SR-MODEL-05 | The main scenario can be done at the first level. | D-058, D-039, D-097, D-105 | A | `sketchpad/tests/model.test.mjs` |
 | SR-MODEL-06 | The chord in focus is the selected one, else the one playing, else the loop's first, else home. | D-058, D-039, D-097, D-105 | A | `sketchpad/tests/model.test.mjs` |
 | SR-MODEL-07 | Notes are written as sharps unless the key's own spelling is chosen; Do-Re-Mi follows the same choice. | D-058, D-039, D-097, D-105 | A | `sketchpad/tests/model.test.mjs` |
-| SR-MODEL-08 | The sound options are four rows, instrument, how a chord is played, reverb and echo, each offering every choice the catalogues have, once. | D-058, D-039, D-097, D-105 | A | `sketchpad/tests/model.test.mjs` |
+| SR-MODEL-08 | The sound options are four rows, instrument, how a chord is played, reverb and echo, each offering every choice the catalogues have (seven ways to play notes), once. | D-058, D-039, D-097, D-105 | A | `sketchpad/tests/model.test.mjs` |
 
 ## sketchpad/guide
 

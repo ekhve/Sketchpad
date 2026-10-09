@@ -16,7 +16,8 @@ import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyA
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
 import { createDriver, loopIndex } from "./core/transport.mjs";
-import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, rollStyleById, rollOffsets } from "./core/playback.mjs";
+import { MAX_VOICES, voiceLifetime, reapVoices, barSecondsAt, pickVoiceIndex, rollOffsets } from "./core/playback.mjs";
+import { PLAY_PATTERNS, RUN_STEP, isRun, playPlan } from "./core/arpeggio.mjs";
 import { scaleById, scalePcs, fitScales, keysContaining, scalesContaining, customScaleFrom, customScalePcs, activeScalePcs } from "./core/scales.mjs";
 import { diagramKeys, sheetData, sheetAsText } from "./core/sheet.mjs";
 import { scalesForStyle } from "./core/styles.mjs";
@@ -290,14 +291,18 @@ function useInstrument() {
     return r.pool;
   }, [chainFor]);
 
-  const play = useCallback((notes, seconds, time, velocity = 0.8, spread = 0) => {
+  const plays = useRef(0);             // counts runs, so a random one differs each time
+  const play = useCallback((notes, seconds, time, velocity = 0.8, how = 0) => {
     if (!ref.current) return;
     const p = preset.current;
     const list = (Array.isArray(notes) ? notes : [notes]).slice(0, 8);
 
-    /* Low to high, each note a moment after the one below it. (D-068) */
-    const sorted = [...list].sort((a, b) => a - b);
-    const offsets = rollOffsets(sorted.length, spread);
+    /* How the notes are played: a way from core/arpeggio (together, rolled, or a run up, down or at
+       random), or, for a caller that has a number, that many seconds of roll. Each note is
+       { midi, at }, at seconds after the first. (D-068, D-108) */
+    const plan = typeof how === "string"
+      ? playPlan(list, how, { seed: ++plays.current })
+      : (() => { const s = [...list].sort((a, b) => a - b), o = rollOffsets(s.length, how); return s.map((midi, i) => ({ midi, at: o[i] })); })();
     /* Asked for "now" only when the notes are about to be struck, after any work
        needed to make a voice: a time taken before that work can already be in the
        past when the voice exists. (D-101) */
@@ -312,10 +317,10 @@ function useInstrument() {
       if (node) {
         try {
           const startAt = at0();
-          sorted.forEach((m, i) => {
+          plan.forEach(({ midi, at }) => {
             node.triggerAttackRelease(
-              Tone.Frequency(m, "midi").toFrequency(),
-              Math.max(0.05, seconds), startAt + offsets[i], velocity
+              Tone.Frequency(midi, "midi").toFrequency(),
+              Math.max(0.05, seconds), startAt + at, velocity
             );
           });
         } catch (e) { setDetail(`note failed: ${e.message}`); }
@@ -332,8 +337,8 @@ function useInstrument() {
     const busy = pool.voices.map((v) => v.until);
     let sounding = 0;
 
-    sorted.forEach((m, k) => {
-      const startsAt = startAt + offsets[k];
+    plan.forEach(({ midi: m, at: offset }) => {
+      const startsAt = startAt + offset;
       const i = pickVoiceIndex(busy, startsAt);
       const v = pool.voices[i];
       try {
@@ -439,6 +444,37 @@ const T = {
   tension: "#B23A48",   // outside-the-scale emphasis, stop states
   ok: "#3E7D5A",        // compatibility confirmations
 };
+
+/* The ways to play notes, as buttons with a picture: the same control for chords and for scales.
+   `only="runs"` offers the four that run through the notes one at a time, which is all a scale can
+   do. (D-108) */
+const PatternIcon = ({ id }) => {
+  const dots = (pts) => pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.9" fill="currentColor" />);
+  const arrow = (d) => <path d={d} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />;
+  const body = {
+    block:  dots([[10, 3], [10, 8], [10, 13]]),
+    roll:   dots([[5, 13], [10, 8], [15, 3]]),
+    slow:   dots([[3, 13], [10, 8], [17, 3]]),
+    up:     arrow("M10 14V3M5.5 7.5L10 3l4.5 4.5"),
+    down:   arrow("M10 2v11M5.5 8.5L10 13l4.5-4.5"),
+    updown: arrow("M6 14V3M2.5 6.5L6 3l3.5 3.5M14 2v11M10.5 9.5L14 13l3.5-3.5"),
+    random: arrow("M2 4h3c4 0 5 8 9 8h4M15.5 9.5L18 12l-2.5 2.5M2 12h3c1.6 0 2.7-1.4 3.6-2.8M11.4 6.8C12.3 5.4 13 4 14 4h4M15.5 1.5L18 4l-2.5 2.5"),
+  }[id];
+  return <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" style={{ flex: "none" }}>{body}</svg>;
+};
+function PatternPicker({ value, onPick, only }) {
+  return (
+    <div className="flex items-center gap-1 flex-wrap" role="group" aria-label="how the notes are played">
+      {PLAY_PATTERNS.filter((p) => only !== "runs" || isRun(p.id)).map((p) => (
+        <button key={p.id} onClick={() => onPick(p.id)} title={p.note} aria-pressed={value === p.id} aria-label={p.name}
+          className="px-2 py-1 rounded-md text-xs whitespace-nowrap flex items-center gap-1"
+          style={{ background: value === p.id ? T.ink : T.raised, color: value === p.id ? T.keyWhite : T.inkSoft, fontWeight: value === p.id ? 600 : 400 }}>
+          <PatternIcon id={p.id} />{p.name}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /* Shown while sound has been asked for and the browser has not yet allowed it.
    A tap on this is a click, which every phone counts as a touch. (D-103) */
@@ -744,7 +780,7 @@ export default function App() {
   const [instId, setInstId] = useState("grand");
   const [echo, setEchoLevel] = useState("light");   // D-107: off, light (the default) or long
   const [space, setSpace] = useState("room");
-  const [roll, setRoll] = useState("block");
+  const [pattern, setPattern] = useState("block");   // D-108: how notes are played, for chords and scales
   const [soundOpen, setSoundOpen] = useState(false);    // D-105: the sound options are folded away until asked for
   const [voicingId, setVoicingId] = useState("close");
   const [lesson, setLesson] = useState({ degree: 0, step: -1 });
@@ -788,7 +824,6 @@ export default function App() {
 
   const pro = has(level, "numerals");           // depth follows from the level
   const can = (f) => has(level, f);
-  const spread = rollStyleById(roll).spread;
   const ctx = { tonic, mode, scaleId };
   const scaleSet = useMemo(() => activeScalePcs(customScale, tonic, scaleId), [customScale, tonic, scaleId]);
   const parentScale = mode === "minor" ? "natural-minor" : "major";
@@ -931,7 +966,7 @@ export default function App() {
     await inst.init(); await inst.resume();
     setPractice({ ...practice, shown: stepNow.show, hint: null });
     if (stepNow.target.kind === "sequence") playSequence(stepNow.show, 330, 0.4);
-    else inst.play(stepNow.show, 1.1, undefined, 0.7, spread);
+    else inst.play(stepNow.show, 1.1, undefined, 0.7, pattern);
   };
 
   /* The hint ladder: first how to find the note, then the note itself. Show me
@@ -990,7 +1025,7 @@ export default function App() {
     const vc = voiced(c);
     await inst.init(); await inst.resume();
     if (!playing) inst.panic();
-    inst.play(vc.notes, 0.85, undefined, 0.65, spread);
+    inst.play(vc.notes, 0.85, undefined, 0.65, pattern);
     setChord(vc);
     if (explain) setNote(explainChord(vc, ctx, system));
   };
@@ -1017,7 +1052,7 @@ export default function App() {
   const playDictionaryChord = async (c) => {
     await inst.init(); await inst.resume();
     if (!playing) inst.panic();
-    inst.play(c.notes, 1.1, undefined, 0.7, spread);
+    inst.play(c.notes, 1.1, undefined, 0.7, pattern);
     setChord(c);
     setNote({
       head: `${lbl(c)} — ${c.full}`,
@@ -1121,21 +1156,13 @@ export default function App() {
 
   useEffect(() => () => driver.current.stop(), []);
 
-  const playScale = (dir) => {
-    const iv = scaleById(scaleId).iv;
-    let seq = [...iv, 12].map((i) => 48 + tonic + i);
-    if (dir === "down") seq = seq.reverse();
-    if (dir === "shuffle") {
-      const r = rng(seed * 13 + 7);
-      seq = [...iv].map((i) => 48 + tonic + i);
-      for (let i = seq.length - 1; i > 0; i--) {
-        const j = Math.floor(r() * (i + 1));
-        [seq[i], seq[j]] = [seq[j], seq[i]];
-      }
-      seq = [...seq, 48 + tonic + 12];
-      setSeed((x) => x + 1);
-    }
-    playSequence(seq, 260, 0.24);
+  /* The scale is played the way notes are played everywhere: the same setting as for chords, and
+     only the running ones, because a scale is one note after another. (D-108) */
+  const playScale = (id) => {
+    const notes = [...scaleById(scaleId).iv, 12].map((i) => 48 + tonic + i);
+    const run = playPlan(notes, isRun(id) ? id : "up", { kind: "scale", seed: seed * 13 + 7 });
+    if (id === "random") setSeed((x) => x + 1);
+    playSequence(run.map((x) => x.midi), RUN_STEP.scale * 1000, 0.24);
   };
 
   const pickScale = (sc) => {
@@ -1328,11 +1355,14 @@ export default function App() {
           {soundOpen && (
             <div id="sound-options" className="mt-2 rounded-md p-2 flex flex-col gap-2" style={{ background: T.surface }}>
               {soundSections().map((sec) => {
-                const chosen = { instrument: instId, played: roll, room: space, echo }[sec.id];
-                const choose = { instrument: setInstId, played: setRoll, room: setSpace, echo: setEchoLevel }[sec.id];
+                const chosen = { instrument: instId, played: pattern, room: space, echo }[sec.id];
+                const choose = { instrument: setInstId, played: setPattern, room: setSpace, echo: setEchoLevel }[sec.id];
                 return (
                   <div key={sec.id} role="group" aria-label={sec.label} className="flex items-center gap-1.5">
                     <span className="text-[10px] w-14 shrink-0" style={{ color: T.inkSoft }}>{sec.label}</span>
+                    {sec.id === "played"
+                      ? <PatternPicker value={pattern} onPick={setPattern} />
+                      : (
                     <div className="flex items-center gap-1 flex-wrap">
                       {sec.options.map((o) => (
                         <button key={o.id} onClick={() => choose(o.id)} title={o.note} aria-pressed={chosen === o.id}
@@ -1341,7 +1371,7 @@ export default function App() {
                           {o.name}
                         </button>
                       ))}
-                    </div>
+                    </div>)}
                   </div>
                 );
               })}
@@ -1479,7 +1509,7 @@ export default function App() {
                     setChord(c);
                     await inst.init(); await inst.resume();
                     if (!playing) inst.panic();
-                    inst.play(v.notes, 0.9, undefined, 0.65, spread);
+                    inst.play(v.notes, 0.9, undefined, 0.65, pattern);
                     setNote({ head: `${lbl(activeChord)} — ${v.name}`, plain: v.why });
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left mb-1.5"
@@ -1782,7 +1812,7 @@ export default function App() {
                       {noteName(m, system)}
                     </button>
                   ))}
-                  <button onClick={() => { inst.init().then(() => inst.play(picked, 1.1, undefined, 0.7, spread)); }}
+                  <button onClick={() => { inst.init().then(() => inst.play(picked, 1.1, undefined, 0.7, pattern)); }}
                     className="px-2.5 py-1 rounded-md text-xs font-semibold" style={{ background: T.homeDot, color: T.keyWhite }}>▶ together</button>
                   <button onClick={() => playArp(picked, "up")} className="px-2.5 py-1 rounded-md text-xs" style={{ background: T.raised, color: T.ink }}>▶ arp ↑</button>
                   <button onClick={() => playArp(picked, "down")} className="px-2.5 py-1 rounded-md text-xs" style={{ background: T.raised, color: T.ink }}>▶ arp ↓</button>
@@ -1879,14 +1909,8 @@ export default function App() {
 
         {tab === "scales" && (
           <>
-            <H right={
-              <div className="flex gap-1">
-                {[["up", "▲"], ["down", "▼"], ["shuffle", "⤨"]].map(([d, glyph]) => (
-                  <button key={d} onClick={() => playScale(d)} className="px-2.5 py-1 rounded text-xs"
-                    style={{ background: T.raised, color: T.homeDot, fontWeight: 600 }}>{glyph}</button>
-                ))}
-              </div>
-            }>Play the scale</H>
+            <H>Play the scale</H>
+            <div className="mb-2"><PatternPicker only="runs" value={pattern} onPick={(id) => { setPattern(id); playScale(id); }} /></div>
             <p className="text-[11px] mb-2" style={{ color: T.inkSoft }}>What are you going for?</p>
             <div className="flex gap-1.5 flex-wrap mb-2">
               {STYLES.map((sName) => (
@@ -2295,7 +2319,7 @@ export default function App() {
                   <Row key={i} left={noteName(inv.bass, system)} mid={inv.name}
                     right={inv.notes.map((m) => noteName(m, system)).join(" ")}
                     accent={T.chordB}
-                    onClick={() => { inst.init().then(() => { inst.play(inv.notes, 0.9, undefined, 0.7, spread); flash(inv.notes, 700); }); }} />
+                    onClick={() => { inst.init().then(() => { inst.play(inv.notes, 0.9, undefined, 0.7, pattern); flash(inv.notes, 700); }); }} />
                 ))}
               </div>
             )}

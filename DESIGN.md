@@ -892,6 +892,22 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Not done.** More instruments (an organ, a string sound) would widen the choice; the check would carry over to them.
 
+
+### D-108 — One way to play notes, for chords and for scales, as buttons with pictures
+
+**Context.** Rolling a chord (together, roll, slow roll) and playing a scale (up, down, mixed) were two controls for one idea (`D-105`, noted then). The owner, asked: yes, the same, as buttons "that look nice, not just text", up, down and random; and for scales only the running patterns.
+
+**Decision.**
+1. **`core/arpeggio`** is the one place that says how a set of notes is played in time. Seven ways: *Together*, *Roll*, *Slow roll* (the three ways to strike a chord, which are `core/playback`'s roll styles) and four runs: *Up*, *Down*, *Up & down*, *Random*. `playPlan(notes, way, { kind, seed })` returns when each note starts. Up, down and up-and-down are `core/voicing.arpeggio`, reused; random is seeded and so repeatable.
+2. **One setting.** The **Played** row in Sound options offers all seven, as buttons with a picture each (stacked dots for together, rising dots for the rolls, arrows for the runs, crossed arrows for random). The **Scales** tab shows the same buttons, only the four runs; pressing one *sets* the way and *plays* the scale. It is the same state, so choosing Down in Scales makes chords arpeggiate downwards too. That coupling is the point of "they are the same", and it is the thing to say if it surprises.
+3. **A scale can only run.** If the setting is Together, Roll or Slow roll, a scale plays Up. A random scale ends on its top note, as before.
+4. **Pace.** A run steps at 0.12 s for a chord (quick, an arpeggio) and 0.26 s for a scale (easy to follow).
+5. The old three glyph buttons of the Scales tab are gone; they were this control, half-built.
+
+**Later.** A sequencer wants exactly this: a pattern over a set of notes and a step. `playPlan` is that seam.
+
+**Checked.** Unit tests of the plan (`CR-ARPEGGIO-01` to `08`), the model of the options, `tools/layout-check.mjs` (each way is a button with a picture; the Scales buttons share state with the Played row) and `tools/sound-check.mjs` (a run on a chord and a scale both put sound out).
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1006,6 +1022,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-08 | Sketchpad's sound controls fold into a "Sound options" section (instrument, how a chord is played, reverb, echo), the engine text is gone, and the octave control sits above the piano; the layout is checked at phone widths (`D-105`, gate G16) |
 | 2026-10-08 | Sound, silence, test sound and reset audio are removed; Fingers and the octave sit on one row above the piano and the legend under it; the tap-to-turn-on bar appears only after 1.5 s and floats, so nothing moves (`D-106`) |
 | 2026-10-09 | The instruments are made to sound different from one another and matched in loudness (the pad was ten times quieter and thin): per-instrument effects, a fuller pad, and echo as Off / Light / Long with a light fast-fading default; measured by `tools/instrument-check.mjs`, gate G17 (`D-107`) |
+| 2026-10-09 | One way to play notes for chords and scales: Together, Roll, Slow roll, Up, Down, Up & down, Random, as buttons with pictures in the Played row and, the runs only, in the Scales tab; `core/arpeggio` (`D-108`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
