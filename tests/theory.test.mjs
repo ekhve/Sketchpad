@@ -3857,6 +3857,16 @@ describe("Feature: The instruments", () => {
     }
     assert.ok(delaySettings("pad", "long").time > delaySettings("rhodes", "long").time, "wider on the pad");
   });
+  test("Strings and a vibraphone are recorded and credited", () => {
+    for (const id of ["strings", "vibes"]) {
+      const i = INSTRUMENTS.find((x) => x.id === id);
+      assert.equal(i.kind, "sampler", id);
+      assert.ok(Object.keys(i.samples.urls).length >= 5, `${id}: recordings built into the app`);
+      assert.ok(Object.values(i.samples.urls).every((u) => u.startsWith("data:audio/")), `${id}: embedded, not fetched`);
+      assert.notEqual(th.instrumentById(i.fallback).kind, "sampler", `${id}: a synth stands in`);
+      assert.match(i.credit, /CC0/, id);
+    }
+  });
 });
 
 

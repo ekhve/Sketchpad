@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
 import { PIANO_SAMPLES } from "../piano-samples.mjs";
+import { STRINGS_SAMPLES, VIBES_SAMPLES, SAMPLE_CREDITS } from "../instrument-samples.mjs";
 
 test("CR-PIANOSAMPLES-01 the built-in piano holds thirteen recordings, every six semitones from C1 to C7, each an embedded audio data URI", () => {
   const names = Object.keys(PIANO_SAMPLES);
@@ -48,14 +49,14 @@ test("CR-INSTRUMENTS-04 the keyboard never asks the piano for a note farther tha
 });
 
 test("CR-INSTRUMENTS-05 every instrument preset has what the audio layer needs to build it, and a sampler has a fallback that is itself a synth", () => {
-  assert.equal(INSTRUMENTS.length, 5); assert.equal(new Set(INSTRUMENTS.map((i) => i.id)).size, 5);
+  assert.equal(INSTRUMENTS.length, 7); assert.equal(new Set(INSTRUMENTS.map((i) => i.id)).size, 7);
   for (const i of INSTRUMENTS) {
     assert.ok(i.name && i.note && ["sampler", "fm", "am", "synth"].includes(i.kind), i.id);
     assert.ok(typeof i.volume === "number" && i.volume < 0 && i.release > 0 && typeof i.delay === "boolean", i.id);
     assert.ok(i.options, `${i.id} has options`);
-    if (i.kind === "sampler") { assert.equal(i.samples.urls, PIANO_SAMPLES); assert.ok(i.credit.includes("CC-BY")); assert.ok(INSTRUMENTS.find((x) => x.id === i.fallback).kind !== "sampler"); }
+    if (i.kind === "sampler") { assert.ok([PIANO_SAMPLES, STRINGS_SAMPLES, VIBES_SAMPLES].includes(i.samples.urls), i.id); assert.ok(/CC-BY|CC0/.test(i.credit), i.id); assert.ok(INSTRUMENTS.find((x) => x.id === i.fallback).kind !== "sampler"); }
   }
-  assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "felt", "pad", "pluck"]);
+  assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "felt", "pad", "pluck", "strings", "vibes"]);
 });
 
 test("CR-INSTRUMENTS-11 an instrument's own effects are a short list of known kinds, each with the numbers it needs", () => {
@@ -116,4 +117,29 @@ test("CR-INSTRUMENTS-10 payloadToBytes turns an embedded payload into the bytes 
   }
   assert.deepEqual(bytes("+/+/"), [0xfb, 0xff, 0xbf], "the last two characters of the alphabet");
   assert.equal(payloadToBytes(PIANO_SAMPLES.C4).length, payloadBytes(PIANO_SAMPLES.C4));
+});
+
+const RECORDED = { strings: STRINGS_SAMPLES, vibes: VIBES_SAMPLES };
+
+test("CR-INSTRUMENTSAMPLES-01 the string section holds seven recordings and the vibraphone six, each an embedded audio data URI", () => {
+  assert.deepEqual(Object.keys(STRINGS_SAMPLES).map(sampleMidi).sort((a, b) => a - b), [43, 50, 57, 62, 69, 76, 83]);
+  assert.deepEqual(Object.keys(VIBES_SAMPLES).map(sampleMidi).sort((a, b) => a - b), [53, 60, 67, 74, 81, 88]);
+  for (const [id, table] of Object.entries(RECORDED)) for (const [n, uri] of Object.entries(table)) {
+    assert.match(uri, /^data:audio\/mpeg;base64,[A-Za-z0-9+/]+=*$/, `${id} ${n}`);
+    const bytes = payloadBytes(uri);
+    assert.ok(bytes > 3000 && bytes < 40000, `${id} ${n}: ${bytes} bytes`);
+  }
+  for (const [id, table] of Object.entries(RECORDED)) assert.equal(INSTRUMENTS.find((i) => i.id === id).samples.urls, table);
+});
+
+test("CR-INSTRUMENTSAMPLES-02 neighbouring recordings of an instrument are at most seven semitones apart", () => {
+  for (const [id, table] of Object.entries(RECORDED)) {
+    const a = sampleAnchors(table);
+    for (let i = 1; i < a.length; i++) assert.ok(a[i] - a[i - 1] <= 7, `${id}: ${a[i - 1]} to ${a[i]}`);
+  }
+});
+
+test("CR-INSTRUMENTSAMPLES-03 each recorded instrument has a line of credit naming its source and its licence", () => {
+  assert.deepEqual(Object.keys(SAMPLE_CREDITS).sort(), ["strings", "vibes"]);
+  for (const [id, line] of Object.entries(SAMPLE_CREDITS)) { assert.match(line, /CC0/, id); assert.match(line, /VSCO|Versilian/, id); assert.equal(INSTRUMENTS.find((i) => i.id === id).credit, line); }
 });

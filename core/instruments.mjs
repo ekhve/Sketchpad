@@ -1,9 +1,10 @@
 /* core/instruments — Instrument presets as data (piano, Rhodes, felt keys, pad, marimba), delay and reverb settings, and the keyboard's range and sample coverage.
-   Layer 1. Depends on: core/piano-samples. Pure: no React, no Tone, no DOM, no dates, no randomness.
+   Layer 1. Depends on: core/piano-samples, core/instrument-samples. Pure: no React, no Tone, no DOM, no dates, no randomness.
    Interface, behaviour and requirements: core/MODULES.md (instruments).
    Moved verbatim from the THEORY block of sketchpad.jsx (D-096); behaviour unchanged. */
 
 import { PIANO_SAMPLES } from "./piano-samples.mjs";
+import { STRINGS_SAMPLES, VIBES_SAMPLES, SAMPLE_CREDITS } from "./instrument-samples.mjs";
 
 
 
@@ -139,6 +140,23 @@ const INSTRUMENTS = [
       modulation: { type: "sine" },
       modulationEnvelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
     } },
+
+  /* Two more recorded instruments, both CC0, for the sounds a synth does not give: a
+     string section that swells in, and a vibraphone. They are held to the same rule as
+     the piano: embedded, offline, with a synth standing in until they are decoded. (D-109) */
+  { id: "strings", name: "Strings", kind: "sampler",
+    note: "A real string section, bowed. Swells in and sings under chords.",
+    volume: -5, release: 1.6, delay: true, fallback: "pad",
+    samples: { baseUrl: "", urls: STRINGS_SAMPLES },
+    credit: SAMPLE_CREDITS.strings,
+    options: { attack: 0.35, release: 1.6 } },
+
+  { id: "vibes", name: "Vibraphone", kind: "sampler",
+    note: "Soft mallets on metal bars. Round, ringing and a little dreamy.",
+    volume: -5, release: 1.2, delay: true, fallback: "pluck",
+    samples: { baseUrl: "", urls: VIBES_SAMPLES },
+    credit: SAMPLE_CREDITS.vibes,
+    options: { release: 1.2 } },
 ];
 
 const instrumentById = (id) => INSTRUMENTS.find((i) => i.id === id) ?? INSTRUMENTS[0];

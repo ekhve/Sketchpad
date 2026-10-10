@@ -664,6 +664,13 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-433 | A scale can only run: given together, roll or slow roll it plays up; a random scale ends on its top note. | D-108 | A | Chords and scales are played the same way |
 | R-434 | The ways to play are buttons with a picture each, the same buttons in the Played row and, the runs only, in the Scales tab, sharing one state. | D-108 | A | The ways to play are buttons with pictures |
 
+## 10zi. Recorded instruments
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-435 | Besides the grand piano, Strings and Vibraphone are recorded instruments, built into the app, each with a synth to stand in until it is ready. | D-109, D-064 | A | Strings and a vibraphone are recorded and credited |
+| R-436 | The app shows where each recorded instrument comes from, and the recordings are licensed for redistribution (CC0). | D-109 | A | Strings and a vibraphone are recorded and credited |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

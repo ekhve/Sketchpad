@@ -8,6 +8,7 @@ export * from "./explain.mjs";
 export * from "./figures.mjs";
 export * from "./fingering.mjs";
 export * from "./harmony.mjs";
+export * from "./instrument-samples.mjs";
 export * from "./instruments.mjs";
 export * from "./keyboard.mjs";
 export * from "./melody.mjs";

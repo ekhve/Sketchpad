@@ -49,7 +49,7 @@ for (const width of [360, 375, 414]) {
   await toggle.click(); await page.waitForTimeout(150);
   check(`${w}: opening shows the four rows`, (await toggle.getAttribute("aria-expanded")) === "true" && (await page.locator('#sound-options > [role="group"]').evaluateAll((g) => g.map((x) => x.getAttribute("aria-label")))).join() === "Sound,Played,Reverb,Echo");
   const names = await page.locator("#sound-options button").allInnerTexts();
-  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Together", "Roll", "Slow roll", "Up", "Down", "Up & down", "Random", "Dry", "Room", "Hall", "Cave", "Off", "Light", "Long"].every((n) => names.includes(n)) && !names.some((n) => /test sound|reset audio/.test(n)), names.join("|"));
+  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Strings", "Vibraphone", "Together", "Roll", "Slow roll", "Up", "Down", "Up & down", "Random", "Dry", "Room", "Hall", "Cave", "Off", "Light", "Long"].every((n) => names.includes(n)) && !names.some((n) => /test sound|reset audio/.test(n)), names.join("|"));
   check(`${w}: the credit for the recordings is kept, inside the options`, /Salamander Grand Piano.*CC-BY/.test(await page.locator("#sound-options").innerText()));
   check(`${w}: nothing wider than the screen, open`, (await overflow()) <= 0, `${await overflow()}px`);
 

@@ -48,6 +48,24 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 |---|---|---|---|
 | `PIANO_SAMPLES` | data | — | Recording name to data URI. |
 
+## core/instrument-samples
+
+**Layer** 0 · **Depends on** nothing · **Used by** core/instruments
+
+**Purpose.** The recordings of the string section and the vibraphone, embedded as data so an app works with no network.
+
+**Behaviour.** Seven mono recordings of a string section (cello and viola, sustained, from G2 to B5) and six of a vibraphone (soft mallets, from F3 to E6), each a data URI of about 7 to 25 kB. Both are CC0 (VSCO 2 Community Edition, Versilian Community Sample Library), shortened, levelled and re-encoded by `tools/make-instrument-samples.mjs`; the credits are kept here and shown by the app though CC0 asks for none (D-109).
+
+**Requirements.** CR-INSTRUMENTSAMPLES-01 … CR-INSTRUMENTSAMPLES-03 (3) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
+
+### Interface
+
+| Name | Kind | Signature | What it is |
+|---|---|---|---|
+| `STRINGS_SAMPLES` | data | — | Recording name to data URI, the string section. |
+| `VIBES_SAMPLES` | data | — | Recording name to data URI, the vibraphone. |
+| `SAMPLE_CREDITS` | data | — | The line of credit for each recorded instrument, by instrument id. |
+
 ## core/playback
 
 **Layer** 0 · **Depends on** nothing · **Used by** core/arpeggio, core/transport, sketchpad
@@ -126,11 +144,11 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 ## core/instruments
 
-**Layer** 1 · **Depends on** core/piano-samples · **Used by** sketchpad, sketchpad/model
+**Layer** 1 · **Depends on** core/instrument-samples, core/piano-samples · **Used by** sketchpad, sketchpad/model
 
 **Purpose.** Instrument presets as data, delay and reverb settings, and the built-in piano's range and sample coverage, so an audio layer builds from data and holds no opinions.
 
-**Behaviour.** Five presets; each says how to build it (`kind`, `options`, and an optional `chain` of its own effects: a filter, a chorus, a tremolo), how long it rings (`release`, which feeds the voice budget) and whether it wants echo. Echo has three levels: off, light (a quick, quiet repeat gone almost at once, the default) and long (D-107). The keyboard's range is checked against the recordings' coverage: no note is farther than three semitones from one (CD-007 records why this check exists).
+**Behaviour.** Seven presets, three of them recordings (the grand piano, strings and a vibraphone) with a synth to stand in until they are decoded; each says how to build it (`kind`, `options`, and an optional `chain` of its own effects: a filter, a chorus, a tremolo), how long it rings (`release`, which feeds the voice budget) and whether it wants echo. Echo has three levels: off, light (a quick, quiet repeat gone almost at once, the default) and long (D-107). The keyboard's range is checked against the recordings' coverage: no note is farther than three semitones from one (CD-007 records why this check exists).
 
 **Requirements.** CR-INSTRUMENTS-01 … CR-INSTRUMENTS-10 (11) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/instruments.test.mjs`.
 

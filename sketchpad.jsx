@@ -130,6 +130,7 @@ function useInstrument() {
         const node = new Tone.Sampler({
           urls: buffers,
           release: preset.options.release ?? 1,
+          attack: preset.options.attack ?? 0,
           volume: preset.volume,
         }).connect(ref.current.out);
         const e = store[preset.id];

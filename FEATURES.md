@@ -238,6 +238,7 @@ Not in the original plan. Each earned its place.
 | Fingers and octave above the piano, legend under it | **Done** | `D-106` |
 | Rolling a chord and playing a scale as one arpeggiator | **Open** | Together/roll/slow roll and up/down/mix are the same idea (`D-105`, noted) |
 | The instruments told apart, matched in loudness, a fuller pad | **Done** | Measured (`D-107`) |
+| Recorded Strings and Vibraphone (CC0), built in like the piano | **Done** | Measured and embedded (`D-109`) |
 | Echo: Off / Light / Long | **Done** | Light, quick and fading, is the default |
 | Ways to play notes (together, roll, slow roll, up, down, up & down, random) shared by chords and scales | **Done** | Buttons with pictures in Played and, the runs, in Scales (`D-108`) |
 | A small synth engine, or another sampled instrument, for good sounds | **Open** | Proposed by the owner; see the notes in `D-108`'s thread: options and licences to decide |

@@ -2388,6 +2388,13 @@ Feature: The instruments
     And the long echo is slower and rings on, wider on the pad
     And off is silent
 
+  @D-109 @auto
+  Scenario: Strings and a vibraphone are recorded and credited
+    Given the instruments
+    Then Strings and Vibraphone are recorded, with recordings built into the app
+    And each names a synth to play until its recordings are ready
+    And each carries a line of credit naming a CC0 source
+
 
 Feature: Playing notes in time
   Chords and scales are played the same way: together, rolled, or running up, down,

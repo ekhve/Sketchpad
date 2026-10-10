@@ -237,6 +237,14 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-PIANOSAMPLES-01 | The built-in piano holds thirteen recordings, every six semitones from C1 to C7, each an embedded audio data URI. | D-069, D-071 | A | `core/tests/instruments.test.mjs` |
 | CR-PIANOSAMPLES-02 | The recordings add up to a size a single-file app can carry. | D-069, D-071 | A | `core/tests/instruments.test.mjs` |
 
+## core/instrument-samples
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| CR-INSTRUMENTSAMPLES-01 | The string section holds seven recordings and the vibraphone six, each an embedded audio data URI, at the notes the instruments play. | D-109 | A | `core/tests/instruments.test.mjs` |
+| CR-INSTRUMENTSAMPLES-02 | Neighbouring recordings of an instrument are at most seven semitones apart, so no note is stretched by more than three and a half. | D-109, D-071 | A | `core/tests/instruments.test.mjs` |
+| CR-INSTRUMENTSAMPLES-03 | Each recorded instrument has a line of credit, naming its source and its licence. | D-109 | A | `core/tests/instruments.test.mjs` |
+
 ## core/keyboard
 
 | ID | Requirement | Source | Mode | Verified by |

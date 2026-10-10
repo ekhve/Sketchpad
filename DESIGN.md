@@ -908,6 +908,22 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** Unit tests of the plan (`CR-ARPEGGIO-01` to `08`), the model of the options, `tools/layout-check.mjs` (each way is a button with a picture; the Scales buttons share state with the Played row) and `tools/sound-check.mjs` (a run on a chord and a scale both put sound out).
 
+### D-109 — Two more recorded instruments: strings and a vibraphone, from CC0 recordings
+
+**Context.** The owner, shown that Prophet-style sounds are commercial: "Sampled is good." The M-VAVE FM-1's open firmwares (Felucca and others) use VSCO 2 Community Edition and the Versilian Community Sample Library (VCSL) for their sampled voices; both are CC0 1.0, so anything in them can be embedded and redistributed with no credit owed. The firmwares themselves are GPL-3.0, so none of their code is used.
+
+**Decision.**
+1. **Two instruments**, chosen from what those libraries hold (there is no electric piano in them): *Strings*, a string section bowed with vibrato, which swells in under chords; and *Vibraphone*, soft mallets, round and ringing.
+2. **Same rules as the piano** (`D-064`, `D-069`): embedded in the file, decoded at load, a synth standing in until they are ready (the pad for the strings, the marimba for the vibraphone), and no network.
+3. **Few, small recordings.** Seven for the strings (cello G2, D3, A3; viola D4, A4, E5, B5) and six for the vibraphone (F3 to E6, a fifth or so apart), mono, 22 kHz, 3.4 to 4.2 s with a fade, levelled to one loudness. No note is stretched by more than three and a half semitones between recordings (`CR-INSTRUMENTSAMPLES-02`); outside their span, above and below, a recording is stretched farther, as the piano's top once was (`D-071`), and that is the honest limit of a few samples.
+4. **Octave names.** The libraries count the octave one higher than scientific naming (their C3 is middle C). The pitches were measured against the spectrum, not trusted from the names, and `tools/make-instrument-samples.mjs` converts them.
+5. **The strings have a slow attack** (`attack` on the sampler, 0.35 s). Recordings do not loop, so a held string note fades after about four seconds; that is a limit of the technique, not a fault.
+6. **Credit.** CC0 asks for none; the app shows a line anyway, as it does for the piano, so the source is never lost.
+
+**Later.** Looped sustains (a loop point per recording) would let strings be held; a Rhodes recording would replace the synthesised one if a CC0 source turns up.
+
+**Checked.** `CR-INSTRUMENTSAMPLES-01` to `03`; `tools/instrument-check.mjs` (gate G17) includes both, pairwise different and level with the rest; `tools/layout-check.mjs` offers both; `tools/sound-check.mjs` plays them under a phone's rules.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1023,6 +1039,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-08 | Sound, silence, test sound and reset audio are removed; Fingers and the octave sit on one row above the piano and the legend under it; the tap-to-turn-on bar appears only after 1.5 s and floats, so nothing moves (`D-106`) |
 | 2026-10-09 | The instruments are made to sound different from one another and matched in loudness (the pad was ten times quieter and thin): per-instrument effects, a fuller pad, and echo as Off / Light / Long with a light fast-fading default; measured by `tools/instrument-check.mjs`, gate G17 (`D-107`) |
 | 2026-10-09 | One way to play notes for chords and scales: Together, Roll, Slow roll, Up, Down, Up & down, Random, as buttons with pictures in the Played row and, the runs only, in the Scales tab; `core/arpeggio` (`D-108`) |
+| 2026-10-10 | Two recorded instruments added from CC0 libraries: Strings and Vibraphone, embedded like the piano with a synth standing in; `core/instrument-samples`, `tools/make-instrument-samples.mjs` (`D-109`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

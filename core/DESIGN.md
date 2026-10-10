@@ -22,7 +22,7 @@ product logic  sketchpad/*     j6/*
 core/        layer 3   chordsets   harmony   sheet
              layer 2   bass  explain  fingering  styles  symbols  voicing
              layer 1   chords  figures  instruments  keyboard  melody  scales  transport
-             layer 0   notes   piano-samples   playback
+             layer 0   notes   piano-samples   instrument-samples   playback
 ```
 
 **Layers.** A module's layer is the longest chain of imports below it (`notes` imports nothing: layer 0; `chords` imports `notes`: layer 1; `harmony` imports `voicing`, which imports `chords`, which imports `notes`: layer 3). A module imports only from lower layers, so there are no cycles. `node tools/core-check.mjs --graph` prints the live picture; the picture above is checked, not drawn from memory (CD-008).
@@ -50,7 +50,7 @@ core/        layer 3   chordsets   harmony   sheet
 | Keyboard logic | `keyboard` | 1 | Key roles, held notes, sliding fingers, hit-testing |
 | Playback arithmetic | `playback` | 0 | Look-ahead scheduling, tempo, voice budget, rolling |
 | **Looping a progression** | `transport` | 1 | What each beat holds (loop, click, count-in), and the **driver** both apps use to play |
-| Instruments | `instruments`, `piano-samples` | 1, 0 | Presets as data, effects, the built-in piano |
+| Instruments | `instruments`, `piano-samples`, `instrument-samples` | 1, 0, 0 | Presets as data, effects, the built-in piano, strings and vibraphone |
 
 ## 3. Interfaces
 

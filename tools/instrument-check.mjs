@@ -14,7 +14,7 @@ let chromium;
 try { ({ chromium } = require(process.env.PLAYWRIGHT || "playwright")); }
 catch (e) { console.error("NO BROWSER: Playwright not found. Set PLAYWRIGHT=/path/to/playwright."); process.exit(3); }
 
-const INSTRUMENTS = ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba"];
+const INSTRUMENTS = ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Strings", "Vibraphone"];
 const probe = () => {
   window.__rec = { t: [], rms: [], centroid: [], spread: [] };
   const connect = AudioNode.prototype.connect;
