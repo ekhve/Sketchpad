@@ -106,6 +106,8 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-HARMONY-09 | A typed slash bass is the nearest note of that name below the chord, and the chord keeps all its notes. | D-077 | A | `core/tests/harmony.test.mjs` |
 | CR-HARMONY-10 | Tension runs from the plain chords of the key to chromatic colour, and each step adds to the one before. | UC-52 | A | `core/tests/harmony.test.mjs` |
 | CR-HARMONY-11 | The chord builders leave their inputs alone and answer the same each time. | D-044, D-077, UC-40 | A | `core/tests/harmony.test.mjs` |
+| CR-HARMONY-12 | A chord's numeral is worked out in the key it is in now, so it follows a change of key. | D-110 | A | `core/tests/harmony.test.mjs` |
+| CR-HARMONY-13 | keyFit says when the chords belong better to another key, and keeps quiet about borrowed chords and relative keys. | D-110 | A | `core/tests/harmony.test.mjs` |
 
 ## core/explain
 

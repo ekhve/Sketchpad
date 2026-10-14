@@ -21,6 +21,41 @@ function romanFor(tonic, rootPc, degreeIndex, sym) {
   return acc + base + (sym.startsWith("dim") ? "°" : sym === "aug" ? "+" : "");
 }
 
+/* A chord's numeral in the key it is in now. The numeral stored on a chord was
+   worked out in the key it was added in, so it went stale the moment the key
+   changed: a sheet could say "C major" over chords numbered for G. This works it
+   out again from the root alone, the nearest degree at or above (so a note a
+   semitone down from a degree is flat, not sharp). (D-110) */
+function romanIn(tonic, rootPc, sym) {
+  const offset = pc(rootPc - tonic);
+  const degreeIndex = MAJOR_REF.findIndex((r) => r >= offset);
+  return romanFor(tonic, rootPc, degreeIndex, sym);
+}
+
+/* Do the chords belong to the key that is set? Each chord either has every one of
+   its notes in the key's scale or it does not. If another key holds more of them,
+   the progression has probably been written in a different key from the one set,
+   and that is worth saying; borrowed chords are not mistakes, so when no other key
+   does better there is nothing to say. Ties prefer the current mode, then a key
+   that starts or ends on its own chord. (D-110) */
+function keyFit(progression, tonic, mode) {
+  const sets = progression.map((c) => [...new Set(c.notes.map(pc))]);
+  const parent = (m) => (m === "minor" ? "natural-minor" : "major");
+  const inside = (t, m) => { const own = scalePcs(t, parent(m)); return sets.map((ps) => ps.every((p) => own.includes(p))); };
+  const here = inside(tonic, mode);
+  const fits = here.filter(Boolean).length;
+  const outside = here.map((ok, i) => (ok ? 0 : i + 1)).filter(Boolean);
+  const root = (i) => progression[i]?.rootPc;
+  let best = null;
+  for (const m of ["major", "minor"]) for (let t = 0; t < 12; t++) {
+    const n = inside(t, m).filter(Boolean).length;
+    const rank = n * 10 + (m === mode ? 3 : 0) + (root(0) === t ? 2 : 0) + (root(progression.length - 1) === t ? 1 : 0);
+    if (!best || rank > best.rank) best = { tonic: t, mode: m, fits: n, rank };
+  }
+  const suggest = progression.length && best.fits > fits ? { tonic: best.tonic, mode: best.mode, fits: best.fits } : null;
+  return { total: progression.length, fits, outside, ok: fits === progression.length, suggest };
+}
+
 /* The diatonic chords of any seven-note interval set. Split out from
    `harmonize` so a scale the user invented can be harmonised too. (D-048) */
 function harmonizeIntervals(tonic, iv, size, idPrefix = "custom", base = DEFAULT_BASE) {
@@ -210,4 +245,4 @@ function chordsAtTension(tonic, mode, level, base = DEFAULT_BASE) {
   return [...core, ...borrowed];
 }
 
-export { romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension };
+export { romanIn, keyFit, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension };

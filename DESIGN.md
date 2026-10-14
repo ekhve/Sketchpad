@@ -924,6 +924,21 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** `CR-INSTRUMENTSAMPLES-01` to `03`; `tools/instrument-check.mjs` (gate G17) includes both, pairwise different and level with the rest; `tools/layout-check.mjs` offers both; `tools/sound-check.mjs` plays them under a phone's rules.
 
+### D-110 — Fewer instruments, a plain start, a simpler first screen, and a loop checked against its key
+
+**Context.** The owner, after hearing the instruments with chords: Marimba and Felt keys are "not so good" under chords, and a DX7-style sound would be welcome; the sound should open with a room and the echo off; the first screen should stay simple, with the progression moved to the producer side and the theory brought forward; and "it is possible to get a progression with the wrong key", because nothing ever checked whether the chords belong to the key that is set. Sheets came out with one key and chords from another.
+
+**Decision.**
+1. **Instruments.** Felt keys and Marimba are removed. *DX keys* is added: an FM electric piano with the two operators at one-to-one, a bright tine in the attack, a clean body and a wide chorus (the Rhodes keeps its tremolo and its different ratio). The stand-ins follow: the grand piano falls back to the Rhodes, Vibraphone to DX keys, Strings still to the pad. Six instruments now: Grand piano, Rhodes, Warm pad, DX keys, Strings, Vibraphone.
+2. **Opening sound.** Reverb *Room*, echo *Off*. Light stays a choice (`D-107`).
+3. **Levels.** *Start* is now a key, its chords and scales, the theory and the lessons (Chords, Scales, Theory, Learn, How to use). *Produce* is where a progression is built: Progression, Find, Bass and Sheet appear there, with the "add" buttons under the chords. *Study* keeps the dictionary, inversions, harmonisation and the formal wording. The main scenario (`UC-00`, build a loop and take it away) is therefore complete at Produce, and the first screen has its own list of needs (`EXPLORE_NEEDS`). This reverses part of `D-058` and `D-073`. A link in How to use to a tab the level hides now opens the level that has it.
+4. **The loop is checked against its key.** `core/harmony.keyFit` asks whether each chord has all its notes in the set key's scale, and which of the 24 major and minor keys holds the most; only when another key holds *more* does the app say so, naming the bars that fall outside, with one button to set that key. Borrowed chords and relative keys (A minor chords in C major) say nothing, because they are not mistakes. The notice shows in the Progression tab and over the Sheet.
+5. **Numerals follow the key.** A chord kept the roman numeral it was added with, so changing the key left "I IV V" over chords that were now something else. `core/harmony.romanIn` works the numeral out again from the root and the key, and the sheet uses it.
+
+**Not done.** The key is not changed for the user, and the loop is not transposed: both are the user's call, and the notice offers the first.
+
+**Checked.** `CR-HARMONY-12`, `13`; the model's levels (`SR-MODEL-03` to `05`); the Levels scenarios; `tools/instrument-check.mjs` (six instruments, pairwise different); `tools/layout-check.mjs` (the Start tabs, Room and Off selected on opening, the wrong-key notice).
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1040,6 +1055,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-09 | The instruments are made to sound different from one another and matched in loudness (the pad was ten times quieter and thin): per-instrument effects, a fuller pad, and echo as Off / Light / Long with a light fast-fading default; measured by `tools/instrument-check.mjs`, gate G17 (`D-107`) |
 | 2026-10-09 | One way to play notes for chords and scales: Together, Roll, Slow roll, Up, Down, Up & down, Random, as buttons with pictures in the Played row and, the runs only, in the Scales tab; `core/arpeggio` (`D-108`) |
 | 2026-10-10 | Two recorded instruments added from CC0 libraries: Strings and Vibraphone, embedded like the piano with a synth standing in; `core/instrument-samples`, `tools/make-instrument-samples.mjs` (`D-109`) |
+| 2026-10-14 | Felt keys and Marimba removed and DX keys added; the sound opens on Room with echo Off; Start is Chords, Scales, Theory, Learn and How to use, with the progression, Find, Bass and Sheet at Produce; a loop is checked against its key (`core/harmony.keyFit`) and its numerals follow the key (`romanIn`) (`D-110`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

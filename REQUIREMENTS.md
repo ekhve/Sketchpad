@@ -671,6 +671,16 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-435 | Besides the grand piano, Strings and Vibraphone are recorded instruments, built into the app, each with a synth to stand in until it is ready. | D-109, D-064 | A | Strings and a vibraphone are recorded and credited |
 | R-436 | The app shows where each recorded instrument comes from, and the recordings are licensed for redistribution (CC0). | D-109 | A | Strings and a vibraphone are recorded and credited |
 
+## 10zj. Keeping to the key, and a simple start
+
+| ID | Requirement | Source | Mode | Verified by |
+|---|---|---|---|---|
+| R-437 | The first level has Chords, Scales, Theory, Learn and How to use; the progression, Find, Bass and Sheet come with Produce. | D-110, D-058, UC-54 | A | The producing tools are not in a beginner's way |
+| R-438 | The sound opens on a room with the echo off. | D-110, D-107 | M | The sound opens plain |
+| R-439 | When another key holds more of a loop's chords than the one set, the app says which bars fall outside, offers that key, and says nothing about borrowed chords or relative keys. | D-110 | A | A loop in the wrong key is noticed |
+| R-440 | A chord's numeral follows the key as it is now, so a sheet is never numbered for another key. | D-110 | A | A loop in the wrong key is noticed |
+| R-441 | The instruments are the grand piano, Rhodes, warm pad, DX keys, strings and vibraphone. | D-110, D-109 | A | The instruments are the six that suit chords |
+
 ## 11. Visual system
 
 | ID | Requirement | Source | Mode | Verified by |

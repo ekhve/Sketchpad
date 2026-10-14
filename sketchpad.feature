@@ -2058,9 +2058,9 @@ Feature: Levels
     Then the app shows the Start level
 
   @UC-54 @auto
-  Scenario: Theory and the sheet are not in a beginner's way
+  Scenario: The producing tools are not in a beginner's way
     Given the Start level
-    Then the theory tab, the sheet, the voicing list and the adventurousness slider are all absent
+    Then the theory tab is there, and the progression, the sheet, the voicing list and the adventurousness slider are all absent
 
   @UC-54 @auto
   Scenario: Producing does not require studying
@@ -2394,6 +2394,29 @@ Feature: The instruments
     Then Strings and Vibraphone are recorded, with recordings built into the app
     And each names a synth to play until its recordings are ready
     And each carries a line of credit naming a CC0 source
+
+  @D-110 @auto
+  Scenario: The instruments are the six that suit chords
+    Given the instruments
+    Then they are the grand piano, Rhodes, warm pad, DX keys, strings and vibraphone
+    And Felt keys and the marimba are gone, and every stand-in is one of them
+
+  @D-110 @manual
+  # measured by tools/layout-check.mjs (gate G16)
+  Scenario: The sound opens plain
+    Given the app freshly opened
+    Then the room is Room and the echo is Off
+
+
+Feature: Keeping to the key
+  A progression is checked against the key that is set. (D-110)
+
+  @D-110 @auto
+  Scenario: A loop in the wrong key is noticed
+    Given a loop of chords from G major and the key set to C major
+    Then the bar that falls outside is named and G major is offered
+    And in G major there is nothing to say, and a borrowed chord or a relative key says nothing
+    And the numerals read I IV V I in G and V I II V in C
 
 
 Feature: Playing notes in time

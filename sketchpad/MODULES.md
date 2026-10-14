@@ -56,7 +56,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 
 **Purpose.** Sketchpad's feature levels and tabs: which features a level unlocks, which tabs it shows, and which chord is the one in focus.
 
-**Behaviour.** Three levels (Start, Produce, Study) each add features to the one before, so nothing a user has found ever moves or disappears; tabs follow from features, in a fixed order. `UC00_NEEDS` lists what the main scenario needs, which the Start level must cover. `soundSections` lists the four rows of the Sound options panel with their choices, built from the instrument, way-to-play and room catalogues so that a new one appears without the panel being touched (D-105). `namingFor` chooses the naming system from the base system and the *accidentals* setting: sharps (the owner's choice, and the default) leaves the plain system, which spells every black key as a sharp; "key" gives the key's own spelling (`core/notes`). Lessons ignore it and always spell for their own key, because they teach what a score shows (D-074). When no chord is selected, `activeChordFor` falls back to the one playing, then the first of the loop, then the home chord. Product-specific, so it lives with the product (CD-001); it traces to D-058 and D-039.
+**Behaviour.** Three levels (Start, Produce, Study) each add features to the one before, so nothing a user has found ever moves or disappears; tabs follow from features, in a fixed order. `EXPLORE_NEEDS` lists what the first screen has to do on its own (a key, its chords and scales, the theory); `UC00_NEEDS` lists what the main scenario needs, which the Produce level covers, since building a progression moved there (D-110). `soundSections` lists the four rows of the Sound options panel with their choices, built from the instrument, way-to-play and room catalogues so that a new one appears without the panel being touched (D-105). `namingFor` chooses the naming system from the base system and the *accidentals* setting: sharps (the owner's choice, and the default) leaves the plain system, which spells every black key as a sharp; "key" gives the key's own spelling (`core/notes`). Lessons ignore it and always spell for their own key, because they teach what a score shows (D-074). When no chord is selected, `activeChordFor` falls back to the one playing, then the first of the loop, then the home chord. Product-specific, so it lives with the product (CD-001); it traces to D-058 and D-039.
 
 **Requirements.** SR-MODEL-01 … SR-MODEL-08 (8) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `sketchpad/tests/model.test.mjs`.
 
@@ -67,6 +67,7 @@ The modules that belong to Sketchpad and not to the core asset base (CD-001): th
 | `LEVELS` | data | — | The three levels, each with what it adds. |
 | `TABS_BY_FEATURE` | data | — | Which tab each feature opens. |
 | `TAB_IDS` | data | — | Every tab id, in display order. |
+| `EXPLORE_NEEDS` | data | — | The features the first level has to cover. |
 | `UC00_NEEDS` | data | — | The features the main scenario needs. |
 | `activeChordFor` | function | `({ selected = null, playingIndex = -1, progression = [], palette = [] })` | Which chord is in focus: the selected one, the one playing, the loop's first, or home. |
 | `featuresAt` | function | `(levelId)` | Every feature available at a level and below. |

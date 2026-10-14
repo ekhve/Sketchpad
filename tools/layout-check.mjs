@@ -38,7 +38,7 @@ for (const width of [360, 375, 414]) {
   const fingers = await page.locator('button:text-is("both")').first().boundingBox();
   check(`${w}: fingers and octave are on one row above the piano`, fingers && octave && key && Math.abs(fingers.y - octave.y) < 30 && fingers.y + fingers.height <= key.y, `fingers y ${Math.round(fingers.y)}, octave y ${Math.round(octave.y)}`);
   const lastKey = await page.locator("[data-midi]").last().boundingBox();
-  const legend = await page.locator("text=in your loop").first().boundingBox();
+  const legend = await page.locator("text=in scale").first().boundingBox();
   check(`${w}: the legend is under the piano`, legend && lastKey && legend.y >= lastKey.y + lastKey.height - 2, `legend y ${Math.round(legend.y)}, keys bottom ${Math.round(lastKey.y + lastKey.height)}`);
   const gone = await page.evaluate(() => [...document.querySelectorAll("button")].map((b) => (b.innerText + " " + (b.getAttribute("aria-label") || "")).toLowerCase()).filter((t) => /silence|muted|turn sound|test sound|reset audio/.test(t)));
   check(`${w}: no sound/silence/test/reset buttons`, gone.length === 0, gone.join("|"));
@@ -49,7 +49,7 @@ for (const width of [360, 375, 414]) {
   await toggle.click(); await page.waitForTimeout(150);
   check(`${w}: opening shows the four rows`, (await toggle.getAttribute("aria-expanded")) === "true" && (await page.locator('#sound-options > [role="group"]').evaluateAll((g) => g.map((x) => x.getAttribute("aria-label")))).join() === "Sound,Played,Reverb,Echo");
   const names = await page.locator("#sound-options button").allInnerTexts();
-  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Felt keys", "Warm pad", "Marimba", "Strings", "Vibraphone", "Together", "Roll", "Slow roll", "Up", "Down", "Up & down", "Random", "Dry", "Room", "Hall", "Cave", "Off", "Light", "Long"].every((n) => names.includes(n)) && !names.some((n) => /test sound|reset audio/.test(n)), names.join("|"));
+  check(`${w}: every instrument, roll style, room and echo choice is offered`, ["Grand piano", "Rhodes", "Warm pad", "DX keys", "Strings", "Vibraphone", "Together", "Roll", "Slow roll", "Up", "Down", "Up & down", "Random", "Dry", "Room", "Hall", "Cave", "Off", "Light", "Long"].every((n) => names.includes(n)) && !names.some((n) => /test sound|reset audio/.test(n)), names.join("|"));
   check(`${w}: the credit for the recordings is kept, inside the options`, /Salamander Grand Piano.*CC-BY/.test(await page.locator("#sound-options").innerText()));
   check(`${w}: nothing wider than the screen, open`, (await overflow()) <= 0, `${await overflow()}px`);
 
@@ -70,6 +70,19 @@ for (const width of [360, 375, 414]) {
   await toggle.click(); await page.waitForTimeout(100);
   check(`${w}: choosing Down in the Scales tab chooses it in the Played row`, (await page.locator('#sound-options button[aria-label="Down"]').getAttribute("aria-pressed")) === "true");
   check(`${w}: nothing wider than the screen, in the Scales tab`, (await overflow()) <= 0, `${await overflow()}px`);
+  /* D-110: a simple start, a plain sound, and a loop in the wrong key is noticed */
+  const tabNames = await page.locator("button").allInnerTexts();
+  check(`${w}: the start has Chords, Scales, Theory, Learn and How to use, and no Progression`, ["Chords", "Scales", "Theory", "Learn", "How to use"].every((n) => tabNames.includes(n)) && !tabNames.includes("Progression") && !tabNames.some((n) => n === "add"));
+  check(`${w}: the five start tabs fit without scrolling`, await page.evaluate(() => { const b = [...document.querySelectorAll("button")].find((x) => x.innerText === "Theory"); const bar = b.parentElement; return bar.scrollWidth <= bar.clientWidth + 1; }));
+  check(`${w}: the sound opens on a room with the echo off`, (await page.locator('#sound-options button:text-is("Room")').getAttribute("aria-pressed")) === "true" && (await page.locator('#sound-options button:text-is("Off")').getAttribute("aria-pressed")) === "true");
+  await page.click('button:text-is("Produce")'); await page.click('button:text-is("G")'); await page.click('button:text-is("Chords")');
+  for (let i = 0; i < 4; i++) await page.locator('button:text-is("add")').nth(i === 3 ? 0 : i).click();
+  await page.click('button:text-is("C")'); await page.click('button:text-is("Progression")'); await page.waitForTimeout(200);
+  const notice = page.locator('[role="status"]');
+  check(`${w}: a loop from G set in C is noticed, and G major is offered`, (await notice.count()) === 1 && /G major/.test(await notice.innerText()), await notice.count() ? await notice.innerText() : "no notice");
+  check(`${w}: the notice fits the screen`, (await overflow()) <= 0, `${await overflow()}px`);
+  await page.click('button:text-is("Set the key to G major")'); await page.waitForTimeout(200);
+  check(`${w}: setting the key clears it`, (await notice.count()) === 0);
   await page.close();
   } catch (e) { check(`${width}px: the checks could run`, false, e.message.split("\n")[0]); }
 }

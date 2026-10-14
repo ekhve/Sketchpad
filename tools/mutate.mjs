@@ -41,7 +41,7 @@ const MUTANTS = [
   ["the pad is a sine again",           'oscillator: { type: "fatsawtooth", count: 3, spread: 28 },', 'oscillator: { type: "sine" },'],
   ["the open voicing does not open",    'dropped[dropped.length - 2] -= 12;', 'dropped[dropped.length - 2] -= 0;'],
   ["rootless keeps its root",           'out.push({ id: "rootless", name: "Rootless", notes: notes.slice(1),', 'out.push({ id: "rootless", name: "Rootless", notes: notes.slice(0),'],
-  ["a struck voice sustains",           'envelope: { attack: 0.002, decay: 0.8, sustain: 0, release: 0.3 },', 'envelope: { attack: 0.002, decay: 0.8, sustain: 0.5, release: 0.3 },'],
+  ["a struck voice sustains",           'envelope: { attack: 0.003, decay: 3, sustain: 0.05, release: 0.9 },', 'envelope: { attack: 0.003, decay: 3, sustain: 0.9, release: 0.9 },'],
   ["the scheduler repeats a bar",       'while (at < now + lookahead && guard++ < 32) {', 'while (at < now + lookahead + 2 && guard++ < 32) {'],
   ["bars can be scheduled in the past", 'bars.push({ at: Math.max(at, now), index: i });', 'bars.push({ at, index: i });'],
   ["voice leading ignores common notes", 'const common = a.filter((p) => b.includes(p));', 'const common = [];'],
@@ -81,7 +81,7 @@ const MUTANTS = [
   ["the eleventh is stacked in thirds", 'voicing: [0,5,10,15,19] },', 'voicing: [0,3,7,10,14] },'],
   ["chords ignore the visible octave",  'function voice(rootPc, intervals, base = DEFAULT_BASE) {\n  const root = base + rootPc;', 'function voice(rootPc, intervals, base = DEFAULT_BASE) {\n  const root = DEFAULT_BASE + rootPc;'],
   ["dry is not dry",                    'const s = SPACES.find((x) => x.id === spaceId) ?? SPACES[0];', 'const s = SPACES.find((x) => x.id === spaceId) ?? SPACES[1];'],
-  ["a sampled instrument has no stand-in", 'volume: -6, release: 1.2, delay: false, fallback: "felt",', 'volume: -6, release: 1.2, delay: false,'],
+  ["a sampled instrument has no stand-in", 'volume: -6, release: 1.2, delay: false, fallback: "rhodes",', 'volume: -6, release: 1.2, delay: false,'],
   ["voicings are read from the current arrangement", 'const base = chord.base ?? Math.floor(Math.min(...chord.notes) / 12) * 12;', 'const base = Math.floor(Math.min(...chord.notes) / 12) * 12;'],
   ["big chords drop only one note",     'if (notes.length >= 5) dropped[dropped.length - 4] -= 12;', ''],
   ["busy voices are stolen first",      'if (busyUntil[i] <= now) { freeIdx = i; break; }', ''],
@@ -110,7 +110,7 @@ const MUTANTS = [
   ["a demonstration always climbs",      'do { m += direction === "down" ? -1 : 1; }', 'do { m += 1; }'],
   ["a hint points at the first note",    'if (t.kind === "sequence") return step.show[attempt.length] ?? null;', 'if (t.kind === "sequence") return step.show[0] ?? null;'],
   ["the four-chord loop loses vi",       'const [I, V, vi, IV] = [tri[0], tri[4], tri[5], tri[3]];', 'const [I, V, vi, IV] = [tri[0], tri[4], tri[3], tri[3]];'],
-  ["lessons leave the first screen",     '"explain", "lessons", "guide"] },', '"explain", "guide"] },'],
+  ["lessons leave the first screen",     '"explain", "theory", "lessons", "guide"] },', '"explain", "theory", "guide"] },'],
 
   /* spelling notes for the key, and the chord table (D-074) */
   ["flat keys spell with sharps",        'const FLAT_SIDE_MAJORS = [0, 1, 3, 5, 8, 10];', 'const FLAT_SIDE_MAJORS = [];'],

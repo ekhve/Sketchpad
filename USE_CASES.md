@@ -160,7 +160,7 @@ Each has scenarios in `sketchpad.feature`.
 | UC-51 | See what changed when something changes | Only the moved notes are ringed and named (`D-056`) |
 | UC-52 | Ask for more adventurous harmony without knowing the terms | One slider, safe to adventurous (`D-056`) |
 | UC-53 | Take the sketch to an instrument on paper | Printable sheet with chord diagrams, scale and bass (`D-057`) |
-| UC-54 | Meet the app without being overwhelmed | Three levels; Start is a key, chords and a loop (`D-058`) |
+| UC-54 | Meet the app without being overwhelmed | Three levels; Start is a key, its chords and scales, the theory and lessons; the progression is at Produce (`D-058`, `D-110`) |
 | UC-55 | Reach the lush extended chords | Elevenths and thirteenths with the spacing they are played with (`D-059`) |
 | UC-56 | Have it sound like a real instrument | Sampled grand piano, retuned synths, four reverb spaces (`D-061`, `D-062`) |
 | UC-57 | Hear the individual notes of a big chord | Together, roll, or slow roll (`D-068`) |

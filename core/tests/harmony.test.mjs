@@ -1,7 +1,7 @@
 /* core/harmony — unit tests, one per requirement in core/REQUIREMENTS.md (CR-HARMONY-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension } from "../harmony.mjs";
+import { romanIn, keyFit, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension } from "../harmony.mjs";
 import { SCALES, scalePcs, customScaleFrom } from "../scales.mjs";
 import { parseChordName } from "../symbols.mjs";
 import { DICTIONARY } from "../chords.mjs";
@@ -138,4 +138,28 @@ test("CR-HARMONY-11 the chord builders leave their inputs alone and answer the s
   assert.deepEqual(suggestNextChords(prog, 0, "major"), suggestNextChords(prog, 0, "major"));
   assert.deepEqual(suggestScaleFor(prog[0], deepFreeze({ tonic: 0, mode: "major" })), null);
   assert.deepEqual(typedChord(deepFreeze(parseChordName("Am")), 0, "major"), typedChord(parseChordName("Am"), 0, "major"));
+});
+
+test("CR-HARMONY-12 a chord's numeral is worked out in the key it is in now, so it follows a change of key", () => {
+  const g = harmonize(7, "major", 3);
+  const prog = [0, 3, 4, 0].map((i) => g[i]);
+  assert.deepEqual(prog.map((c) => romanIn(7, c.rootPc, c.sym)), ["I", "IV", "V", "I"]);
+  assert.deepEqual(prog.map((c) => romanIn(0, c.rootPc, c.sym)), ["V", "I", "II", "V"], "the same chords in C are V I II V");
+  const c = harmonize(0, "natural-minor", 3);
+  assert.deepEqual([2, 5, 6].map((i) => romanIn(0, c[i].rootPc, c[i].sym)), ["♭III", "♭VI", "♭VII"]);
+});
+
+test("CR-HARMONY-13 keyFit says when the chords belong to another key better, and keeps quiet about borrowed chords", () => {
+  const g = harmonize(7, "major", 3), prog = [0, 3, 4, 0].map((i) => g[i]);
+  const wrong = keyFit(prog, 0, "major");
+  assert.equal(wrong.ok, false); assert.deepEqual(wrong.outside, [3]);
+  assert.deepEqual(wrong.suggest, { tonic: 7, mode: "major", fits: 4 });
+  const right = keyFit(prog, 7, "major");
+  assert.equal(right.ok, true); assert.equal(right.suggest, null);
+  const c = harmonize(0, "major", 3);
+  const borrowed = keyFit([c[0], c[3], { ...harmonize(0, "natural-minor", 3)[5] }, c[0]], 0, "major");
+  assert.equal(borrowed.ok, false); assert.equal(borrowed.suggest, null, "one borrowed chord is not a different key");
+  assert.deepEqual(keyFit([], 0, "major"), { total: 0, fits: 0, outside: [], ok: true, suggest: null });
+  const relative = keyFit([c[5], c[3], c[4], c[5]], 0, "major");
+  assert.equal(relative.suggest, null, "A minor chords fit C major; nothing to change");
 });

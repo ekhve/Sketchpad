@@ -123,7 +123,7 @@ const CONTRACT = {
   "core/voicing": { voice: [[0, [0, 4, 7]]], stackAscending: [[[0, 4, 7, 11, 2], 0]], dictionaryFor: [[3, 36]], voicingsFor: [[C], [Am7]], voiceLeading: [[C, Am7]], arpeggio: [[[60, 64, 67], "updown"]], smoothestVoicing: [[C, Am7]] },
   "core/symbols": { nearestSuffix: [["maj7x"]], parseChordName: [["F#m7/C#"], ["Hmaj"]], parseChordNames: [["C | Am, F  G7"]], typedLabel: [[{ rootPc: 0, sym: "", bassPc: 4 }, "letters"]] },
   "core/styles": { scalesForStyle: [["soul", "major"]] },
-  "core/harmony": { romanFor: [[0, 10, 6, ""]], harmonizeIntervals: [[0, [0, 2, 4, 5, 7, 9, 11], 4]], harmonize: [[0, "major", 3]], suggestScaleFor: [[{ notes: [58, 62, 65] }, ctx]], harmonizeSteps: [[0, "major", 1, 3]], suggestNextChords: [[triads, 0, "major"]], typedChord: [[parsed, 0, "major"]], harmonizeCustom: [[customScaleFrom([60, 62, 64, 65, 67, 69, 71], "x")]], chordsAtTension: [[0, "major", 3]] },
+  "core/harmony": { romanIn: [[0, 7, ""]], keyFit: [[triads, 0, "major"]], romanFor: [[0, 10, 6, ""]], harmonizeIntervals: [[0, [0, 2, 4, 5, 7, 9, 11], 4]], harmonize: [[0, "major", 3]], suggestScaleFor: [[{ notes: [58, 62, 65] }, ctx]], harmonizeSteps: [[0, "major", 1, 3]], suggestNextChords: [[triads, 0, "major"]], typedChord: [[parsed, 0, "major"]], harmonizeCustom: [[customScaleFrom([60, 62, 64, 65, 67, 69, 71], "x")]], chordsAtTension: [[0, "major", 3]] },
   "core/explain": { explainChord: [[triads[1], ctx]], explainProgression: [[triads, ctx]], describeChange: [[[60, 64, 67], [57, 60, 64]]] },
   "core/melody": { melodyRole: [[60, [0, 4, 7], major]], melodyGuide: [[C, major]], changedNotes: [[[60, 64], [60, 65]]] },
   "core/chordsets": { buildSet: [[CHORD_SETS[0], 2]], setsFor: [["major"]] },

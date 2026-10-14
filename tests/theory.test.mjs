@@ -2364,14 +2364,19 @@ describe("Feature: Chord diagrams", () => {
    Levels — how much of the app is on screen
    ========================================================================== */
 
-const { LEVELS, levelIndex, featuresAt, has, tabsAt, TABS_BY_FEATURE, UC00_NEEDS } = th;
+const { LEVELS, levelIndex, featuresAt, has, tabsAt, TABS_BY_FEATURE, UC00_NEEDS, EXPLORE_NEEDS } = th;
 
 describe("Feature: Levels", () => {
   test("The main scenario is completable at the simplest level", () => {
-    // if UC-00 needs something Start does not have, the split is wrong
-    for (const f of UC00_NEEDS) {
-      assert.ok(has("start", f), `Start is missing "${f}", which the main scenario needs`);
+    // if the first screen lacks something exploring needs, the split is wrong (D-110:
+    // building a loop moved up to Produce, so the main scenario is complete there)
+    for (const f of EXPLORE_NEEDS) {
+      assert.ok(has("start", f), `Start is missing "${f}", which exploring a key needs`);
     }
+    for (const f of UC00_NEEDS) {
+      assert.ok(has("produce", f), `Produce is missing "${f}", which the main scenario needs`);
+    }
+    assert.equal(has("start", "loop"), false, "the start does not build a progression");
   });
 
   test("Start is genuinely small", () => {
@@ -2379,7 +2384,7 @@ describe("Feature: Levels", () => {
     // most. The levels themselves are on their way out (D-072, D-073).
     const tabs = tabsAt("start");
     assert.ok(tabs.length <= 5, `${tabs.length} tabs is not a first impression, it is a menu`);
-    assert.ok(tabs.includes("chords") && tabs.includes("scales") && tabs.includes("prog") && tabs.includes("learn"));
+    assert.ok(tabs.includes("chords") && tabs.includes("scales") && tabs.includes("theory") && tabs.includes("learn") && !tabs.includes("prog"));
   });
 
   test("Levels only ever add, so nothing a user found disappears", () => {
@@ -2431,8 +2436,10 @@ describe("Feature: Levels", () => {
     assert.deepEqual(tabsAt("nonsense"), tabsAt("start"));
   });
 
-  test("Theory and the sheet are not in a beginner's way", () => {
-    assert.ok(!tabsAt("start").includes("theory"));
+  test("The producing tools are not in a beginner's way", () => {
+    // D-110: the theory moved to Start; the progression moved to Produce
+    assert.ok(tabsAt("start").includes("theory"));
+    assert.ok(!tabsAt("start").includes("prog"));
     assert.ok(!tabsAt("start").includes("sheet"));
     assert.ok(!has("start", "tension"), "a slider called adventurous is not a first impression");
     assert.ok(!has("start", "voicings"));
@@ -3857,6 +3864,10 @@ describe("Feature: The instruments", () => {
     }
     assert.ok(delaySettings("pad", "long").time > delaySettings("rhodes", "long").time, "wider on the pad");
   });
+  test("The instruments are the six that suit chords", () => {
+    assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "pad", "dx", "strings", "vibes"]);
+    for (const i of INSTRUMENTS.filter((x) => x.kind === "sampler")) assert.ok(INSTRUMENTS.some((x) => x.id === i.fallback && x.kind !== "sampler"), i.id);
+  });
   test("Strings and a vibraphone are recorded and credited", () => {
     for (const id of ["strings", "vibes"]) {
       const i = INSTRUMENTS.find((x) => x.id === id);
@@ -3879,5 +3890,20 @@ describe("Feature: Playing notes in time", () => {
     for (const id of ["block", "roll", "slow"]) assert.deepEqual(playPlan(scale, id, { kind: "scale" }).map((x) => x.midi), scale, `${id} runs a scale up`);
     for (const seed of [1, 2, 3]) { const r = playPlan(scale, "random", { kind: "scale", seed }).map((x) => x.midi); assert.equal(r.at(-1), 72); assert.deepEqual(r, playPlan(scale, "random", { kind: "scale", seed }).map((x) => x.midi)); }
     assert.equal(PLAY_PATTERNS.filter((p) => isRun(p.id)).length, 4);
+  });
+});
+
+describe("Feature: Keeping to the key", () => {
+  const { keyFit, romanIn, harmonize } = th;
+  test("A loop in the wrong key is noticed", () => {
+    const g = harmonize(7, "major", 3), prog = [0, 3, 4, 0].map((i) => g[i]);
+    const wrong = keyFit(prog, 0, "major");
+    assert.deepEqual(wrong.outside, [3]); assert.deepEqual(wrong.suggest, { tonic: 7, mode: "major", fits: 4 });
+    assert.equal(keyFit(prog, 7, "major").suggest, null);
+    const c = harmonize(0, "major", 3), minor = harmonize(0, "natural-minor", 3);
+    assert.equal(keyFit([c[0], c[3], minor[5], c[0]], 0, "major").suggest, null, "a borrowed chord");
+    assert.equal(keyFit([c[5], c[3], c[4], c[5]], 0, "major").suggest, null, "a relative key");
+    assert.deepEqual(prog.map((x) => romanIn(7, x.rootPc, x.sym)), ["I", "IV", "V", "I"]);
+    assert.deepEqual(prog.map((x) => romanIn(0, x.rootPc, x.sym)), ["V", "I", "II", "V"]);
   });
 });

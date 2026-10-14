@@ -14,7 +14,7 @@ catch (e) { console.error("Playwright not found. Set PLAYWRIGHT=/path/to/playwri
 
 const wait = Number(process.argv[2] ?? 2500);
 const apps = [
-  ["sketchpad", "build/sketchpad-app.html", (p) => p.locator('button:text-is("add")').first().locator("xpath=preceding::button[1]").click()],
+  ["sketchpad", "build/sketchpad-app.html", (p) => p.locator('[data-chord-pad]').first().click()],
   ["j6", "build/j6-app.html", (p) => p.click('button[aria-label^="J-6 key C:"]')],
 ];
 const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });

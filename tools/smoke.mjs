@@ -77,7 +77,7 @@ if (app === "sketchpad") {
 
   // build a loop from the chord pads, then read everything that depends on it
   await step("build a loop", async () => {
-    await click('button:text-is("Chords")', "last");
+    await click('button:text-is("Produce")'); await click('button:text-is("Chords")', "last");
     for (let i = 0; i < 4; i++) await click('button:text-is("add")', "first");
     for (const tab of ["Progression", "Bass", "Sheet", "Theory", "Find"])
       await step(`loop / ${tab}`, async () => { await click(`button:text-is("${tab}")`, "last"); await log(`loop / ${tab}`); });

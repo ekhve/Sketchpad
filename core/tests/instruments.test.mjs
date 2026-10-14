@@ -49,14 +49,14 @@ test("CR-INSTRUMENTS-04 the keyboard never asks the piano for a note farther tha
 });
 
 test("CR-INSTRUMENTS-05 every instrument preset has what the audio layer needs to build it, and a sampler has a fallback that is itself a synth", () => {
-  assert.equal(INSTRUMENTS.length, 7); assert.equal(new Set(INSTRUMENTS.map((i) => i.id)).size, 7);
+  assert.equal(INSTRUMENTS.length, 6); assert.equal(new Set(INSTRUMENTS.map((i) => i.id)).size, 6);
   for (const i of INSTRUMENTS) {
     assert.ok(i.name && i.note && ["sampler", "fm", "am", "synth"].includes(i.kind), i.id);
     assert.ok(typeof i.volume === "number" && i.volume < 0 && i.release > 0 && typeof i.delay === "boolean", i.id);
     assert.ok(i.options, `${i.id} has options`);
     if (i.kind === "sampler") { assert.ok([PIANO_SAMPLES, STRINGS_SAMPLES, VIBES_SAMPLES].includes(i.samples.urls), i.id); assert.ok(/CC-BY|CC0/.test(i.credit), i.id); assert.ok(INSTRUMENTS.find((x) => x.id === i.fallback).kind !== "sampler"); }
   }
-  assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "felt", "pad", "pluck", "strings", "vibes"]);
+  assert.deepEqual(INSTRUMENTS.map((i) => i.id), ["grand", "rhodes", "pad", "dx", "strings", "vibes"]);
 });
 
 test("CR-INSTRUMENTS-11 an instrument's own effects are a short list of known kinds, each with the numbers it needs", () => {

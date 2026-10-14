@@ -49,13 +49,13 @@ If any of these fail, stop and report; the rest of the script is wasted.
 | 1.5b | Press three keys **at once** | All three sound and light; lifting one leaves two | Any of them drops out |
 | 1.5c | Press a key and **drag across** the keys | Each sounds as you reach it, stops as you leave | Only the first note sounds — that means the browser is still stealing the gesture |
 | 1.6 | Play 40 or so notes quickly | Still sounding; voice counter drops back near 0 between notes | It goes quiet → this was the bug that took three attempts |
-| 1.7 | Tap **C#m**, then **Play loop** in Progression | Chords sound in time, piano follows, loop repeats without a gap | — |
+| 1.7 | (Switch to **Produce** first: the progression lives there.) Tap **C#m**, then **Play loop** in Progression | Chords sound in time, piano follows, loop repeats without a gap | — |
 
 ## Part 1b — Type a song in (3 min)
 
 | # | Do | Expect |
 |---|---|---|
-| 1b.1 | **Progression** → type `am7 f#m7 dm7 g7sus4` in lower case | Four chords appear as you type, named Am7 F#m7 Dm7 G7sus4; the keyboard does not capitalise anything |
+| 1b.1 | (Switch to **Produce** first: the progression lives there.) **Progression** → type `am7 f#m7 dm7 g7sus4` in lower case | Four chords appear as you type, named Am7 F#m7 Dm7 G7sus4; the keyboard does not capitalise anything |
 | 1b.2 | Read the line under them | "No single key holds all of these…" — true for this verse |
 | 1b.3 | Delete `f#m7` | A minor and C major are offered; tap A minor |
 | 1b.4 | Type `Cmaj8` | Shown in red: "Did you mean Cmaj7?", and Add is gone |
@@ -68,7 +68,7 @@ If any of these fail, stop and report; the rest of the script is wasted.
 |---|---|---|
 | 1c.1 | Tap **C** in Chords, then **Fingers: right** under the keyboard | 1, 3, 5 on C, E, G in solid dark discs |
 | 1c.2 | **left**, then **both** | 5-3-1 in outlined purple discs; then a purple bass C in the octave below, with the chord in the right hand and a bracket over each hand |
-| 1c.3 | Type `Cmaj9` in Progression and tap it, with **right** chosen | If it's wider than your reach, both hands appear anyway and it says "split between hands" |
+| 1c.3 | (Switch to **Produce** first: the progression lives there.) Type `Cmaj9` in Progression and tap it, with **right** chosen | If it's wider than your reach, both hands appear anyway and it says "split between hands" |
 | 1c.4 | **hand reaches: 7th**, then **10th** | The split appears and disappears |
 | 1c.5 | **Learn → The major scale** | Right-hand numbers on by themselves; the card says "thumb under onto F"; play it and follow them |
 | 1c.6 | Switch to a key like **E♭**, open the scale again | The thumb never lands on a black key |
@@ -88,7 +88,7 @@ This is `UC-00`, the thing the app exists for. Do it as if you meant it.
 | 2.4 | Add four chords with **add** | Each lights as you add it |
 | 2.5 | Play the loop | Piano follows; scale dots stay visible underneath |
 | 2.6 | Go to **Bass** | It describes a chord without you having selected one |
-| 2.7 | Go to **Progression** → "which scales fit" | Ranked, naming what each one misses |
+| 2.7 | (Switch to **Produce** first: the progression lives there.) Go to **Progression** → "which scales fit" | Ranked, naming what each one misses |
 | 2.8 | Tap one | Piano lights the palette to play over your loop |
 
 **The question that matters:** did you at any point want to do something and not find it?
@@ -101,6 +101,10 @@ This is `UC-00`, the thing the app exists for. Do it as if you meant it.
 | 3.0b | Look under the piano | Above the piano: Fingers on the left, octave arrows on the right. Under it: the legend, then one line, **Sound options ▾**. No engine text, no sound/silence buttons. Open it: Sound, Played, Reverb, Echo. Tap a key: nothing on the screen moves | Anything you need often that is now hidden; anything still cluttered |
 | 3.1a | In Sound options, Played: try Up, Down, Up & down, Random on a chord; then the Scales tab | Same buttons, same setting; a scale only runs; the chord arpeggiates quickly, the scale at an easy pace | Anything that surprises, such as choosing Down in Scales changing how chords play |
 | 3.1b | Open Sound options and play a chord on **Strings**, then single notes up the keyboard, then **Vibraphone** | Strings swell in and sound like a bowed section, fading after a few seconds; the vibraphone rings and is round. Neither is a thin synth; the credit line names a CC0 source (`D-109`) | A synth-like or thin sound, a note much quieter than the others, a very low or very high note that sounds slowed or sped up too far (expected a little beyond the recordings), no sound at all |
+| 3.1c | Play chords on **DX keys** and the **Rhodes**, one after the other | Two different electric pianos: the DX glassy and clean with a wide chorus, the Rhodes warmer with a slow shimmer. Felt keys and Marimba are no longer in the list (`D-110`) | The two sounding alike, DX thin or harsh |
+| 3.1d | Reload the app and open Sound options | **Room** and echo **Off** are already chosen | Anything else selected |
+| 3.1e | Open the app on **Start** | Tabs are Chords, Scales, Theory, Learn, How to use, all visible without scrolling; no "add" buttons under the chords; Theory shows where chords come from, not the whole dictionary | A Progression tab, a tab cut off at the edge |
+| 3.1f | Switch to **Produce**, key **G**, add four chords from G, then switch the key to **C** and open Progression | A note names the bar outside C major and offers **Set the key to G major**; pressing it clears the note. The Sheet shows the same note | No note, a note when the key is right, numerals on the Sheet that do not match the key |
 | 3.1 | Try each instrument on the same chord (in Sound options) | Clearly different sounds, about equally loud; the pad full and slow, not thin (the numbers are in `tools/instrument-check.mjs`; your ear decides which you would use) | Which would you actually use? |
 | 3.2 | Try echo **Off, Light, Long** on the Rhodes and the pad (Light is the default: air, gone quickly) | Obvious, and not muddy | Too much? Too little? |
 | 3.3 | Tap a chord, then quickly another | The first stops; they don't pile up | |
@@ -166,7 +170,7 @@ New. The lessons listen to what you play, so play them for real rather than read
 | 7.6 | Play a scale note in the wrong direction (the D **below** your C) | "Right note, wrong way" |
 | 7.7 | Finish a lesson → **Again in G** | The same lesson restarts in G; the key at the top changes too |
 | 7.8 | Halfway through a lesson, pick another key at the top | The lesson starts again from step 1 in that key |
-| 7.9 | **8 · The four-chord loop** → finish → **Put C G Am F in my loop** | Progression opens with those four chords, ready to play |
+| 7.9 | (Switch to **Produce** first: the progression lives there.) **8 · The four-chord loop** → finish → **Put C G Am F in my loop** | Progression opens with those four chords, ready to play |
 | 7.10 | **5 · The minor scale** in C | It asks for C D E♭ F G A♭ B♭ C — flats, not D# G# A# |
 | 7.11 | Pick **E♭** at the top (major), then switch to **minor** | Major: the key button reads E♭ and the chords use flats. Minor: the same button reads D#, and everything uses sharps |
 | 7.12 | Switch **A B C → Do Re Mi** and open Theory → **Build it** in C minor | It speaks Do Re Mi♭, not C D E |

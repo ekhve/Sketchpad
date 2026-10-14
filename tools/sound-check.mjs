@@ -31,7 +31,7 @@ const MODES = [
 const url = (f) => new URL(`../${f}`, import.meta.url).href;
 const SK = "build/sketchpad-app.html", J6 = "build/j6-app.html";
 const key = (m = 60) => (p) => p.locator(`[data-midi="${m}"]`).first();
-const pad = (p) => p.locator('button:text-is("add")').first().locator("xpath=preceding::button[1]");
+const pad = (p) => p.locator("[data-chord-pad]").first();
 const j6key = (p) => p.locator('button[aria-label^="J-6 key C:"]').first();
 
 async function touch(page, cdp, locator, holdMs) {

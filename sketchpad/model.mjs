@@ -60,6 +60,7 @@ const TAB_IDS = ["chords", "find", "scales", "prog", "bass", "theory", "sheet", 
    changed how things were *described* and never what was *shown*, which is the
    wrong axis. A level chooses the surface; depth follows from it.
 
+   Start was changed in D-110: it no longer builds a progression, and carries the theory instead.
    Levels are cumulative, so nothing a user has found ever moves or disappears.
    ========================================================================== */
 
@@ -67,14 +68,14 @@ const LEVELS = [
   { id: "start", name: "Start",
     /* Lessons are here, not at Study: learning is the mode with the fewest
        prerequisites, so it has to be reachable on the first screen. (D-073) */
-    note: "A key, some chords, a loop, and lessons to practise. Enough to make something in a minute.",
-    adds: ["key", "piano", "sound", "chords", "scales", "loop", "explain", "lessons", "guide"] },
+    note: "A key, its chords and scales, the theory behind them, and short lessons to practise.",
+    adds: ["key", "piano", "sound", "chords", "scales", "explain", "theory", "lessons", "guide"] },
   { id: "produce", name: "Produce",
-    note: "The working tools: richer chords, voicings, chord sets, bass, riffs and the printable sheet.",
-    adds: ["sevenths", "voicings", "sets", "tension", "find", "bass", "riffs", "sheet", "numerals", "naming"] },
+    note: "Making something: collect chords into a progression, richer chords, voicings, chord sets, bass, riffs and the printable sheet.",
+    adds: ["loop", "sevenths", "voicings", "sets", "tension", "find", "bass", "riffs", "sheet", "numerals", "naming"] },
   { id: "study", name: "Study",
     note: "Where everything comes from: the dictionary, inversions, harmonisation and the formal wording.",
-    adds: ["theory", "dictionary", "inversions", "harmonise", "formal", "melodyGuide"] },
+    adds: ["dictionary", "inversions", "harmonise", "formal", "melodyGuide"] },
 ];
 
 const levelIndex = (id) => Math.max(0, LEVELS.findIndex((l) => l.id === id));
@@ -105,4 +106,9 @@ function tabsAt(levelId) {
    is wrong. These are the features UC-00 actually needs. (D-058) */
 const UC00_NEEDS = ["key", "piano", "sound", "chords", "scales", "loop", "explain"];
 
-export { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS };
+/* What the first screen has to do on its own: find a key, hear its chords and scales,
+   and be told why. Building a loop moved up to Produce at the owner's request, so the
+   start is simple (D-110). */
+const EXPLORE_NEEDS = ["key", "piano", "sound", "chords", "scales", "explain", "theory"];
+
+export { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS, EXPLORE_NEEDS };

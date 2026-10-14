@@ -435,9 +435,9 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Purpose.** Chords in a key: the diatonic chords of a scale, their roman numerals, harmonising a custom scale, suggesting a scale or the next chord, borrowed chords and tension levels, and typed chords placed in a key.
 
-**Behaviour.** `harmonize` builds a chord on each note of a seven-note scale from the scale's own notes, stacked in thirds, ascending (CD-004 for the octave). Numerals are measured against the major scale, so a minor key shows its flats (♭III, ♭VI, ♭VII) and the case follows the chord's quality. Chords outside the key are not mistakes: `suggestScaleFor` names the scale they come from. `suggestNextChords` ranks by how the harmony behaves (a fourth up, shared notes, going home). `chordsAtTension` adds borrowed chords from level 2.
+**Behaviour.** `harmonize` builds a chord on each note of a seven-note scale from the scale's own notes, stacked in thirds, ascending (CD-004 for the octave). Numerals are measured against the major scale, so a minor key shows its flats (♭III, ♭VI, ♭VII) and the case follows the chord's quality. Chords outside the key are not mistakes: `suggestScaleFor` names the scale they come from. `suggestNextChords` ranks by how the harmony behaves (a fourth up, shared notes, going home). `chordsAtTension` adds borrowed chords from level 2. `keyFit` says whether a progression belongs to the key that is set and, only when another key holds more of its chords, which one; a numeral is worked out again from the root (`romanIn`) because the one stored on a chord is for the key it was added in (D-110).
 
-**Requirements.** CR-HARMONY-01 … CR-HARMONY-11 (11) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/harmony.test.mjs`.
+**Requirements.** CR-HARMONY-01 … CR-HARMONY-13 (13) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/harmony.test.mjs`.
 
 ### Interface
 
@@ -450,7 +450,9 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `harmonizeCustom` | function | `(def, size = 3, base = DEFAULT_BASE)` | The diatonic chords of a scale of your own. |
 | `harmonizeIntervals` | function | `(tonic, iv, size, idPrefix = "custom", base = DEFAULT_BASE)` | The diatonic chords of any seven-note interval set. |
 | `harmonizeSteps` | function | `(tonic, scaleId, degreeIndex, size = 3, system = "letters")` | Building one chord out of a scale, a step at a time. |
+| `keyFit` | function | `(progression, tonic, mode)` | Whether a progression's chords belong to the key that is set, and the key that holds more of them when one does. |
 | `romanFor` | function | `(tonic, rootPc, degreeIndex, sym)` | A chord's roman numeral in a key. |
+| `romanIn` | function | `(tonic, rootPc, sym)` | A chord's roman numeral in the key it is in now, from its root alone. |
 | `suggestNextChords` | function | `(prog, tonic, mode, size = 3)` | Four ranked chords that could come next, each with a reason. |
 | `suggestScaleFor` | function | `(chord, ctx)` | The scale a chord with outside notes comes from. |
 | `typedChord` | function | `(parsed, tonic, mode, base = DEFAULT_BASE)` | A parsed chord name as a chord the app can play, number and explain in a key. |

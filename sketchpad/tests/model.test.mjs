@@ -1,7 +1,7 @@
 /* sketchpad/model — unit tests, one per requirement in sketchpad/REQUIREMENTS.md (SR-MODEL-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS } from "../model.mjs";
+import { soundSections, namingFor, activeChordFor, TAB_IDS, LEVELS, levelIndex, featuresAt, has, TABS_BY_FEATURE, tabsAt, UC00_NEEDS, EXPLORE_NEEDS } from "../model.mjs";
 import { noteName } from "../../core/notes.mjs";
 import { ECHO_LEVELS, INSTRUMENTS, SPACES } from "../../core/instruments.mjs";
 import { PLAY_PATTERNS } from "../../core/arpeggio.mjs";
@@ -23,22 +23,24 @@ test("SR-MODEL-02 levelIndex finds a level's position, and an unknown level is t
 });
 
 test("SR-MODEL-03 has says whether a level has a feature, counting every level below it", () => {
-  assert.equal(has("start", "loop"), true); assert.equal(has("start", "bass"), false); assert.equal(has("produce", "bass"), true); assert.equal(has("produce", "theory"), false); assert.equal(has("study", "theory"), true);
+  assert.equal(has("start", "loop"), false); assert.equal(has("produce", "loop"), true); assert.equal(has("start", "bass"), false); assert.equal(has("produce", "bass"), true); assert.equal(has("start", "theory"), true); assert.equal(has("produce", "theory"), true);
   assert.equal(has("study", "loop"), true, "nothing found at a lower level disappears");
   assert.equal(has("start", "nonsense"), false);
 });
 
 test("SR-MODEL-04 tabs follow features and come in a fixed order, so a tab never moves when another appears", () => {
-  assert.deepEqual(tabsAt("start"), ["chords", "scales", "prog", "learn", "guide"]);
+  assert.deepEqual(tabsAt("start"), ["chords", "scales", "theory", "learn", "guide"]);
   for (const lv of LEVELS) { const t = tabsAt(lv.id); assert.deepEqual(t, TAB_IDS.filter((id) => t.includes(id)), `${lv.id} is in the fixed order`); }
   for (let i = 1; i < LEVELS.length; i++) assert.ok(tabsAt(LEVELS[i - 1].id).every((t) => tabsAt(LEVELS[i].id).includes(t)));
   assert.equal(tabsAt("study").length, TAB_IDS.length, "Study shows every tab");
   for (const tab of Object.values(TABS_BY_FEATURE)) assert.ok(TAB_IDS.includes(tab), tab);
 });
 
-test("SR-MODEL-05 the main scenario can be done at the first level", () => {
-  assert.ok(UC00_NEEDS.length >= 5);
-  for (const f of UC00_NEEDS) assert.ok(has("start", f), f);
+test("SR-MODEL-05 the first level finds a key, its chords and scales and the theory; the main scenario is done at the second", () => {
+  assert.ok(EXPLORE_NEEDS.length >= 5);
+  for (const f of EXPLORE_NEEDS) assert.ok(has("start", f), f);
+  assert.equal(has("start", "loop"), false, "the first screen builds no progression");
+  for (const f of UC00_NEEDS) assert.ok(has("produce", f), f);
 });
 
 test("SR-MODEL-06 the chord in focus is the selected one, else the one playing, else the loop's first, else home", () => {

@@ -1,4 +1,4 @@
-/* core/instruments — Instrument presets as data (piano, Rhodes, felt keys, pad, marimba), delay and reverb settings, and the keyboard's range and sample coverage.
+/* core/instruments — Instrument presets as data (piano, Rhodes, DX keys, pad, strings, vibraphone), delay and reverb settings, and the keyboard's range and sample coverage.
    Layer 1. Depends on: core/piano-samples, core/instrument-samples. Pure: no React, no Tone, no DOM, no dates, no randomness.
    Interface, behaviour and requirements: core/MODULES.md (instruments).
    Moved verbatim from the THEORY block of sketchpad.jsx (D-096); behaviour unchanged. */
@@ -87,7 +87,7 @@ const INSTRUMENTS = [
      first-time user expects a piano. (D-067) */
   { id: "grand", name: "Grand piano", kind: "sampler",
     note: "Real recordings, built into the app. No download, works offline.",
-    volume: -6, release: 1.2, delay: false, fallback: "felt",
+    volume: -6, release: 1.2, delay: false, fallback: "rhodes",
     samples: { baseUrl: "", urls: PIANO_SAMPLES },
     credit: PIANO_CREDIT,
     options: { release: 1.2 } },
@@ -108,17 +108,6 @@ const INSTRUMENTS = [
       modulationEnvelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.1 },
     } },
 
-  /* Felt keys: a piano with a strip of felt over the strings. Dark, round, and gone
-     quickly; nothing like a Rhodes's ring. (D-107) */
-  { id: "felt", name: "Felt keys", kind: "synth",
-    note: "Soft and close, with the hammers muted. Dark, round, quick to fade.",
-    volume: -14, release: 0.6, delay: false,
-    chain: [{ type: "filter", frequency: 380, q: 0.7 }],
-    options: {
-      oscillator: { type: "triangle" },
-      envelope: { attack: 0.06, decay: 0.9, sustain: 0.04, release: 0.6 },
-    } },
-
   /* A pad is wide and slow. The first one was a sine through a square: thin. Three
      detuned saws through a filter and a chorus is what a pad is. (D-107) */
   { id: "pad", name: "Warm pad", kind: "synth",
@@ -130,15 +119,21 @@ const INSTRUMENTS = [
       envelope: { attack: 0.55, decay: 0.5, sustain: 0.75, release: 1.8 },
     } },
 
-  { id: "pluck", name: "Marimba", kind: "fm",
-    note: "Short and wooden. Cuts through a busy beat.",
-    volume: -5, release: 0.3, delay: false,
+  /* A DX-style electric piano: two sine operators at one-to-one, the bright tine
+     in the attack only, then a clean tone, with the wide chorus every DX preset
+     was played through. Glassier and cleaner than the Rhodes, which is the point
+     of having both. Felt keys and the marimba are gone: chords on them were not
+     good. (D-110) */
+  { id: "dx", name: "DX keys", kind: "fm",
+    note: "Glassy FM electric piano, the 80s kind. Bright tine, clean body, wide chorus.",
+    volume: -4, release: 0.9, delay: true,
+    chain: [{ type: "chorus", frequency: 0.9, delayTime: 3.5, depth: 0.6 }],
     options: {
-      harmonicity: 3.5, modulationIndex: 9,
+      harmonicity: 1, modulationIndex: 18,
       oscillator: { type: "sine" },
-      envelope: { attack: 0.002, decay: 0.8, sustain: 0, release: 0.3 },
+      envelope: { attack: 0.003, decay: 3, sustain: 0.05, release: 0.9 },
       modulation: { type: "sine" },
-      modulationEnvelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
+      modulationEnvelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.5 },
     } },
 
   /* Two more recorded instruments, both CC0, for the sounds a synth does not give: a
@@ -153,7 +148,7 @@ const INSTRUMENTS = [
 
   { id: "vibes", name: "Vibraphone", kind: "sampler",
     note: "Soft mallets on metal bars. Round, ringing and a little dreamy.",
-    volume: -5, release: 1.2, delay: true, fallback: "pluck",
+    volume: -5, release: 1.2, delay: true, fallback: "dx",
     samples: { baseUrl: "", urls: VIBES_SAMPLES },
     credit: SAMPLE_CREDITS.vibes,
     options: { release: 1.2 } },
@@ -161,7 +156,7 @@ const INSTRUMENTS = [
 
 const instrumentById = (id) => INSTRUMENTS.find((i) => i.id === id) ?? INSTRUMENTS[0];
 
-/* Echo has three settings. Light is the default: a quick, quiet repeat or two that is gone
+/* Echo has three settings. Off is the default (D-110). Light is a quick, quiet repeat or two that is gone
    almost at once, which gives a sound some air without anyone hearing a delay. Long is the
    old echo, wider on the pad. (D-041, D-061, D-107) */
 const ECHO_LEVELS = [

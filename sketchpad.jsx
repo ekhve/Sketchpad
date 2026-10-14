@@ -10,7 +10,7 @@ import { CHORD_SETS, buildSet, setsFor } from "./core/chordsets.mjs";
 import { explainChord, explainProgression, describeChange } from "./core/explain.mjs";
 import { rng, STYLES, patternsFor, place, renderProgressionFigure, explainFigure, planBar } from "./core/figures.mjs";
 import { HAND_REACH, DEFAULT_REACH, FINGER_HANDS, effectiveFingerHand, FINGER_COPY, fingerChord, stepFingering, litLessonFingers } from "./core/fingering.mjs";
-import { harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, chordsAtTension } from "./core/harmony.mjs";
+import { romanIn, keyFit, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, chordsAtTension } from "./core/harmony.mjs";
 import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, reverbSettings } from "./core/instruments.mjs";
 import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyAtPosition } from "./core/keyboard.mjs";
 import { melodyRole, changedNotes } from "./core/melody.mjs";
@@ -327,7 +327,7 @@ function useInstrument() {
         } catch (e) { setDetail(`note failed: ${e.message}`); }
         return;
       }
-      voicePreset = instrumentById(p.fallback ?? "felt");
+      voicePreset = instrumentById(p.fallback ?? "rhodes");
     }
 
     const pool = poolFor(voicePreset);
@@ -377,7 +377,7 @@ function useInstrument() {
         } catch (e) {}
         return;
       }
-      q = instrumentById(p.fallback ?? "felt");
+      q = instrumentById(p.fallback ?? "rhodes");
     }
 
     try {
@@ -725,12 +725,12 @@ const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers 
   );
 };
 
-const Legend = () => (
+const Legend = ({ loop = true }) => (
   <div className="flex items-center gap-3 flex-wrap text-[10px] mb-1.5" style={{ color: T.inkSoft }}>
     <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.homeDot, boxShadow: `0 0 0 3px ${T.homeDot}44` }} /> home</span>
     <span className="flex items-center gap-1.5"><i className="block rounded-full" style={{ width: 7, height: 7, background: T.scaleDot }} /> in scale</span>
     <span className="flex items-center gap-1.5"><i className="block rounded-sm" style={{ width: 9, height: 9, background: T.chordW }} /> this chord</span>
-    <span className="flex items-center gap-1.5"><i className="block rounded-sm" style={{ width: 9, height: 9, background: T.loopW, boxShadow: `inset 0 0 0 1px ${T.edge}` }} /> in your loop</span>
+    {loop && <span className="flex items-center gap-1.5"><i className="block rounded-sm" style={{ width: 9, height: 9, background: T.loopW, boxShadow: `inset 0 0 0 1px ${T.edge}` }} /> in your loop</span>}
     <span className="flex items-center gap-1.5"><i className="block rounded-sm" style={{ width: 9, height: 9, background: T.bassW }} /> bass</span>
   </div>
 );
@@ -779,7 +779,7 @@ export default function App() {
   const [sounding, setSounding] = useState(new Set());
   const [bassLit, setBassLit] = useState([]);
   const [instId, setInstId] = useState("grand");
-  const [echo, setEchoLevel] = useState("light");   // D-107: off, light (the default) or long
+  const [echo, setEchoLevel] = useState("off");   // D-107, D-110: off (the default), light or long
   const [space, setSpace] = useState("room");
   const [pattern, setPattern] = useState("block");   // D-108: how notes are played, for chords and scales
   const [soundOpen, setSoundOpen] = useState(false);    // D-105: the sound options are folded away until asked for
@@ -825,6 +825,12 @@ export default function App() {
 
   const pro = has(level, "numerals");           // depth follows from the level
   const can = (f) => has(level, f);
+  /* A link to a tab the level hides opens the level that has it, so a tab is never open
+     without being in the bar. (D-110) */
+  const goTab = (id) => {
+    if (!tabsAt(level).includes(id)) { const l = LEVELS.find((x) => tabsAt(x.id).includes(id)); if (l) setLevel(l.id); }
+    setTab(id);
+  };
   const ctx = { tonic, mode, scaleId };
   const scaleSet = useMemo(() => activeScalePcs(customScale, tonic, scaleId), [customScale, tonic, scaleId]);
   const parentScale = mode === "minor" ? "natural-minor" : "major";
@@ -1179,9 +1185,23 @@ export default function App() {
     });
   };
 
+  /* Chords keep the numeral they were added with, which is wrong as soon as the key
+     changes, and nothing used to notice a loop written in another key. (D-110) */
+  const progNow = useMemo(() => prog.map((c) => ({ ...c, roman: romanIn(tonic, c.rootPc, c.sym) })), [prog, tonic]);
+  const fit = useMemo(() => keyFit(prog, tonic, mode), [prog, tonic, mode]);
+  const keyNotice = fit.suggest && (
+    <div role="status" className="rounded-md px-3 py-2 mb-3 text-[12px] no-print" style={{ background: T.surface, color: T.ink, boxShadow: `inset 0 0 0 1px ${T.tension}` }}>
+      {fit.outside.length === 1 ? `Bar ${fit.outside[0]} has` : `Bars ${fit.outside.join(", ")} have`} notes outside {noteName(tonic, system)} {mode}.
+      {" "}These chords fit {noteName(fit.suggest.tonic, system)} {fit.suggest.mode} better ({fit.suggest.fits} of {fit.total}, against {fit.fits}).{" "}
+      <button onClick={() => { setTonic(fit.suggest.tonic); setMode(fit.suggest.mode); }} className="underline font-semibold" style={{ color: T.homeDot }}>
+        Set the key to {noteName(fit.suggest.tonic, system)} {fit.suggest.mode}
+      </button>
+    </div>
+  );
+
   const sheet = useMemo(
-    () => sheetData({ tonic, mode, scaleId, customScale, progression: prog, bpm, bassFigure, system, fingering: sheetFingers, reach }),
-    [tonic, mode, scaleId, customScale, prog, bpm, bassFigure, system, sheetFingers, reach]
+    () => sheetData({ tonic, mode, scaleId, customScale, progression: progNow, bpm, bassFigure, system, fingering: sheetFingers, reach }),
+    [tonic, mode, scaleId, customScale, progNow, bpm, bassFigure, system, sheetFingers, reach]
   );
   const styleGuide = useMemo(() => scalesForStyle(style, mode), [style, mode]);
   const fits = useMemo(() => fitScales(prog, tonic), [prog, tonic]);
@@ -1330,7 +1350,7 @@ export default function App() {
           )}
 
           <div className="flex items-center gap-2 flex-wrap mt-1.5">
-            <Legend />
+            <Legend loop={can("loop")} />
             {can("melodyGuide") && <button onClick={() => setGuide(!guide)} aria-pressed={guide}
               className="text-[10px] px-2 py-0.5 rounded ml-auto"
               style={{ background: guide ? T.homeDot : T.raised, color: guide ? T.keyWhite : T.inkSoft, fontWeight: guide ? 600 : 400 }}>
@@ -1415,7 +1435,7 @@ export default function App() {
           <div className="flex gap-1 mt-2 -mx-1 px-1 overflow-x-auto">
             {TABS.filter((t) => tabsAt(level).includes(t.id)).map((t) => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className="px-3 py-1.5 rounded-md text-[13px] whitespace-nowrap"
+                className="px-1.5 py-1.5 rounded-md text-[13px] whitespace-nowrap"
                 style={{ background: tab === t.id ? T.ink : T.raised, color: tab === t.id ? T.keyWhite : T.inkSoft, fontWeight: tab === t.id ? 600 : 400 }}>
                 {t.label}
               </button>
@@ -1459,15 +1479,15 @@ export default function App() {
                 return (
                   <div key={c.id} className="rounded-lg overflow-hidden"
                     style={{ background: on ? T.chordW : T.surface, boxShadow: `inset 0 0 0 1px ${on ? T.chordW : c.extra ? T.tension : T.edge}` }}>
-                    <button onClick={() => { tapChord(c); if (c.why) setNote({ head: `${lbl(c)} — borrowed`, plain: c.why }); }}
+                    <button data-chord-pad={c.id} onClick={() => { tapChord(c); if (c.why) setNote({ head: `${lbl(c)} — borrowed`, plain: c.why }); }}
                       className="w-full px-2 pt-2 pb-1 text-left">
                       <div className="text-[14px] font-semibold leading-tight" style={{ color: on ? T.padInk : T.ink }}>{lbl(c)}</div>
                       <div className="text-[9px] leading-tight" style={{ color: on ? T.padSub : T.inkSoft }}>
                         {c.extra ? "borrowed" : pro ? c.roman : c.notes.map((m) => noteName(m, system)).join(" ")}
                       </div>
                     </button>
-                    <button onClick={() => addChord(c)} className="w-full text-[10px] py-1"
-                      style={{ background: on ? "rgba(0,0,0,.14)" : T.raised, color: on ? T.padInk : T.inkSoft }}>add</button>
+                    {can("loop") && <button onClick={() => addChord(c)} className="w-full text-[10px] py-1"
+                      style={{ background: on ? "rgba(0,0,0,.14)" : T.raised, color: on ? T.padInk : T.inkSoft }}>add</button>}
                   </div>
                 );
               })}
@@ -1535,7 +1555,7 @@ export default function App() {
                         <div className="text-[13px] font-semibold leading-tight">{c.name}</div>
                         <div className="text-[9px] leading-tight" style={{ color: T.inkSoft }}>{c.notes.map((m) => noteName(m, system)).join(" ")}</div>
                       </button>
-                      <button onClick={() => addChord(c)} className="w-full text-[10px] py-1" style={{ background: T.raised, color: T.inkSoft }}>add</button>
+                      {can("loop") && <button onClick={() => addChord(c)} className="w-full text-[10px] py-1" style={{ background: T.raised, color: T.inkSoft }}>add</button>}
                     </div>
                   ))}
                 </div>
@@ -1592,6 +1612,7 @@ export default function App() {
               </p>
             ) : (
               <>
+                {keyNotice}
                 <div className="flex gap-1.5 flex-wrap mb-3 no-print">
                   <button onClick={() => window.print()} className="px-3 py-1.5 rounded-md text-xs font-semibold"
                     style={{ background: T.homeDot, color: T.keyWhite }}>Print</button>
@@ -1754,7 +1775,7 @@ export default function App() {
                     className="w-full py-2 rounded-md text-sm font-semibold" style={{ background: T.homeDot, color: T.keyWhite }}>
                     Again in {noteName(nextKeyRound(tonic), namingFor({ base: baseSystem, accidentals, tonic: nextKeyRound(tonic), mode }))} — one step round the circle of fifths
                   </button>
-                  {lessonNow.loop && (
+                  {lessonNow.loop && can("loop") && (
                     <button onClick={() => { addAll(lessonNow.loop); setTab("prog"); }}
                       className="w-full py-2 rounded-md text-sm" style={{ background: T.surface, color: T.ink, boxShadow: `inset 0 0 0 1px ${T.edge}` }}>
                       Put {lessonNow.loop.map(lbl).join(" ")} in my loop
@@ -1782,7 +1803,7 @@ export default function App() {
                   ))}
                 </ul>
                 {g.tab && (
-                  <button onClick={() => setTab(g.tab)} className="px-3 py-1.5 rounded-md text-xs font-semibold"
+                  <button onClick={() => goTab(g.tab)} className="px-3 py-1.5 rounded-md text-xs font-semibold"
                     style={{ background: T.raised, color: T.homeDot }}>
                     Open {TAB_LABELS[g.tab]} →
                   </button>
@@ -2058,6 +2079,7 @@ export default function App() {
               </p>
             ) : (
               <>
+                {keyNotice}
                 <div className="flex gap-1.5 flex-wrap mb-3">
                   {prog.map((c, i) => (
                     <button key={i} onClick={() => setProg(prog.filter((_, j) => j !== i))}
@@ -2292,6 +2314,7 @@ export default function App() {
               </div>
             </div>
 
+            {can("dictionary") && <>
             <H>Chord dictionary — {noteName(tonic, system)}</H>
             <div className="mb-5">
               {dictionaryFor(tonic, base).map((c) => (
@@ -2307,7 +2330,9 @@ export default function App() {
                 </button>
               ))}
             </div>
+            </>}
 
+            {can("inversions") && <>
             <H>Inversions</H>
             {!activeChord ? (
               <p className="text-sm mb-5" style={{ color: T.inkSoft }}>Pick a chord to hear its inversions.</p>
@@ -2324,7 +2349,9 @@ export default function App() {
                 ))}
               </div>
             )}
+            </>}
 
+            {!can("dictionary") && <p className="text-[12px] mb-1" style={{ color: T.inkSoft }}>The chord dictionary and inversions are in Study, at the top right.</p>}
             <H>Bass in one paragraph</H>
             <p className="text-[12px] leading-relaxed" style={{ color: T.inkSoft }}>{BASS_PARAGRAPH}</p>
           </>
