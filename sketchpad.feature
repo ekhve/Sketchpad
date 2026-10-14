@@ -2581,7 +2581,8 @@ Feature: The embedded recordings are usable audio
   @D-071 @auto
   Scenario: The keyboard cannot be scrolled past the recordings
     Given the octave control
-    Then its highest position still leaves a full keyboard inside the recorded range
+    Then its highest position still leaves two octaves inside the recorded range, so Oct 5 can be reached
+    And the keyboard drawn from any position never runs past the recordings
     And that limit is derived from the samples rather than written down separately
 
   @D-071 @manual
@@ -3543,3 +3544,13 @@ Feature: The J-6 Explorer installs as its own app
     Then it opens full screen as J-6 Explorer with its own icon, and works in flight mode
     And Explore, Find, the piano and both sounds work with the phone on the desk next to the J-6
     And "← Sketchpad" opens Sketchpad
+
+
+Feature: Building a chord from the scale
+  The Theory tab builds a chord one note at a time. It is built upwards. (D-111)
+
+  @D-111 @auto
+  Scenario: A chord built note by note is in root position
+    Given the Theory tab's "Build it" for any chord of any key
+    Then each note is above the one before, so F A C is F, A and the C above the A
+    And the notes are the chord's, in close position

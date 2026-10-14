@@ -1,7 +1,7 @@
 /* core/instruments + core/piano-samples — unit tests, one per requirement in core/REQUIREMENTS.md (CR-INSTRUMENTS-nn, CR-PIANOSAMPLES-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
+import { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, visibleOctaves, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes } from "../instruments.mjs";
 import { PIANO_SAMPLES } from "../piano-samples.mjs";
 import { STRINGS_SAMPLES, VIBES_SAMPLES, SAMPLE_CREDITS } from "../instrument-samples.mjs";
 
@@ -41,7 +41,9 @@ test("CR-INSTRUMENTS-03 stretchAt is how far a note is from its nearest recordin
 
 test("CR-INSTRUMENTS-04 the keyboard never asks the piano for a note farther than three semitones from a recording", () => {
   assert.deepEqual(PIANO_RANGE, { lowest: 24, highest: 96 });
-  assert.equal(KEYBOARD_OCTAVES, 4); assert.equal(HIGHEST_START_MIDI, 48);
+  assert.equal(KEYBOARD_OCTAVES, 4); assert.equal(HIGHEST_START_MIDI, 72);
+  for (let start = PIANO_RANGE.lowest; start <= HIGHEST_START_MIDI; start += 12) assert.ok(start + visibleOctaves(start) * 12 <= PIANO_RANGE.highest, `from ${start} the keyboard stays inside the recordings`);
+  assert.deepEqual([24, 36, 48, 60, 72].map(visibleOctaves), [4, 4, 4, 3, 2], "four octaves, fewer near the top");
   assert.equal(worstStretch(), 3);
   assert.ok(worstStretch(sampleAnchors(), 24, 96) <= 3);
   assert.ok(worstStretch(sampleAnchors({ C1: 1, C5: 1 }), 24, 96) > 12, "recordings that stop short of the range are caught");

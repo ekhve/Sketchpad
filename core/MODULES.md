@@ -122,7 +122,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Behaviour.** A *pattern* says rhythm and role ("root on 1, chord tone on the and-of-2, approach the next chord") and nothing about pitch; the *rules* resolve each role to a note from the chord, the next chord and the scale (CD-003). Generation is seeded: same seed, same figure, no randomness anywhere. `planBar` turns a bar into events in seconds, with no two notes on one voice overlapping; `planIsClean` checks that. Known limit: the 50 ms floor on a note's length can overlap the next note at a bar of half a second (480 BPM), beyond any tempo the apps offer (CD-007).
 
-**Requirements.** CR-FIGURES-01 … CR-FIGURES-13 (13) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/figures.test.mjs`.
+**Requirements.** CR-FIGURES-01 … CR-FIGURES-14 (14) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/figures.test.mjs`.
 
 ### Interface
 
@@ -135,6 +135,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `VOICES` | data | — | The three voices: chord, bass, riff. |
 | `explainFigure` | function | `(pattern, figure, system = "letters")` | A figure in plain language. |
 | `patternsFor` | function | `(kind, style)` | The patterns of a kind that suit a style. |
+| `climb` | function | `(pcs, near)` | A run of pitch classes climbed in order: the first nearest the reference, each next one above the one before. |
 | `place` | function | `(pitchClass, near)` | The note with a pitch class nearest to a reference. |
 | `planBar` | function | `({ chordNotes = [], bassFigure = [], riffFigure = [], sixteenth, barSeconds, gap = 0.05 })` | A bar as events in seconds, never overlapping on a voice. |
 | `planIsClean` | function | `(events, barSeconds)` | Whether a plan has no overlap and nothing outside the bar. |
@@ -160,6 +161,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `HIGHEST_START_MIDI` | data | — | The highest note the keyboard can start from. |
 | `INSTRUMENTS` | data | — | The five presets. |
 | `KEYBOARD_OCTAVES` | data | — | Four octaves on screen. |
+| `visibleOctaves` | function | `(startMidi)` | How many octaves the keyboard draws from a start: four, fewer near the top of the range. |
 | `PIANO_RANGE` | data | — | The lowest and highest notes the piano plays. |
 | `SPACES` | data | — | Dry, Room, Hall, Cave. |
 | `base64Payload` | function | `(uri)` | The data part of an embedded data URI. |

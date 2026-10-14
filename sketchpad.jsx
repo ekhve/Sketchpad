@@ -8,10 +8,10 @@ import { bassOptions, BASS_PARAGRAPH, bassTransitions } from "./core/bass.mjs";
 import { inversions, identifyChord, customChordFrom } from "./core/chords.mjs";
 import { CHORD_SETS, buildSet, setsFor } from "./core/chordsets.mjs";
 import { explainChord, explainProgression, describeChange } from "./core/explain.mjs";
-import { rng, STYLES, patternsFor, place, renderProgressionFigure, explainFigure, planBar } from "./core/figures.mjs";
+import { rng, STYLES, patternsFor, climb, renderProgressionFigure, explainFigure, planBar } from "./core/figures.mjs";
 import { HAND_REACH, DEFAULT_REACH, FINGER_HANDS, effectiveFingerHand, FINGER_COPY, fingerChord, stepFingering, litLessonFingers } from "./core/fingering.mjs";
 import { romanIn, keyFit, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, chordsAtTension } from "./core/harmony.mjs";
-import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, reverbSettings } from "./core/instruments.mjs";
+import { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, visibleOctaves, INSTRUMENTS, instrumentById, payloadToBytes, delaySettings, reverbSettings } from "./core/instruments.mjs";
 import { keyRole, keyMarker, MAX_HELD, heldAfterDown, heldAfterUp, slideTo, keyAtPosition } from "./core/keyboard.mjs";
 import { melodyRole, changedNotes } from "./core/melody.mjs";
 import { NAMES, pc, isWhite, baseOf, noteName, spelling } from "./core/notes.mjs";
@@ -1231,8 +1231,9 @@ export default function App() {
     const st = lessonSteps[next];
     if (!st) return;
     await inst.init(); await inst.resume();
-    const midis = st.pcs.map((p) => place(p, 54));
-    inst.play(st.added !== null ? [place(st.added, 54)] : midis, st.added !== null ? 0.6 : 1.2, undefined, 0.75);
+    /* built upwards from the root, so F A C is F A and then the C above, not the one below (D-111) */
+    const midis = climb(st.pcs, 54);
+    inst.play(st.added !== null ? [midis[midis.length - 1]] : midis, st.added !== null ? 0.6 : 1.2, undefined, 0.75);
     setChord({ id: "lesson", rootPc: tonic, sym: "", full: "building", notes: midis, degreeIndex: 0, roman: "" });
   };
 
@@ -1341,7 +1342,7 @@ export default function App() {
             bassLit={extraBass !== null ? [...bassLit, extraBass] : bassLit} picked={tab === "find" ? picked : tab === "learn" && lessonNow ? practice.attempt : []}
             changed={changed} guide={guide}
             fingers={pianoFingers} brackets={pianoBrackets}
-            system={system} onDown={noteDown} onUp={noteUp} octaves={KEYBOARD_OCTAVES} />
+            system={system} onDown={noteDown} onUp={noteUp} octaves={visibleOctaves(startMidi)} />
 
           {fingerHand !== "off" && !inLesson && chordFingering && (chordFingering.split || chordFingering.tooWide) && (
             <p className="text-[11px] mt-1" style={{ color: chordFingering.tooWide ? T.tension : T.inkSoft }}>

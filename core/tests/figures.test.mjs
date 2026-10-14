@@ -1,7 +1,7 @@
 /* core/figures — unit tests, one per requirement in core/REQUIREMENTS.md (CR-FIGURES-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { STEPS_PER_BAR, rng, PATTERNS, STYLES, patternsFor, place, renderFigure, renderProgressionFigure, explainFigure, VOICES, VELOCITY, planBar, planIsClean } from "../figures.mjs";
+import { STEPS_PER_BAR, rng, PATTERNS, STYLES, patternsFor, place, climb, renderFigure, renderProgressionFigure, explainFigure, VOICES, VELOCITY, planBar, planIsClean } from "../figures.mjs";
 import { STYLE_COLOURS } from "../styles.mjs";
 import { harmonize } from "../harmony.mjs";
 import { scalePcs } from "../scales.mjs";
@@ -156,4 +156,17 @@ test("CR-FIGURES-13 planIsClean rejects overlapping notes, empty notes, and note
   assert.equal(planIsClean([ev("bass", 2, 1)], 2), false, "starts after the bar");
   assert.equal(planIsClean([ev("bass", -0.1, 1)], 2), false);
   assert.equal(planIsClean([], 2), true);
+});
+
+test("CR-FIGURES-14 a run of pitch classes is climbed in order, each note above the one before", () => {
+  assert.deepEqual([5, 9, 0].map((p) => place(p, 54)), [53, 57, 48], "placed one by one, the C lands below the F");
+  assert.deepEqual(climb([5, 9, 0], 54), [53, 57, 60], "climbed, F A C is F A and the C above");
+  assert.deepEqual(climb([2, 6, 9, 1], 54), [50, 54, 57, 61]);
+  assert.deepEqual(climb([0, 0], 60), [60, 72], "the same note again is the octave above");
+  assert.deepEqual(climb([], 60), []);
+  for (let near = 40; near < 70; near++) for (const run of [[5, 9, 0], [11, 2, 5, 8], [7, 11, 2, 5, 9]]) {
+    const c = climb(run, near);
+    assert.ok(c.every((m, i) => i === 0 || m > c[i - 1]), `${run} near ${near}`);
+    assert.deepEqual(c.map(pc), run);
+  }
 });

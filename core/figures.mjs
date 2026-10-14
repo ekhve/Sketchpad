@@ -136,6 +136,21 @@ function place(pitchClass, near) {
   return Math.abs(base - near) <= Math.abs(base + 12 - near) ? base : base + 12;
 }
 
+/* A run of pitch classes climbed in order: the first is the note nearest to `near`
+   and every later one is the next note above the one before. Placing each on its own
+   near a reference puts every note in whichever octave is closest, so F A C near 54
+   came out C F A, the C a sixth below, which is an inversion of the chord that was
+   asked for. A chord or a scale is built upwards. (D-111) */
+function climb(pcs, near) {
+  let last = null;
+  return pcs.map((p) => {
+    if (last === null) return (last = place(p, near));
+    let up = (((p - last) % 12) + 12) % 12;
+    if (up === 0) up = 12;
+    return (last += up);
+  });
+}
+
 /* Resolve one pattern over one chord. Pure. (UC-29) */
 function renderFigure(pattern, chord, nextChord, scaleSet, seed, center) {
   const r = rng(seed);
@@ -276,4 +291,4 @@ function planIsClean(events, barSeconds) {
   return true;
 }
 
-export { STEPS_PER_BAR, rng, PATTERNS, STYLES, patternsFor, place, renderFigure, renderProgressionFigure, explainFigure, VOICES, VELOCITY, planBar, planIsClean };
+export { STEPS_PER_BAR, rng, PATTERNS, STYLES, patternsFor, place, climb, renderFigure, renderProgressionFigure, explainFigure, VOICES, VELOCITY, planBar, planIsClean };

@@ -70,6 +70,13 @@ for (const width of [360, 375, 414]) {
   await toggle.click(); await page.waitForTimeout(100);
   check(`${w}: choosing Down in the Scales tab chooses it in the Played row`, (await page.locator('#sound-options button[aria-label="Down"]').getAttribute("aria-pressed")) === "true");
   check(`${w}: nothing wider than the screen, in the Scales tab`, (await overflow()) <= 0, `${await overflow()}px`);
+  /* D-111: the octave control reaches Oct 5 and the keyboard never runs past the recordings */
+  for (let i = 0; i < 4; i++) await page.click('button[aria-label="Octave up"]:not([disabled])').catch(() => {});
+  check(`${w}: the octave control reaches Oct 5`, /Oct 5/.test(await page.locator("body").innerText()) && (await page.locator('button[aria-label="Octave up"]').isDisabled()), (await page.locator("body").innerText()).match(/Oct \d/)?.[0]);
+  const keys = await page.locator("[data-midi]").evaluateAll((k) => k.map((x) => +x.getAttribute("data-midi")));
+  check(`${w}: at Oct 5 the keyboard ends at the top of the recordings`, Math.max(...keys) === 96 && Math.min(...keys) === 72, `${Math.min(...keys)} to ${Math.max(...keys)}`);
+  check(`${w}: nothing wider than the screen, at Oct 5`, (await overflow()) <= 0);
+
   /* D-110: a simple start, a plain sound, and a loop in the wrong key is noticed */
   const tabNames = await page.locator("button").allInnerTexts();
   check(`${w}: the start has Chords, Scales, Theory, Learn and How to use, and no Progression`, ["Chords", "Scales", "Theory", "Learn", "How to use"].every((n) => tabNames.includes(n)) && !tabNames.includes("Progression") && !tabNames.some((n) => n === "add"));

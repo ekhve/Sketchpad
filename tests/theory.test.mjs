@@ -2825,12 +2825,13 @@ describe("Feature: The piano travels with the app", () => {
     /* The clamp on the octave buttons is derived from the sample span rather
        than typed in, so widening the span widens the keyboard and nothing
        else has to be remembered. (D-071) */
-    const { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI } = th;
-    assert.equal(HIGHEST_START_MIDI,
-      PIANO_RANGE.highest - KEYBOARD_OCTAVES * 12,
-      "the highest scroll position must leave a full keyboard inside the range");
-    assert.ok(HIGHEST_START_MIDI >= PIANO_RANGE.lowest,
-      "the range is narrower than the keyboard is wide");
+    const { PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, visibleOctaves } = th;
+    for (let start = PIANO_RANGE.lowest; start <= HIGHEST_START_MIDI; start += 12) {
+      assert.ok(start + visibleOctaves(start) * 12 <= PIANO_RANGE.highest, `from ${start} the keyboard runs past the recordings`);
+      assert.ok(visibleOctaves(start) <= KEYBOARD_OCTAVES);
+    }
+    assert.ok(HIGHEST_START_MIDI + 24 === PIANO_RANGE.highest, "the highest start leaves two octaves, so Oct 5 can be reached (D-111)");
+    assert.ok(HIGHEST_START_MIDI >= PIANO_RANGE.lowest, "the range is narrower than the keyboard is wide");
   });
 
   test("Each sample is small enough to ship", () => {
@@ -3905,5 +3906,20 @@ describe("Feature: Keeping to the key", () => {
     assert.equal(keyFit([c[5], c[3], c[4], c[5]], 0, "major").suggest, null, "a relative key");
     assert.deepEqual(prog.map((x) => romanIn(7, x.rootPc, x.sym)), ["I", "IV", "V", "I"]);
     assert.deepEqual(prog.map((x) => romanIn(0, x.rootPc, x.sym)), ["V", "I", "II", "V"]);
+  });
+});
+
+describe("Feature: Building a chord from the scale", () => {
+  const { climb, harmonize, harmonizeSteps, pc } = th;
+  test("A chord built note by note is in root position", () => {
+    for (let tonic = 0; tonic < 12; tonic++) for (let degree = 0; degree < 7; degree++) {
+      const steps = harmonizeSteps(tonic, "major", degree, 3);
+      const pcs = steps[steps.length - 1].pcs, chord = harmonize(tonic, "major", 3)[degree];
+      const built = climb(pcs, 54);
+      assert.deepEqual(built.map((m) => m % 12), chord.notes.map((m) => m % 12), `${tonic}/${degree}`);
+      assert.ok(built.every((m, i) => i === 0 || m > built[i - 1]), `${tonic}/${degree}: rising ${built}`);
+      assert.ok(built[2] - built[0] < 12, `${tonic}/${degree}: close position ${built}`);
+    }
+    assert.deepEqual(climb([5, 9, 0], 54), [53, 57, 60], "F A C is F, A and the C above");
   });
 });

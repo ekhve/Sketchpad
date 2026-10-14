@@ -157,6 +157,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-FIGURES-11 | planBar plans a bar as events with a start and length in seconds: one chord event under the figures, the bass and riff notes on their own steps. | D-031, D-034, CD-003 | A | `core/tests/figures.test.mjs` |
 | CR-FIGURES-12 | No note on one voice is longer than the gap before the next, so notes cannot pile up. | D-031, R-118, CD-007 | A | `core/tests/figures.test.mjs` |
 | CR-FIGURES-13 | planIsClean rejects overlapping notes, empty notes, and notes that start outside the bar. | R-118 | A | `core/tests/figures.test.mjs` |
+| CR-FIGURES-14 | A run of pitch classes is climbed in order, each note above the one before, so a chord built from them is not an inversion. | D-111 | A | `core/tests/figures.test.mjs` |
 
 ## core/bass
 

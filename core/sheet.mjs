@@ -4,7 +4,7 @@
    Moved verbatim from the THEORY block of sketchpad.jsx (D-096); behaviour unchanged. */
 
 import { chordLabel } from "./chords.mjs";
-import { place } from "./figures.mjs";
+import { climb } from "./figures.mjs";
 import { DEFAULT_REACH, fingerChord } from "./fingering.mjs";
 import { WHITE_PCS, pc, noteName } from "./notes.mjs";
 import { scaleById, activeScalePcs } from "./scales.mjs";
@@ -57,7 +57,7 @@ function sheetData({ tonic, mode, scaleId, customScale, progression = [],
   /* the scale is drawn in one octave from the tonic, which is how anyone
      would write it out by hand */
   const scaleStart = 48 + tonic;
-  const scalePitches = scaleNotes.map((p) => place(p, scaleStart + 5));
+  const scalePitches = climb(scaleNotes, scaleStart);
 
   return {
     title: `${noteName(tonic, system)} ${mode}`,

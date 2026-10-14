@@ -42,7 +42,16 @@ const PIANO_CREDIT =
 
 const PIANO_RANGE = { lowest: 24, highest: 96 };
 const KEYBOARD_OCTAVES = 4;
-const HIGHEST_START_MIDI = PIANO_RANGE.highest - KEYBOARD_OCTAVES * 12;
+const MIN_OCTAVES = 2;
+/* The window can start as high as leaves two octaves before the top of the range, so
+   Oct 5 is reachable. Four octaves were shown from every start, which stopped the start
+   at Oct 3 so that the keyboard would not run past the last recording. Now the window
+   shrinks towards the top instead of the start being refused. (D-111) */
+const HIGHEST_START_MIDI = PIANO_RANGE.highest - MIN_OCTAVES * 12;
+
+/* How many octaves are drawn from a start: four, fewer near the top of the range. */
+const visibleOctaves = (startMidi) =>
+  Math.max(MIN_OCTAVES, Math.min(KEYBOARD_OCTAVES, Math.floor((PIANO_RANGE.highest - startMidi) / 12)));
 
 const SAMPLE_STEPS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
@@ -218,4 +227,4 @@ function payloadToBytes(uri) {
   return out;
 }
 
-export { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };
+export { ECHO_LEVELS, payloadToBytes, PIANO_RANGE, KEYBOARD_OCTAVES, HIGHEST_START_MIDI, visibleOctaves, sampleMidi, sampleAnchors, stretchAt, worstStretch, INSTRUMENTS, instrumentById, delaySettings, SPACES, reverbSettings, base64Payload, payloadBytes };

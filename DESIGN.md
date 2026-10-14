@@ -939,6 +939,21 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** `CR-HARMONY-12`, `13`; the model's levels (`SR-MODEL-03` to `05`); the Levels scenarios; `tools/instrument-check.mjs` (six instruments, pairwise different); `tools/layout-check.mjs` (the Start tabs, Room and Off selected on opening, the wrong-key notice).
 
+### D-111 — The octave control reaches Oct 5, and chords are built upwards
+
+**Context.** The owner: "I can't go to more than octave 3", and in the Theory tab, choosing F (IV) played the C *below* the F and A, which is a correct chord but an inversion; "check the lessons in the theory."
+
+**Cause 1.** The keyboard always drew four octaves from its start, so the start was stopped at Oct 3 (C3 to C7) to keep from drawing past the last recording (`D-071`). That limit was right and the way it was enforced was too blunt.
+
+**Cause 2.** The "Build it" lesson placed each note of the chord on its own, near middle F: F near 54 is 53, A is 57, and C is a tie between 48 and 60 that the code resolved downwards. So F A C came out as C F A. The sheet's scale diagram placed each note the same way, with the same tie.
+
+**Decision.**
+1. **`visibleOctaves(start)`**: four octaves, fewer near the top. The highest start is two octaves below the top of the recorded range (C5, Oct 5), so the keyboard never runs past the recordings and every key it draws is within three semitones of one (`R-230`).
+2. **`climb(pcs, near)`**: the one place that builds a run of notes upwards: the first nearest the reference, each next one the next note above. "Build it" and the sheet's scale use it. `place` stays for what it is good at, finding the nearest note to a reference (bass approaches), and is no longer used to build a chord.
+3. **The lessons were checked**: every Learn lesson, in four keys and two octaves, shows its chords and sequences rising, in root position unless a lesson asks for an inversion; nothing needed changing there. The Theory tab's "Build it" and the sheet's scale were the two places that built notes independently.
+
+**Checked.** `CR-FIGURES-14`, `CR-INSTRUMENTS-04`, and the scenarios "A chord built note by note is in root position" (all 12 keys, all 7 chords) and "The keyboard cannot be scrolled past the recordings".
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1056,6 +1071,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-09 | One way to play notes for chords and scales: Together, Roll, Slow roll, Up, Down, Up & down, Random, as buttons with pictures in the Played row and, the runs only, in the Scales tab; `core/arpeggio` (`D-108`) |
 | 2026-10-10 | Two recorded instruments added from CC0 libraries: Strings and Vibraphone, embedded like the piano with a synth standing in; `core/instrument-samples`, `tools/make-instrument-samples.mjs` (`D-109`) |
 | 2026-10-14 | Felt keys and Marimba removed and DX keys added; the sound opens on Room with echo Off; Start is Chords, Scales, Theory, Learn and How to use, with the progression, Find, Bass and Sheet at Produce; a loop is checked against its key (`core/harmony.keyFit`) and its numerals follow the key (`romanIn`) (`D-110`) |
+| 2026-10-14 | The octave control reaches Oct 5 (the keyboard is drawn shorter near the top instead of the start being refused); "Build it" and the sheet's scale are built upwards, so F A C is no longer C F A (`D-111`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

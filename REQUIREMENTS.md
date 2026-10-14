@@ -680,6 +680,8 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-439 | When another key holds more of a loop's chords than the one set, the app says which bars fall outside, offers that key, and says nothing about borrowed chords or relative keys. | D-110 | A | A loop in the wrong key is noticed |
 | R-440 | A chord's numeral follows the key as it is now, so a sheet is never numbered for another key. | D-110 | A | A loop in the wrong key is noticed |
 | R-441 | The instruments are the grand piano, Rhodes, warm pad, DX keys, strings and vibraphone. | D-110, D-109 | A | The instruments are the six that suit chords |
+| R-442 | The octave control reaches Oct 5: the keyboard's highest start leaves two octaves inside the recordings, and the keyboard is drawn shorter near the top rather than refused. | D-111, D-071 | A | The keyboard cannot be scrolled past the recordings |
+| R-443 | A chord built one note at a time in the Theory tab, and the scale on the sheet, are built upwards, never with a note dropped an octave below the one before. | D-111 | A | A chord built note by note is in root position |
 
 ## 11. Visual system
 
