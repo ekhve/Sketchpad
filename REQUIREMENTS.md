@@ -686,6 +686,8 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-445 | The sheet can show the scale over two octaves, as a tick box, off by default; the text export says so. | D-112 | A | The sheet shows note names and the scale over two octaves when asked |
 | R-446 | The sheet exports every way: on screen, as copied text and as a PDF, with and without note names, fingering and the two-octave scale, as one page holding the sheet and not the buttons. | D-112, UC-53 | A | Every combination of the sheet's options is exported |
 | R-447 | The diagrams fill the width they are given, so the printed sheet uses the page. | D-112 | A | Every combination of the sheet's options is exported |
+| R-448 | Note names on the sheet are readable on a phone: at least 9 pixels high, with the chords one to a row when the sheet carries names or fingers. | D-113 | A | Every combination of the sheet's options is exported |
+| R-449 | The scale's keyboard is exactly as long as the scale, and a key is the same size over one octave as over two. | D-113 | A | Every combination of the sheet's options is exported |
 
 ## 11. Visual system
 

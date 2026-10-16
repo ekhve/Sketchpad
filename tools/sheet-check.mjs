@@ -27,7 +27,7 @@ const hasPdftotext = (() => { try { execFileSync("pdftotext", ["-v"], { stdio: "
 const browser = await chromium.launch();
 const dir = mkdtempSync(join(tmpdir(), "sheet-check-"));
 let first = true;
-const pdfWords = {};
+const pdfWords = {}, keyPx = {};
 for (const names of [false, true]) for (const fingers of [false, true]) for (const two of [false, true]) {
   const label = `names ${names ? "on" : "off"}, fingers ${fingers ? "on" : "off"}, ${two ? "two octaves" : "one octave"}`;
   try {
@@ -57,12 +57,18 @@ for (const names of [false, true]) for (const fingers of [false, true]) for (con
         leftHand: sheet.querySelectorAll('svg[aria-label^="left hand"]').length,
         scaleWords: sheet.querySelector(".mb-4 .text-\\[11px\\]")?.innerText.trim().split(/\s+/).length ?? 0,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        scaleWhites: [...scale.querySelectorAll("rect")].filter((r) => +r.getAttribute("height") === scale.viewBox.baseVal.height).length,
+        keyPx: [...scale.querySelectorAll("rect")][0].getBoundingClientRect().width,
+        nameMinPx: Math.min(...[...sheet.querySelectorAll("[data-key-name]")].map((t) => t.getBoundingClientRect().height), 999),
       };
     });
     const scaleCount = two ? 15 : 7;
     check(`${label}: note names are on the keys only when asked for`, names ? dom.keyNames === 4 * 3 + scaleCount && dom.scaleNames === scaleCount : dom.keyNames === 0, `${dom.keyNames} names, ${dom.scaleNames} on the scale`);
     check(`${label}: fingers are on the keys only when asked for`, fingers ? dom.fingerMarks >= 4 * 3 && dom.leftHand === 4 : dom.fingerMarks === 0 && dom.leftHand === 0, `${dom.fingerMarks} marks, ${dom.leftHand} left-hand`);
     check(`${label}: the scale runs over ${two ? "two octaves" : "one octave"}`, dom.scaleWords === scaleCount, `${dom.scaleWords} notes written under it`);
+    check(`${label}: the scale's keyboard is as long as the scale (${two ? 15 : 7} white keys)`, dom.scaleWhites === (two ? 15 : 7), `${dom.scaleWhites} white keys`);
+    keyPx[`${names}|${fingers}|${two}`] = dom.keyPx;
+    if (names) check(`${label}: the names are big enough to read on a phone (at least 9 px)`, dom.nameMinPx >= 9, `${dom.nameMinPx.toFixed(1)} px`);
     check(`${label}: nothing wider than the screen`, dom.overflow <= 0, `${dom.overflow}px`);
 
     /* copy as text */
@@ -88,6 +94,10 @@ for (const names of [false, true]) for (const fingers of [false, true]) for (con
     check(`${label}: no errors on the page`, errors.length === 0, errors[0]);
     await context.close();
   } catch (e) { check(`${label}: the check could run`, false, String(e.message).split("\n")[0]); }
+}
+for (const names of [false, true]) for (const fingers of [false, true]) {
+  const a = keyPx[`${names}|${fingers}|false`], b = keyPx[`${names}|${fingers}|true`];
+  check(`names ${names ? "on" : "off"}, fingers ${fingers ? "on" : "off"}: a key on the scale is the same size over one octave and two`, Math.abs(a - b) / b < 0.03, `${a.toFixed(1)} px and ${b.toFixed(1)} px`);
 }
 if (hasPdftotext) for (const fingers of [false, true]) for (const two of [false, true]) {
   const off = pdfWords[`false|${fingers}|${two}`], on = pdfWords[`true|${fingers}|${two}`];

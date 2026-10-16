@@ -695,11 +695,17 @@ const FingerMark = ({ k, small = false }) => (
 
 /* A chord as a picture, because a name on paper tells you nothing you did not
    already know. (D-057) */
-const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers = [], labels = [] }) => {
-  const { whites, blacks } = diagramKeys(startMidi, octaves, notes);
+const Diagram = ({ startMidi, octaves, endMidi, notes, width = 168, height = 46, fingers = [], labels = [], fullWhites = 0 }) => {
+  const { whites, blacks } = diagramKeys(startMidi, octaves, notes, endMidi);
   const at = (m) => whites.find((k) => k.midi === m) ?? blacks.find((k) => k.midi === m);
+  /* Names are as big as the key under them allows, and no bigger than the key is wide: they were a fixed 6.5 and
+     unreadable on a phone. A diagram shorter than a full one is drawn at the same key size, not stretched. (D-113) */
+  const whiteW = width / whites.length, blackW = whiteW * 0.62;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const nameWhite = clamp(whiteW * 0.62, 5.5, 11), nameBlack = clamp(blackW * 0.8, 4.5, 8);
+  const share = fullWhites ? Math.min(1, whites.length / fullWhites) : 1;
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ display: "block", width: "100%", maxWidth: "100%", height: "auto" }}>
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ display: "block", width: `${share * 100}%`, maxWidth: "100%", height: "auto" }}>
       {whites.map((k) => (
         <rect key={k.midi} x={k.x * width} y={0} width={k.w * width - 0.8} height={height}
           fill={k.on ? T.chordW : T.paper} stroke={T.paperLine} strokeWidth="0.7" />
@@ -711,9 +717,9 @@ const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers 
       {labels.filter((l) => at(l.midi)).map((l) => {
         const k = at(l.midi), white = isWhite(l.midi);
         const cx = (k.x + k.w / 2) * width - (white ? 0.4 : 0);
-        const cy = white ? height - 15 : height * 0.62 - 17;
+        const cy = white ? height - 7 - 5.2 - 2.5 : height * 0.62 - 6 - 5.2 - 2.5;
         return (
-          <text key={`n${l.midi}`} x={cx} y={cy} fontSize={white ? 6.5 : 5.5} fontWeight="700" textAnchor="middle"
+          <text key={`n${l.midi}`} x={cx} y={cy} fontSize={white ? nameWhite : nameBlack} fontWeight="800" textAnchor="middle"
             fill={white ? T.paperInk : T.paper} data-key-name={l.text}>{l.text}</text>
         );
       })}
@@ -762,7 +768,14 @@ const Row = ({ left, mid, right, onClick, accent = T.homeDot }) => (
 /* Tone 15 moved the transport and the draw scheduler behind accessors.
    its accessors, and then kept failing for reasons I could not observe. It is
    gone: the loop now runs on our own lookahead scheduler. (D-039, D-043) */
+const whitesIn = (lo, hi) => { let n = 0; for (let m = lo; m <= hi; m++) if (isWhite(m)) n++; return n; };
+
 const PRINT_CSS = `
+/* The chord diagrams: one to a row on a phone when they carry names or fingers, since two to a row made the
+   names too small to read; two to a row on anything wider, and always on paper. (D-113) */
+.sheet-chords { display: grid; grid-template-columns: 1fr; gap: 12px 12px; }
+.sheet-chords.sheet-two { grid-template-columns: 1fr 1fr; }
+@media (min-width: 560px), print { .sheet-chords { grid-template-columns: 1fr 1fr; } }
 @media print {
   body * { visibility: hidden !important; }
   #sheet, #sheet * { visibility: visible !important; }
@@ -1657,12 +1670,12 @@ export default function App() {
 
                   <div className="mb-4">
                     <div className="text-[10px] uppercase tracking-wide mb-1" style={{ color: T.paperFaint }}>Scale</div>
-                    <Diagram startMidi={sheet.scale.start} octaves={sheet.scale.octaves} notes={sheet.scale.notes} width={300} height={52} labels={sheet.scale.labels} />
+                    <Diagram startMidi={sheet.scale.start} endMidi={sheet.scale.end} notes={sheet.scale.notes} width={20 * whitesIn(sheet.scale.start, sheet.scale.end)} fullWhites={15} height={52} labels={sheet.scale.labels} />
                     <div className="text-[11px] mt-1">{sheet.scale.names.join("  ")}</div>
                   </div>
 
                   <div className="text-[10px] uppercase tracking-wide mb-1.5" style={{ color: T.paperFaint }}>Chords</div>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-3 mb-4">
+                  <div className={`sheet-chords ${sheetNames || sheetFingers ? "" : "sheet-two"} mb-4`}>
                     {sheet.chords.map((c) => (
                       <div key={c.bar}>
                         <div className="flex items-baseline gap-1.5">

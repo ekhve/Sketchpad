@@ -21,9 +21,11 @@ import { scaleById, activeScalePcs } from "./scales.mjs";
    ========================================================================== */
 
 /* Key positions for a small diagram, in units of 0..1 across the width, so the
-   caller picks the size. Shares its layout rules with the real keyboard. */
-function diagramKeys(startMidi, octaves, lit = []) {
-  const midis = Array.from({ length: octaves * 12 + 1 }, (_, i) => startMidi + i);
+   caller picks the size. Shares its layout rules with the real keyboard. It runs
+   from `startMidi` for `octaves` octaves, or to `endMidi` when that is given, which
+   is how a scale gets a keyboard exactly as long as it is. Both ends are white keys. (D-113) */
+function diagramKeys(startMidi, octaves, lit = [], endMidi = startMidi + octaves * 12) {
+  const midis = Array.from({ length: endMidi - startMidi + 1 }, (_, i) => startMidi + i);
   const whites = midis.filter((m) => WHITE_PCS.includes(pc(m)));
   const w = 1 / whites.length;
   const on = (m) => lit.includes(m);
@@ -61,6 +63,16 @@ function sheetData({ tonic, mode, scaleId, customScale, progression = [],
   const twoOctaves = scaleOctaves === 2;
   const run = twoOctaves ? [...scaleNotes, ...scaleNotes, scaleNotes[0]] : scaleNotes;
   const scalePitches = climb(run, scaleStart);
+  /* the scale's keyboard is exactly as long as the scale: from the white key at or below
+     its first note to the white key at or above its last. It was a fixed two or three
+     octaves from a C, so the same scale was drawn on a keyboard that changed length with
+     the option and had empty keys at the end. (D-113) */
+  const scaleKeys = (() => {
+    let start = Math.min(...scalePitches), end = Math.max(...scalePitches);
+    while (!WHITE_PCS.includes(pc(start))) start--;
+    while (!WHITE_PCS.includes(pc(end))) end++;
+    return { start, end };
+  })();
   const nameOf = (m) => noteName(m, system);
   const labelsFor = (notes) => (names ? notes.map((m) => ({ midi: m, text: nameOf(m) })) : []);
 
@@ -71,8 +83,8 @@ function sheetData({ tonic, mode, scaleId, customScale, progression = [],
     scale: { name: scaleName, notes: [...new Set(scalePitches)].sort((a, b) => a - b),
              names: run.map((p) => noteName(p, system)),
              labels: labelsFor([...new Set(scalePitches)].sort((a, b) => a - b)),
-             start: Math.floor(scaleStart / 12) * 12,
-             octaves: twoOctaves ? Math.max(2, Math.ceil((Math.max(...scalePitches) - Math.floor(scaleStart / 12) * 12) / 12)) : 2,
+             start: scaleKeys.start, end: scaleKeys.end,
+             octaves: Math.ceil((scaleKeys.end - scaleKeys.start) / 12),
              span: twoOctaves ? 2 : 1 },
     options: { names: !!names, fingering: !!fingering, scaleOctaves: twoOctaves ? 2 : 1 },
     chords: progression.map((c, i) => ({

@@ -76,8 +76,7 @@ export function differences(a, b) {
 
 if (import.meta.url === new URL(process.argv[1], "file:").href || process.argv[1]?.endsWith("instrument-check.mjs")) {
   const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
-  const measured = {};
-  for (const name of INSTRUMENTS) {
+  const measure = async (name) => {
     const page = await browser.newPage({ viewport: { width: 390, height: 900 } });
     await page.addInitScript(`(${probe.toString()})()`);
     await page.goto(new URL("../build/sketchpad-app.html", import.meta.url).href);
@@ -97,9 +96,30 @@ if (import.meta.url === new URL(process.argv[1], "file:").href || process.argv[1
     await page.waitForTimeout(300);
     const rec = await page.evaluate(() => { clearInterval(window.__timer); return window.__rec; });
     if (process.env.DEBUG) console.log(name, rec.t.length, Math.max(...rec.rms));
-    measured[name] = features(rec);
     await page.close();
-  }
+    return features(rec);
+  };
+  /* One reading of an instrument can be an outlier: the timer that samples it is a browser timer, and the attack and the
+     level after a second move with it. So each is read once, and only an instrument in a pair that looks alike is read two
+     more times, and judged on the middle value of the three. A pair has to look different on the typical reading. */
+  const readings = {};
+  for (const name of INSTRUMENTS) readings[name] = [await measure(name)];
+  const middle = (list) => {
+    if (list.length === 1 || list.some((f) => f.silent)) return list[0];
+    const out = {};
+    for (const k of Object.keys(list[0])) out[k] = [...list.map((f) => f[k])].sort((a, b) => a - b)[Math.floor(list.length / 2)];
+    return out;
+  };
+  const alike = () => {
+    const now = Object.fromEntries(INSTRUMENTS.map((n) => [n, middle(readings[n])])), out = new Set();
+    for (let i = 0; i < INSTRUMENTS.length; i++) for (let j = i + 1; j < INSTRUMENTS.length; j++) {
+      const a = now[INSTRUMENTS[i]], b = now[INSTRUMENTS[j]];
+      if (!a.silent && !b.silent && differences(a, b).length < 2) { out.add(INSTRUMENTS[i]); out.add(INSTRUMENTS[j]); }
+    }
+    return out;
+  };
+  for (const name of alike()) { for (let k = 0; k < 2; k++) readings[name].push(await measure(name)); console.log(`     (${name} read three times, judged on the middle reading)`); }
+  const measured = Object.fromEntries(INSTRUMENTS.map((n) => [n, middle(readings[n])]));
   await browser.close();
   let bad = 0;
   for (const [n, f] of Object.entries(measured)) console.log(`${n.padEnd(12)} ${f.silent ? "SILENT" : `attack ${f.attack.toFixed(0)} ms · decay ${f.decay.toFixed(2)} s · after 1 s ${(f.sustain * 100).toFixed(0)}% · brightness ${f.bright.toFixed(0)} Hz · width ${f.wide.toFixed(0)} Hz · level ${f.peak.toFixed(3)}`}`);

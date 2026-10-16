@@ -935,6 +935,8 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 4. **The loop is checked against its key.** `core/harmony.keyFit` asks whether each chord has all its notes in the set key's scale, and which of the 24 major and minor keys holds the most; only when another key holds *more* does the app say so, naming the bars that fall outside, with one button to set that key. Borrowed chords and relative keys (A minor chords in C major) say nothing, because they are not mistakes. The notice shows in the Progression tab and over the Sheet.
 5. **Numerals follow the key.** A chord kept the roman numeral it was added with, so changing the key left "I IV V" over chords that were now something else. `core/harmony.romanIn` works the numeral out again from the root and the key, and the sheet uses it.
 
+**Measuring the instruments.** One reading of an instrument can be an outlier (the sampling timer is a browser timer), and a pair of instruments failed on a single odd reading. `tools/instrument-check.mjs` now reads each instrument once and reads only those in a pair that looks alike two more times, judging on the middle reading. A struck voice still decays (a rule of `D-062`, tested), so DX keys is told apart by its brightness and its shorter tail, not by a held body.
+
 **Not done.** The key is not changed for the user, and the loop is not transposed: both are the user's call, and the notice offers the first.
 
 **Checked.** `CR-HARMONY-12`, `13`; the model's levels (`SR-MODEL-03` to `05`); the Levels scenarios; `tools/instrument-check.mjs` (six instruments, pairwise different); `tools/layout-check.mjs` (the Start tabs, Room and Off selected on opening, the wrong-key notice).
@@ -967,6 +969,19 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 **Not done.** Names are not printed on the bass notes' own boxes (the bass is a line of names already), and there is no setting for more than two octaves.
 
 **Checked.** `CR-SHEET-11` to `13`, the scenarios in "The sheet's options" and the G18 check.
+
+### D-113 — Names big enough to read, and a scale keyboard that is as long as the scale
+
+**Context.** The owner, on a phone, with note names and the two-octave scale ticked: "the note names in the chords are very tiny", and "the octaves in the scale part seem weird: it took two octaves by default and then it became three somehow." (`D-112`)
+
+**Cause.** Names were a fixed 6.5 units on a diagram drawn 168 units wide and shown about 185 pixels across, two to a row: about 7 pixels. The scale's keyboard was a fixed run from a C, two octaves for a one-octave scale (the second empty) and three for a two-octave one (the third empty), so ticking the option changed the keyboard's length and the size of every key.
+
+**Decision.**
+1. **Names are sized from the key.** A name is as big as its key allows (about 0.6 of a white key's width for a white key, 0.8 of a black key's) and no bigger than 11 units, bold. With chords one to a row on a phone (below), they come out at 10 to 14 pixels.
+2. **One chord to a row on a phone** when the sheet carries names or fingers, two to a row otherwise and on anything 560 pixels or wider, and always two on paper. The diagrams are the same drawing at a larger size; nothing else changes.
+3. **The scale's keyboard is exactly as long as the scale**: from the white key at or below its first note to the white key at or above its last (`diagramKeys` takes an end key). A one-octave scale is drawn at about half the width of a two-octave one, so a key is the same size either way and ticking the option only adds keys.
+
+**Checked.** `CR-SHEET-14`; `tools/sheet-check.mjs` (gate G18) now also checks the white keys of the scale (7 or 15 in C), that a key is the same size over one octave and two, and that a name is at least 9 pixels high on a phone.
 
 ## 5. What this project has taught, so far
 
@@ -1087,6 +1102,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-14 | Felt keys and Marimba removed and DX keys added; the sound opens on Room with echo Off; Start is Chords, Scales, Theory, Learn and How to use, with the progression, Find, Bass and Sheet at Produce; a loop is checked against its key (`core/harmony.keyFit`) and its numerals follow the key (`romanIn`) (`D-110`) |
 | 2026-10-14 | The octave control reaches Oct 5 (the keyboard is drawn shorter near the top instead of the start being refused); "Build it" and the sheet's scale are built upwards, so F A C is no longer C F A (`D-111`) |
 | 2026-10-16 | The sheet can put note names on the keys and show the scale over two octaves (two tick boxes, off by default); its diagrams scale, so the PDF uses the page; every combination is exported and checked as screen, text and PDF by `tools/sheet-check.mjs`, gate G18 (`D-112`) |
+| 2026-10-16 | The sheet's note names are sized from the key and the chords go one to a row on a phone, so the names can be read; the scale's keyboard is exactly as long as the scale, and a key is the same size over one octave or two (`D-113`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

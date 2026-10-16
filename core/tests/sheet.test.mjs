@@ -138,3 +138,19 @@ test("CR-SHEET-13 every combination of names, fingering and two octaves gives a 
     assert.ok(text.split("\n").length >= 4 + 2, tag);
   }
 });
+
+test("CR-SHEET-14 the scale's keyboard is exactly as long as the scale, from a white key to a white key, in any key and either span", () => {
+  for (let tonic = 0; tonic < 12; tonic++) for (const scaleOctaves of [1, 2]) {
+    const sc = sheetData({ ...base, tonic, scaleOctaves }).scale;
+    assert.ok(isWhite(sc.start) && isWhite(sc.end), `tonic ${tonic}: both ends are white keys`);
+    assert.ok(sc.start <= sc.notes[0] && sc.notes[0] - sc.start <= 1, `tonic ${tonic}: starts at the first note or the white key just below it`);
+    assert.ok(sc.end >= sc.notes.at(-1) && sc.end - sc.notes.at(-1) <= 1, `tonic ${tonic}: ends at the last note or the white key just above it`);
+    const d = diagramKeys(sc.start, sc.octaves, sc.notes, sc.end);
+    assert.equal(d.whites.at(0).midi, sc.start); assert.equal(d.whites.at(-1).midi, sc.end);
+    assert.ok(Math.abs(d.whites.at(-1).x + d.whites.at(-1).w - 1) < 1e-12, "the keys fill the width");
+  }
+  const one = sheetData(base).scale, two = sheetData({ ...base, scaleOctaves: 2 }).scale;
+  assert.equal(diagramKeys(one.start, one.octaves, [], one.end).whites.length, 7, "C major, one octave: seven white keys");
+  assert.equal(diagramKeys(two.start, two.octaves, [], two.end).whites.length, 15, "two octaves: fifteen");
+  assert.equal(diagramKeys(48, 2, [], 59).whites.length, 7, "an end key that is given is where the keyboard stops");
+});
