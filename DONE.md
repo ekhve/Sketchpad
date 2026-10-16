@@ -7,7 +7,7 @@
 A change is **done** when all three of the following are true. Not one. Not two.
 
 1. Every gate below either passes or has a recorded, dated exception.
-2. `node tools/check-done.mjs` reports every automated gate passing (22 as of 2026-10-09).
+2. `node tools/check-done.mjs` reports every automated gate passing (23 as of 2026-10-16).
 3. A person has run the manual gates that the change touches.
 
 Anything less is in progress, however well it works on a phone.
@@ -65,6 +65,7 @@ A requirement that cannot be stated as true-or-false is not a requirement; it is
 | **DoD-18d** | Sound comes out in both apps under a phone's touch rules: a key, a pad, a second note, and the banner when nothing else can start it (`D-103`). | `check-done` G15 |
 | **DoD-18e** | The screen is laid out as asked at phone widths: what is shown, what is folded, where the controls are, nothing wider than the screen (`D-105`). | `check-done` G16 |
 | **DoD-18f** | The instruments are told apart by what comes out of them: pairwise different, about as loud, a full pad (`D-107`). | `check-done` G17 |
+| **DoD-18g** | The sheet exports every way: with and without note names, fingering and the two-octave scale, on screen, as text and as a PDF (`D-112`). | `check-done` G18 |
 | **DoD-19** | No colour literals in components; every colour comes from a role-named token. | `check-done` G8 |
 | **DoD-20** | A new visual role is added to the token set before it is used. | By hand, at review |
 
@@ -110,6 +111,7 @@ Measured by `node tools/check-done.mjs`. A threshold is a floor, not a target to
 | Sound under a phone's touch rules | all cases audible | 6 cases × 4 readings | G15 |
 | Instruments told apart, level, full pad | all | 10 pairs, 5 levels, 1 width | G17 |
 | Screen layout at phone widths | all checks | 15 checks × 3 widths | G16 |
+| The sheet, every combination of options, screen / text / PDF | all | 8 combinations | G18 |
 | Mutation score | ≥ 90% | 225/225 (100%) | G2 |
 | Stale mutants | 0 | 0 | G3 |
 | Requirements with a real scenario | 100% | 405/405 | G4 |

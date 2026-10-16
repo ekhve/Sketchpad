@@ -48,29 +48,39 @@ function diagramRange(allNotes, minOctaves = 2) {
 
 function sheetData({ tonic, mode, scaleId, customScale, progression = [],
                      bpm = 88, bassFigure = null, system = "letters",
-                     fingering = false, reach = DEFAULT_REACH }) {
+                     fingering = false, reach = DEFAULT_REACH,
+                     names = false, scaleOctaves = 1 }) {
   const scaleNotes = activeScalePcs(customScale, tonic, scaleId);
   const scaleName = customScale ? customScale.name : `${noteName(tonic, system)} ${scaleById(scaleId).name}`;
   const allNotes = progression.flatMap((c) => c.notes);
   const range = diagramRange(allNotes);
 
-  /* the scale is drawn in one octave from the tonic, which is how anyone
-     would write it out by hand */
+  /* the scale is drawn from the tonic upwards, which is how anyone would write it out by
+     hand: one octave, or two with the tonic again on top. (D-112) */
   const scaleStart = 48 + tonic;
-  const scalePitches = climb(scaleNotes, scaleStart);
+  const twoOctaves = scaleOctaves === 2;
+  const run = twoOctaves ? [...scaleNotes, ...scaleNotes, scaleNotes[0]] : scaleNotes;
+  const scalePitches = climb(run, scaleStart);
+  const nameOf = (m) => noteName(m, system);
+  const labelsFor = (notes) => (names ? notes.map((m) => ({ midi: m, text: nameOf(m) })) : []);
 
   return {
     title: `${noteName(tonic, system)} ${mode}`,
     meta: [`${bpm} bpm`, scaleName, `${progression.length} bar${progression.length === 1 ? "" : "s"}`],
     range,
     scale: { name: scaleName, notes: [...new Set(scalePitches)].sort((a, b) => a - b),
-             names: scaleNotes.map((p) => noteName(p, system)),
-             start: Math.floor(scaleStart / 12) * 12 },
+             names: run.map((p) => noteName(p, system)),
+             labels: labelsFor([...new Set(scalePitches)].sort((a, b) => a - b)),
+             start: Math.floor(scaleStart / 12) * 12,
+             octaves: twoOctaves ? Math.max(2, Math.ceil((Math.max(...scalePitches) - Math.floor(scaleStart / 12) * 12) / 12)) : 2,
+             span: twoOctaves ? 2 : 1 },
+    options: { names: !!names, fingering: !!fingering, scaleOctaves: twoOctaves ? 2 : 1 },
     chords: progression.map((c, i) => ({
       bar: i + 1,
       label: chordLabel(c.rootPc, c.sym, system),
       notes: c.notes,
       names: c.notes.map((m) => noteName(m, system)),
+      labels: labelsFor(c.notes),
       roman: c.roman || "",
       // D-078: right hand on the chord when asked for; a chord too wide is split
       fingers: fingering ? fingerChord(c.notes, { hand: "right", reach }).keys : [],
@@ -88,7 +98,7 @@ function sheetData({ tonic, mode, scaleId, customScale, progression = [],
 /* The same sheet as text, for pasting somewhere that has no pictures. */
 function sheetAsText(sheet) {
   const lines = [`${sheet.title}  ·  ${sheet.meta.join("  ·  ")}`, ""];
-  lines.push(`Scale: ${sheet.scale.names.join(" ")}`, "");
+  lines.push(`Scale${sheet.scale.span === 2 ? " (two octaves)" : ""}: ${sheet.scale.names.join(" ")}`, "");
   for (const c of sheet.chords) {
     const bass = sheet.bass.find((b) => b.bar === c.bar);
     const rh = c.fingers?.length ? `  fingers ${[...c.fingers].sort((a, b) => a.midi - b.midi).map((k) => (k.hand === "L" ? "L" : "") + k.finger).join("-")}` : "";

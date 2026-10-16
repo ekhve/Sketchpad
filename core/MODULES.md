@@ -467,7 +467,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 
 **Behaviour.** What goes on the sheet is a pure function of the progression, so the layout is checked without rendering it. Key positions are in units of the keyboard's width, so the caller picks the size. Diagram ranges snap to whole octaves so every diagram lines up.
 
-**Requirements.** CR-SHEET-01 … CR-SHEET-10 (10) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/sheet.test.mjs`.
+**Requirements.** CR-SHEET-01 … CR-SHEET-13 (13) in [REQUIREMENTS.md](REQUIREMENTS.md); verified by `core/tests/sheet.test.mjs`.
 
 ### Interface
 
@@ -476,4 +476,4 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 | `diagramKeys` | function | `(startMidi, octaves, lit = [])` | A small keyboard's keys in units of its width, with the lit ones marked. |
 | `diagramRange` | function | `(allNotes, minOctaves = 2)` | The window of keyboard worth drawing, in whole octaves. |
 | `sheetAsText` | function | `(sheet)` | The same sheet as plain text. |
-| `sheetData` | function | `({ tonic, mode, scaleId, customScale, progression = [], bpm = 88, bassFigure = null, system = "letters", fingering = false, reach = DEFAULT_REACH })` | The sheet: title, scale, chords, bass and fingers, bar by bar. |
+| `sheetData` | function | `({ tonic, mode, scaleId, customScale, progression = [], bpm = 88, bassFigure = null, system = "letters", fingering = false, reach = DEFAULT_REACH, names = false, scaleOctaves = 1 })` | The sheet: title, scale (one octave or two), chords, bass, and, when asked for, note names and fingers on the keys, bar by bar. |

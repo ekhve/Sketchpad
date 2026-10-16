@@ -259,6 +259,22 @@ for (const r of core.results) gate(r.id, r.name, r.ok, r.ok ? r.detail : r.probl
       : code === 0 ? `${passed} comparisons: pairs, loudness, a fuller pad` : `${failing} failing: ${(out.match(/^FAIL\s.*$/m) || [""])[0].slice(0, 120)}`);
 }
 
+/* ---------- G18: the sheet exports every way ----------
+   The sheet leaves the app three ways, on screen, as copied text and as a PDF, and has three options: note names on
+   the keys, fingering and the scale over two octaves. tools/sheet-check.mjs takes the eight combinations and checks
+   each of the three outputs shows what was asked for and no more. Needs a browser, like G15 to G17. (D-112) */
+{
+  let out = "", code = 0;
+  try {
+    const root = process.env.PLAYWRIGHT || (() => { try { return execSync("npm root -g", { encoding: "utf8" }).trim() + "/playwright"; } catch { return undefined; } })();
+    out = execSync("node tools/sheet-check.mjs 2>&1", { encoding: "utf8", env: { ...process.env, ...(root ? { PLAYWRIGHT: root } : {}) }, timeout: 300000 });
+  } catch (e) { out = (e.stdout || "") + (e.stderr || ""); code = e.status ?? 1; }
+  const passed = (out.match(/^ok\s/gm) || []).length, failing = (out.match(/^FAIL\s/gm) || []).length;
+  gate("G18", "The sheet exports every way", code === 0 && passed > 0,
+    code === 3 ? "no browser here: run where Playwright is installed (PLAYWRIGHT=/path), or record an exception in DONE.md"
+      : code === 0 ? `${passed} checks: eight combinations, on screen, as text and as a PDF` : `${failing} failing: ${(out.match(/^FAIL\s.*$/m) || [""])[0].slice(0, 120)}`);
+}
+
 /* ---------- verdict ---------- */
 const width = Math.max(...results.map((r) => r.name.length));
 console.log("\nDEFINITION OF DONE — automated gates\n");

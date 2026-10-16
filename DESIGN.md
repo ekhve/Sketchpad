@@ -954,6 +954,20 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** `CR-FIGURES-14`, `CR-INSTRUMENTS-04`, and the scenarios "A chord built note by note is in root position" (all 12 keys, all 7 chords) and "The keyboard cannot be scrolled past the recordings".
 
+### D-112 — Note names on the sheet's keys, the scale over two octaves, and a sheet that uses the page
+
+**Context.** The owner: the sheet should be able to put note names on the keys, as it does fingering; test that it exports with and without, with both, and with fingers; and the scale may be worth showing over two octaves, as an option, since "we have space in the PDF and in the GUI".
+
+**Decision.**
+1. **Note names on the keys** is a tick box on the Sheet tab beside "Show suggested fingering", off by default. `sheetData` takes `names` and gives each chord and the scale a list of `{ midi, text }` labels; the diagram draws them on the lit keys, above the finger numbers when both are on. The names the sheet already wrote under each diagram stay either way.
+2. **The scale over two octaves** is a second tick box, off by default. `sheetData` takes `scaleOctaves` (1 or 2); two octaves is tonic to tonic to tonic, fifteen notes, built upwards with `climb` (`D-111`), and the text export says "Scale (two octaves)". The diagram is as many octaves wide as the run needs, and no wider.
+3. **The diagrams fill the width they are given.** They were drawn at a fixed size, so the printed page was a phone screen in the corner of an A4 sheet. They are scalable now, so the PDF uses the page and the names are legible on it. The print style also gives the page a white ground and no minimum height.
+4. **Export is tested every way.** `tools/sheet-check.mjs` (gate G18) takes the eight combinations of names, fingers and one or two octaves, and for each checks the diagrams on screen, the "Copy as text" output, and a PDF made in print media: a real PDF, one page, holding the sheet and not the buttons, and, with `pdftotext`, with more words in it when the names are on.
+
+**Not done.** Names are not printed on the bass notes' own boxes (the bass is a line of names already), and there is no setting for more than two octaves.
+
+**Checked.** `CR-SHEET-11` to `13`, the scenarios in "The sheet's options" and the G18 check.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1072,6 +1086,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-10 | Two recorded instruments added from CC0 libraries: Strings and Vibraphone, embedded like the piano with a synth standing in; `core/instrument-samples`, `tools/make-instrument-samples.mjs` (`D-109`) |
 | 2026-10-14 | Felt keys and Marimba removed and DX keys added; the sound opens on Room with echo Off; Start is Chords, Scales, Theory, Learn and How to use, with the progression, Find, Bass and Sheet at Produce; a loop is checked against its key (`core/harmony.keyFit`) and its numerals follow the key (`romanIn`) (`D-110`) |
 | 2026-10-14 | The octave control reaches Oct 5 (the keyboard is drawn shorter near the top instead of the start being refused); "Build it" and the sheet's scale are built upwards, so F A C is no longer C F A (`D-111`) |
+| 2026-10-16 | The sheet can put note names on the keys and show the scale over two octaves (two tick boxes, off by default); its diagrams scale, so the PDF uses the page; every combination is exported and checked as screen, text and PDF by `tools/sheet-check.mjs`, gate G18 (`D-112`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |

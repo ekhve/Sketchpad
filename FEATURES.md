@@ -242,6 +242,7 @@ Not in the original plan. Each earned its place.
 | DX keys added; Felt keys and Marimba removed; the sound opens on Room, echo Off | **Done** | Measured (`D-110`) |
 | A simple start: Chords, Scales, Theory, Learn, How to use; the progression is at Produce | **Done** | Checked on screen (`D-110`) |
 | A loop written in another key is noticed, with a one-tap fix; numerals follow the key | **Done** | Tested and on screen (`D-110`) |
+| The sheet: note names on the keys and the scale over two octaves, both optional; the PDF uses the page | **Done** | Checked every combination as screen, text and PDF (`D-112`) |
 | Echo: Off / Light / Long | **Done** | Light, quick and fading, is the default |
 | Ways to play notes (together, roll, slow roll, up, down, up & down, random) shared by chords and scales | **Done** | Buttons with pictures in Played and, the runs, in Scales (`D-108`) |
 | A small synth engine, or another sampled instrument, for good sounds | **Open** | Proposed by the owner; see the notes in `D-108`'s thread: options and licences to decide |

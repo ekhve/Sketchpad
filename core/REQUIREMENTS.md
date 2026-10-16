@@ -296,6 +296,9 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-SHEET-08 | Fingering is added only when asked for: right-hand fingers on each chord, and a left little finger on a single bass note. | D-057, D-078, UC-53 | A | `core/tests/sheet.test.mjs` |
 | CR-SHEET-09 | sheetAsText prints the same sheet as plain text: a header, the scale, and a line for every bar. | D-057, D-078, UC-53 | A | `core/tests/sheet.test.mjs` |
 | CR-SHEET-10 | The sheet is a pure function of what it is given. | D-057, D-078, UC-53 | A | `core/tests/sheet.test.mjs` |
+| CR-SHEET-11 | Note names go on the keys only when asked for: each lit key of each chord and of the scale, and nothing else changes. | D-112 | A | `core/tests/sheet.test.mjs` |
+| CR-SHEET-12 | The scale can run over two octaves, tonic to tonic to tonic, inside its diagram, in any key. | D-112 | A | `core/tests/sheet.test.mjs` |
+| CR-SHEET-13 | Every combination of names, fingering and two octaves gives a sheet and its text, and the text says what was asked for. | D-112 | A | `core/tests/sheet.test.mjs` |
 
 ## The asset base as a whole
 

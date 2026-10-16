@@ -682,6 +682,10 @@ The music logic is a set of modules the products share. Their own requirements a
 | R-441 | The instruments are the grand piano, Rhodes, warm pad, DX keys, strings and vibraphone. | D-110, D-109 | A | The instruments are the six that suit chords |
 | R-442 | The octave control reaches Oct 5: the keyboard's highest start leaves two octaves inside the recordings, and the keyboard is drawn shorter near the top rather than refused. | D-111, D-071 | A | The keyboard cannot be scrolled past the recordings |
 | R-443 | A chord built one note at a time in the Theory tab, and the scale on the sheet, are built upwards, never with a note dropped an octave below the one before. | D-111 | A | A chord built note by note is in root position |
+| R-444 | The sheet can carry note names on the keys, as it can carry fingering: a tick box, off by default, naming each lit key of each chord and of the scale. | D-112, D-091 | A | The sheet shows note names and the scale over two octaves when asked |
+| R-445 | The sheet can show the scale over two octaves, as a tick box, off by default; the text export says so. | D-112 | A | The sheet shows note names and the scale over two octaves when asked |
+| R-446 | The sheet exports every way: on screen, as copied text and as a PDF, with and without note names, fingering and the two-octave scale, as one page holding the sheet and not the buttons. | D-112, UC-53 | A | Every combination of the sheet's options is exported |
+| R-447 | The diagrams fill the width they are given, so the printed sheet uses the page. | D-112 | A | Every combination of the sheet's options is exported |
 
 ## 11. Visual system
 

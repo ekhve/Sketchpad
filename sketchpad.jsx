@@ -695,11 +695,11 @@ const FingerMark = ({ k, small = false }) => (
 
 /* A chord as a picture, because a name on paper tells you nothing you did not
    already know. (D-057) */
-const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers = [] }) => {
+const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers = [], labels = [] }) => {
   const { whites, blacks } = diagramKeys(startMidi, octaves, notes);
   const at = (m) => whites.find((k) => k.midi === m) ?? blacks.find((k) => k.midi === m);
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ display: "block", width: "100%", maxWidth: "100%", height: "auto" }}>
       {whites.map((k) => (
         <rect key={k.midi} x={k.x * width} y={0} width={k.w * width - 0.8} height={height}
           fill={k.on ? T.chordW : T.paper} stroke={T.paperLine} strokeWidth="0.7" />
@@ -708,6 +708,15 @@ const Diagram = ({ startMidi, octaves, notes, width = 168, height = 46, fingers 
         <rect key={k.midi} x={k.x * width} y={0} width={k.w * width} height={height * 0.62}
           fill={k.on ? T.chordB : T.paperLine} stroke={T.paperLine} strokeWidth="0.7" />
       ))}
+      {labels.filter((l) => at(l.midi)).map((l) => {
+        const k = at(l.midi), white = isWhite(l.midi);
+        const cx = (k.x + k.w / 2) * width - (white ? 0.4 : 0);
+        const cy = white ? height - 15 : height * 0.62 - 17;
+        return (
+          <text key={`n${l.midi}`} x={cx} y={cy} fontSize={white ? 6.5 : 5.5} fontWeight="700" textAnchor="middle"
+            fill={white ? T.paperInk : T.paper} data-key-name={l.text}>{l.text}</text>
+        );
+      })}
       {fingers.filter((f) => at(f.midi)).map((f) => {
         const k = at(f.midi);
         const cx = (k.x + k.w / 2) * width - (isWhite(f.midi) ? 0.4 : 0);
@@ -757,6 +766,7 @@ const PRINT_CSS = `
 @media print {
   body * { visibility: hidden !important; }
   #sheet, #sheet * { visibility: visible !important; }
+  html, body, .min-h-screen { background: #fff !important; min-height: 0 !important; }
   #sheet { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; padding: 0 !important; }
   .no-print { display: none !important; }
   @page { margin: 14mm; }
@@ -802,6 +812,8 @@ export default function App() {
   const [fingerChoice, setFingerChoice] = useState(null);
   const [reach, setReach] = useState(DEFAULT_REACH);
   const [sheetFingers, setSheetFingers] = useState(false);
+  const [sheetNames, setSheetNames] = useState(false);       // D-112: note names on the keys
+  const [sheetTwoOctaves, setSheetTwoOctaves] = useState(false);
   /* Names are spelled for the key: letters or Do-Re-Mi, with flats where the
      key uses them. Every `system` below is this spelling. (D-019, D-074) */
   const system = useMemo(() => namingFor({ base: baseSystem, accidentals, tonic, mode }), [baseSystem, accidentals, tonic, mode]);
@@ -1200,8 +1212,8 @@ export default function App() {
   );
 
   const sheet = useMemo(
-    () => sheetData({ tonic, mode, scaleId, customScale, progression: progNow, bpm, bassFigure, system, fingering: sheetFingers, reach }),
-    [tonic, mode, scaleId, customScale, progNow, bpm, bassFigure, system, sheetFingers, reach]
+    () => sheetData({ tonic, mode, scaleId, customScale, progression: progNow, bpm, bassFigure, system, fingering: sheetFingers, reach, names: sheetNames, scaleOctaves: sheetTwoOctaves ? 2 : 1 }),
+    [tonic, mode, scaleId, customScale, progNow, bpm, bassFigure, system, sheetFingers, reach, sheetNames, sheetTwoOctaves]
   );
   const styleGuide = useMemo(() => scalesForStyle(style, mode), [style, mode]);
   const fits = useMemo(() => fitScales(prog, tonic), [prog, tonic]);
@@ -1626,6 +1638,14 @@ export default function App() {
                     <input type="checkbox" checked={sheetFingers} onChange={(e) => setSheetFingers(e.target.checked)} style={{ accentColor: T.homeDot }} />
                     Show suggested fingering
                   </label>
+                  <label className="flex items-center gap-1.5 text-[12px] w-full mt-1" style={{ color: T.ink }}>
+                    <input type="checkbox" checked={sheetNames} onChange={(e) => setSheetNames(e.target.checked)} style={{ accentColor: T.homeDot }} />
+                    Show note names on the keys
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[12px] w-full mt-1" style={{ color: T.ink }}>
+                    <input type="checkbox" checked={sheetTwoOctaves} onChange={(e) => setSheetTwoOctaves(e.target.checked)} style={{ accentColor: T.homeDot }} />
+                    Show the scale over two octaves
+                  </label>
                 </div>
 
                 <div id="sheet" className="rounded-lg p-4"
@@ -1637,7 +1657,7 @@ export default function App() {
 
                   <div className="mb-4">
                     <div className="text-[10px] uppercase tracking-wide mb-1" style={{ color: T.paperFaint }}>Scale</div>
-                    <Diagram startMidi={sheet.scale.start} octaves={2} notes={sheet.scale.notes} width={300} height={52} />
+                    <Diagram startMidi={sheet.scale.start} octaves={sheet.scale.octaves} notes={sheet.scale.notes} width={300} height={52} labels={sheet.scale.labels} />
                     <div className="text-[11px] mt-1">{sheet.scale.names.join("  ")}</div>
                   </div>
 
@@ -1649,7 +1669,7 @@ export default function App() {
                           <span className="text-[13px] font-semibold">{c.bar}. {c.label}</span>
                           <span className="text-[10px]" style={{ color: T.paperFaint }}>{c.roman}</span>
                         </div>
-                        <Diagram startMidi={sheet.range.startMidi} octaves={sheet.range.octaves} notes={c.notes} width={168} height={44} fingers={c.fingers} />
+                        <Diagram startMidi={sheet.range.startMidi} octaves={sheet.range.octaves} notes={c.notes} width={168} height={44} fingers={c.fingers} labels={c.labels} />
                         <div className="text-[10px] mt-0.5" style={{ color: T.paperLine }}>{c.names.join(" ")}</div>
                       </div>
                     ))}

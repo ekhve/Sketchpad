@@ -3923,3 +3923,18 @@ describe("Feature: Building a chord from the scale", () => {
     assert.deepEqual(climb([5, 9, 0], 54), [53, 57, 60], "F A C is F, A and the C above");
   });
 });
+
+describe("Feature: The sheet's options", () => {
+  const { sheetData, sheetAsText, harmonize } = th;
+  test("The sheet shows note names and the scale over two octaves when asked", () => {
+    const g = harmonize(0, "major", 3), progression = [0, 5, 3, 4].map((i) => g[i]);
+    const base = { tonic: 0, mode: "major", scaleId: "major", progression };
+    const plain = sheetData(base);
+    assert.ok(plain.chords.every((c) => c.labels.length === 0) && plain.scale.labels.length === 0 && plain.scale.span === 1);
+    const named = sheetData({ ...base, names: true });
+    assert.ok(named.chords.every((c) => c.labels.length === 3) && named.scale.labels.length === 7);
+    const two = sheetData({ ...base, names: true, scaleOctaves: 2 });
+    assert.equal(two.scale.notes.length, 15); assert.equal(two.scale.notes.at(-1) - two.scale.notes[0], 24);
+    assert.match(sheetAsText(two), /Scale \(two octaves\): C D E F G A B C D E F G A B C/);
+  });
+});

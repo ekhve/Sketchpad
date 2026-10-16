@@ -3434,6 +3434,22 @@ Feature: J-6 Explore — what am I playing?
     When Show suggested fingering is ticked
     Then each chord has right-hand numbers and each bass note a left-hand 5
 
+  @D-112 @UC-64 @auto
+  Scenario: The sheet shows note names and the scale over two octaves when asked
+    Given the sheet for C Am F G
+    Then the keys carry no note names, and the scale is one octave
+    When "Show note names on the keys" is ticked
+    Then each lit key of each chord and of the scale is named
+    When "Show the scale over two octaves" is ticked
+    Then the scale runs from the tonic to the tonic two octaves up, and the text says so
+
+  @D-112 @UC-53 @manual
+  # measured by tools/sheet-check.mjs (gate G18)
+  Scenario: Every combination of the sheet's options is exported
+    Given each combination of note names, fingering and the two-octave scale
+    Then on screen, as copied text and as a PDF it shows what was asked for and no more
+    And the PDF is one page that holds the sheet and not the buttons, and its diagrams fill the page
+
   @D-091 @D-092 @UC-64 @auto
   Scenario: The sheet's scale is the one chosen to play along with
     Given A minor pentatonic chosen to play along with
