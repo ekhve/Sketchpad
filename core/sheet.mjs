@@ -63,15 +63,15 @@ function sheetData({ tonic, mode, scaleId, customScale, progression = [],
   const twoOctaves = scaleOctaves === 2;
   const run = twoOctaves ? [...scaleNotes, ...scaleNotes, scaleNotes[0]] : scaleNotes;
   const scalePitches = climb(run, scaleStart);
-  /* the scale's keyboard is exactly as long as the scale: from the white key at or below
-     its first note to the white key at or above its last. It was a fixed two or three
-     octaves from a C, so the same scale was drawn on a keyboard that changed length with
-     the option and had empty keys at the end. (D-113) */
+  /* The scale's keyboard starts on a C, like every other keyboard in the app, and runs to the
+     white key at or above the scale's last note. Starting on the scale's own first note made a
+     keyboard that began on D in one key and F# in the next, which is hard to read against a
+     piano; ending on the last note keeps it from growing empty keys at the end, and a key is
+     the same size over one octave and two. (D-113, D-114) */
   const scaleKeys = (() => {
-    let start = Math.min(...scalePitches), end = Math.max(...scalePitches);
-    while (!WHITE_PCS.includes(pc(start))) start--;
+    let end = Math.max(...scalePitches);
     while (!WHITE_PCS.includes(pc(end))) end++;
-    return { start, end };
+    return { start: Math.floor(Math.min(...scalePitches) / 12) * 12, end };
   })();
   const nameOf = (m) => noteName(m, system);
   const labelsFor = (notes) => (names ? notes.map((m) => ({ midi: m, text: nameOf(m) })) : []);

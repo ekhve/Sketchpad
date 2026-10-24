@@ -48,7 +48,7 @@ const MUTANTS = [
   ["two octaves is one octave", 'const run = twoOctaves ? [...scaleNotes, ...scaleNotes, scaleNotes[0]] : scaleNotes;', 'const run = scaleNotes;'],
   ["the two-octave scale has no tonic on top", '[...scaleNotes, ...scaleNotes, scaleNotes[0]]', '[...scaleNotes, ...scaleNotes]'],
   ["the scale keyboard ends on a black key", 'while (!WHITE_PCS.includes(pc(end))) end++;', ''],
-  ["the scale keyboard starts on a black key", 'while (!WHITE_PCS.includes(pc(start))) start--;', ''],
+  ["the scale keyboard starts on the scale's own first note", 'start: Math.floor(Math.min(...scalePitches) / 12) * 12, end', 'start: Math.min(...scalePitches), end'],
   ["a struck voice sustains",           'envelope: { attack: 0.003, decay: 3, sustain: 0.05, release: 0.9 },', 'envelope: { attack: 0.003, decay: 3, sustain: 0.9, release: 0.9 },'],
   ["the scheduler repeats a bar",       'while (at < now + lookahead && guard++ < 32) {', 'while (at < now + lookahead + 2 && guard++ < 32) {'],
   ["bars can be scheduled in the past", 'bars.push({ at: Math.max(at, now), index: i });', 'bars.push({ at, index: i });'],

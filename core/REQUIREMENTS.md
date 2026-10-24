@@ -299,7 +299,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-SHEET-11 | Note names go on the keys only when asked for: each lit key of each chord and of the scale, and nothing else changes. | D-112 | A | `core/tests/sheet.test.mjs` |
 | CR-SHEET-12 | The scale can run over two octaves, tonic to tonic to tonic, inside its diagram, in any key. | D-112 | A | `core/tests/sheet.test.mjs` |
 | CR-SHEET-13 | Every combination of names, fingering and two octaves gives a sheet and its text, and the text says what was asked for. | D-112 | A | `core/tests/sheet.test.mjs` |
-| CR-SHEET-14 | The scale's keyboard is exactly as long as the scale, from a white key to a white key, in any key and either span. | D-113 | A | `core/tests/sheet.test.mjs` |
+| CR-SHEET-14 | The scale's keyboard starts on a C and ends on the white key at or above the scale's last note, in any key and either span. | D-113, D-114 | A | `core/tests/sheet.test.mjs` |
 
 ## The asset base as a whole
 

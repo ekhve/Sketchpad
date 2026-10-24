@@ -139,11 +139,12 @@ test("CR-SHEET-13 every combination of names, fingering and two octaves gives a 
   }
 });
 
-test("CR-SHEET-14 the scale's keyboard is exactly as long as the scale, from a white key to a white key, in any key and either span", () => {
+test("CR-SHEET-14 the scale's keyboard starts on a C and ends on the white key at or above the scale's last note, in any key and either span", () => {
   for (let tonic = 0; tonic < 12; tonic++) for (const scaleOctaves of [1, 2]) {
     const sc = sheetData({ ...base, tonic, scaleOctaves }).scale;
-    assert.ok(isWhite(sc.start) && isWhite(sc.end), `tonic ${tonic}: both ends are white keys`);
-    assert.ok(sc.start <= sc.notes[0] && sc.notes[0] - sc.start <= 1, `tonic ${tonic}: starts at the first note or the white key just below it`);
+    assert.ok(isWhite(sc.end), `tonic ${tonic}: it ends on a white key`);
+    assert.equal(sc.start % 12, 0, `tonic ${tonic}: it starts on a C`);
+    assert.ok(sc.start <= sc.notes[0] && sc.notes[0] - sc.start < 12, `tonic ${tonic}: the C at or just below the first note`);
     assert.ok(sc.end >= sc.notes.at(-1) && sc.end - sc.notes.at(-1) <= 1, `tonic ${tonic}: ends at the last note or the white key just above it`);
     const d = diagramKeys(sc.start, sc.octaves, sc.notes, sc.end);
     assert.equal(d.whites.at(0).midi, sc.start); assert.equal(d.whites.at(-1).midi, sc.end);
@@ -153,4 +154,7 @@ test("CR-SHEET-14 the scale's keyboard is exactly as long as the scale, from a w
   assert.equal(diagramKeys(one.start, one.octaves, [], one.end).whites.length, 7, "C major, one octave: seven white keys");
   assert.equal(diagramKeys(two.start, two.octaves, [], two.end).whites.length, 15, "two octaves: fifteen");
   assert.equal(diagramKeys(48, 2, [], 59).whites.length, 7, "an end key that is given is where the keyboard stops");
+  const d = sheetData({ ...base, tonic: 2 }).scale;
+  assert.equal(d.start, 48, "D major starts on the C below its D, not on the D"); assert.equal(d.end, 62, "and ends on the D above its C#");
+  assert.equal(sheetData({ ...base, tonic: 6, scaleOctaves: 2 }).scale.start, 48, "F# major starts on a C too");
 });

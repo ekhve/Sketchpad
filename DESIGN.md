@@ -983,6 +983,14 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** `CR-SHEET-14`; `tools/sheet-check.mjs` (gate G18) now also checks the white keys of the scale (7 or 15 in C), that a key is the same size over one octave and two, and that a name is at least 9 pixels high on a phone.
 
+### D-114 — The scale's keyboard starts on a C
+
+**Context.** The owner: "I would like the keyboard to start on C in the octaves part of the sheet. Sometimes it starts from the root; not very easy to understand."
+
+**Decision.** `D-113` started the scale's keyboard on the white key at or below the scale's first note, so a D major scale began on a D and F♯ major on an F, and no two keys looked alike against a piano. It now starts on the **C** at or below the first note, as the chord diagrams and the main keyboard do. The other end is unchanged: the white key at or above the last note, so there are no empty keys at the end and a key is the same size over one octave and over two. In C major nothing changes; in D major the scale now begins on the C, with the D lit. A key keeps its size until the keyboard needs more than fifteen white keys (a two-octave scale in a key above D♯); then the keyboard is shrunk to fit the width, and the names shrink with it (to about 9 pixels in B major).
+
+**Checked.** `CR-SHEET-14` (any key starts on a C; D major is C to D, F♯ major starts on C) and the export check.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1103,6 +1111,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-14 | The octave control reaches Oct 5 (the keyboard is drawn shorter near the top instead of the start being refused); "Build it" and the sheet's scale are built upwards, so F A C is no longer C F A (`D-111`) |
 | 2026-10-16 | The sheet can put note names on the keys and show the scale over two octaves (two tick boxes, off by default); its diagrams scale, so the PDF uses the page; every combination is exported and checked as screen, text and PDF by `tools/sheet-check.mjs`, gate G18 (`D-112`) |
 | 2026-10-16 | The sheet's note names are sized from the key and the chords go one to a row on a phone, so the names can be read; the scale's keyboard is exactly as long as the scale, and a key is the same size over one octave or two (`D-113`) |
+| 2026-10-24 | The scale's keyboard on the sheet starts on a C in every key, not on its own first note (`D-114`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
