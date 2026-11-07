@@ -89,6 +89,37 @@ function harmonize(tonic, scaleId, size, base = DEFAULT_BASE) {
 
 /* A chord with notes outside the key is not a mistake — it belongs to a scale
    the user has not chosen yet. Name that scale. (UC-37) */
+// The keys a set of played notes could be in, best first, and whether the notes are enough to tell (D-115).
+// events: MIDI numbers, or { note, len } (len: whole units of any duration; default 1), in the order played.
+// Each of the 24 major and minor keys scores 8 for every unit of playing it holds, plus the total for each piece of
+// tonic evidence (the first, the last, the lowest and the most-played note, each when it is the tonic): so a tonic
+// heard in all four places outweighs half the playing falling outside, and a passing note doesn't hide the key.
+// Ties: major before minor, then the tonic nearest above the first note. Ambiguous when the second key is less
+// than one piece of evidence behind: C F C fits C major and C minor equally, so it says so instead of choosing.
+function keysForNotes(events, limit = 5) {
+  const ev = events.map((e) => (typeof e === "number" ? { note: e, len: 1 } : { note: e.note, len: e.len ?? 1 }));
+  if (!ev.length) return { candidates: [], ambiguous: true, heard: [] };
+  const w = Array(12).fill(0);
+  for (const e of ev) w[pc(e.note)] += e.len;
+  const heard = w.map((x, p) => (x > 0 ? p : -1)).filter((p) => p >= 0);
+  const most = Math.max(...w), heaviest = heard.filter((p) => w[p] === most);
+  const first = pc(ev[0].note), last = pc(ev[ev.length - 1].note);
+  const lowest = pc(Math.min(...ev.map((e) => e.note)));
+  const total = w.reduce((a, x) => a + x, 0);
+  const all = [];
+  for (const mode of ["major", "minor"]) for (let t = 0; t < 12; t++) {
+    const own = scalePcs(t, mode === "minor" ? "natural-minor" : "major");
+    const held = heard.reduce((a, p) => a + (own.includes(p) ? w[p] : 0), 0);
+    const evidence = (first === t) + (last === t) + (lowest === t) + (heaviest.length === 1 && heaviest[0] === t);
+    all.push({ tonic: t, mode, held, score: 8 * held + evidence * total, outside: heard.filter((p) => !own.includes(p)), evidence });
+  }
+  all.sort((a, b) => b.score - a.score || (a.mode === "major" ? 0 : 1) - (b.mode === "major" ? 0 : 1)
+    || ((a.tonic - first + 12) % 12) - ((b.tonic - first + 12) % 12));
+  const candidates = all.slice(0, limit).map((c) => ({ tonic: c.tonic, mode: c.mode, fit: c.held / total, outside: c.outside, evidence: c.evidence }));
+  const ambiguous = all[0].score - all[1].score < total;
+  return { candidates, ambiguous, heard };
+}
+
 function suggestScaleFor(chord, ctx) {
   const chordPcs = [...new Set(chord.notes.map(pc))];
   const parentId = ctx.mode === "minor" ? "natural-minor" : "major";
@@ -245,4 +276,4 @@ function chordsAtTension(tonic, mode, level, base = DEFAULT_BASE) {
   return [...core, ...borrowed];
 }
 
-export { romanIn, keyFit, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension };
+export { romanIn, keyFit, keysForNotes, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension };

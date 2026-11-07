@@ -1,7 +1,7 @@
 /* core/harmony — unit tests, one per requirement in core/REQUIREMENTS.md (CR-HARMONY-nn). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { romanIn, keyFit, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension } from "../harmony.mjs";
+import { romanIn, keyFit, keysForNotes, romanFor, harmonizeIntervals, harmonize, suggestScaleFor, harmonizeSteps, suggestNextChords, typedChord, harmonizeCustom, TENSION_LEVELS, BORROWED, chordsAtTension } from "../harmony.mjs";
 import { SCALES, scalePcs, customScaleFrom } from "../scales.mjs";
 import { parseChordName } from "../symbols.mjs";
 import { DICTIONARY } from "../chords.mjs";
@@ -162,4 +162,28 @@ test("CR-HARMONY-13 keyFit says when the chords belong to another key better, an
   assert.deepEqual(keyFit([], 0, "major"), { total: 0, fits: 0, outside: [], ok: true, suggest: null });
   const relative = keyFit([c[5], c[3], c[4], c[5]], 0, "major");
   assert.equal(relative.suggest, null, "A minor chords fit C major; nothing to change");
+});
+
+test("CR-HARMONY-14 keysForNotes ranks the keys played notes could be in, and says when they are not enough to tell", () => {
+  const top = (r) => r.candidates.slice(0, 2).map((c) => [c.tonic, c.mode]);
+  const cfc = keysForNotes([48, 53, 48]);
+  assert.equal(cfc.ambiguous, true, "C F C fits C major and C minor alike");
+  assert.deepEqual(top(cfc), [[0, "major"], [0, "minor"]]);
+  assert.deepEqual(cfc.heard, [0, 5]);
+  assert.ok(cfc.candidates.every((c) => c.fit === 1), "every candidate holds every note heard");
+  const scale = keysForNotes([60, 62, 64, 65, 67, 69, 71, 72]);
+  assert.equal(scale.ambiguous, false);
+  assert.deepEqual(scale.candidates[0], { tonic: 0, mode: "major", fit: 1, outside: [], evidence: 4 });
+  const riff = keysForNotes([45, 57, 48, 52, 45]);
+  assert.deepEqual(top(riff)[0], [9, "minor"], "a riff that starts, ends and sits on A is in A minor, not C major");
+  assert.equal(riff.ambiguous, false);
+  const passing = keysForNotes([{ note: 48, len: 4 }, { note: 54, len: 1 }]);
+  assert.deepEqual(passing.candidates[0].outside, [6], "a passing F sharp is reported, not hidden");
+  assert.equal(passing.candidates[0].tonic, 0, "and it does not hide the key the rest of the playing is in");
+  const blues = keysForNotes([48, 51, 53, 54, 55, 58, 48]);
+  assert.deepEqual(top(blues)[0], [0, "minor"]);
+  assert.deepEqual(keysForNotes([]), { candidates: [], ambiguous: true, heard: [] });
+  assert.equal(keysForNotes([60, 64, 67], 3).candidates.length, 3);
+  const frozen = Object.freeze([Object.freeze({ note: 48, len: 2 }), 53]);
+  assert.deepEqual(keysForNotes(frozen), keysForNotes([{ note: 48, len: 2 }, 53]), "leaves its input alone; plain numbers and events mix");
 });
