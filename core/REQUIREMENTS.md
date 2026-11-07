@@ -108,6 +108,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 | CR-HARMONY-11 | The chord builders leave their inputs alone and answer the same each time. | D-044, D-077, UC-40 | A | `core/tests/harmony.test.mjs` |
 | CR-HARMONY-12 | A chord's numeral is worked out in the key it is in now, so it follows a change of key. | D-110 | A | `core/tests/harmony.test.mjs` |
 | CR-HARMONY-13 | keyFit says when the chords belong better to another key, and keeps quiet about borrowed chords and relative keys. | D-110 | A | `core/tests/harmony.test.mjs` |
+| CR-HARMONY-14 | keysForNotes ranks the 24 major and minor keys that played notes could be in, by how much of the playing each holds and by tonic evidence, and says when the notes are not enough to tell. | D-115 | A | `core/tests/harmony.test.mjs` |
 
 ## core/explain
 

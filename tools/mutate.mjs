@@ -18,6 +18,8 @@ const MUTANTS = [
   ["rising line loses its direction",   'const up = s.r === "stepUp" ? true : s.r === "stepDown" ? false : r() < 0.5;', 'const up = r() < 0.5;'],
   ["variation stops varying",           'renderFigure(pattern, chord, progression[(i + 1) % progression.length], scaleSet, seed + i * 7919, center)', 'renderFigure(pattern, chord, progression[(i + 1) % progression.length], scaleSet, 0, center)'],
   ["voicings lose their register",      'const root = base + rootPc;', 'const root = base - 24 + rootPc;'],
+  ["key ranking ignores the tonic evidence", 'score: 8 * held + evidence * total,', 'score: 8 * held,'],
+  ["key ranking is always sure",         'const ambiguous = all[0].score - all[1].score < total;', 'const ambiguous = false;'],
   ["harmony judged against the palette", 'const keyNotes = scalePcs(ctx.tonic, parentId);', 'const keyNotes = scalePcs(ctx.tonic, ctx.scaleId);'],
   ["notes outlast the gap before the next", 'const dur = Math.max(0.05, Math.min(n.dur * sixteenth, nextAt - at - gap));', 'const dur = n.dur * sixteenth;'],
   ["the chord fills the whole bar",      'dur: Math.max(0.1, barSeconds * 0.5 - gap), vel: VELOCITY.chord });', 'dur: barSeconds, vel: VELOCITY.chord });'],

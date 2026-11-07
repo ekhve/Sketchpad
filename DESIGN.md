@@ -991,6 +991,14 @@ The theory was one 2,770-line block inside `sketchpad.jsx`, cut out and tested a
 
 **Checked.** `CR-SHEET-14` (any key starts on a C; D major is C to D, F♯ major starts on C) and the export check.
 
+### D-115 — The keys a few played notes could be in
+
+**Context.** fm1-scales (the FM-1 firmware built on this core) lets a song start from a bass riff or a melody, with the key left on AUTO. `keyFit` judges a progression of chords; nothing ranked keys from single notes. The owner decided it is written here first and ported from here, so the theory has one home (fm1-scales D-027).
+
+**Decision.** `keysForNotes(events)` scores each of the 24 major and minor keys: 8 for every unit of playing (by duration) the key holds, plus the whole playing's length for each piece of tonic evidence: the first, the last, the lowest and the most-played note, each when it is the tonic. A tonic heard in all four places outweighs half the playing falling outside, so a passing note never hides the key, and the notes outside are listed, not dropped. It says **ambiguous** when the second key is less than one piece of evidence behind: C F C is as much C minor as C major, so it says so instead of choosing. Ties go to major, then to the tonic nearest above the first note. Integer arithmetic only, so a C port gives the same answers.
+
+**Checked.** `CR-HARMONY-14` (C F C ambiguous; a C major scale clear; an A minor riff is A minor, not C major; a passing F♯ reported but not hiding C; a C blues line is C minor), two mutants (no tonic evidence; never ambiguous) and the export check.
+
 ## 5. What this project has taught, so far
 
 Five bug classes, and what actually fixed each.
@@ -1112,6 +1120,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-16 | The sheet can put note names on the keys and show the scale over two octaves (two tick boxes, off by default); its diagrams scale, so the PDF uses the page; every combination is exported and checked as screen, text and PDF by `tools/sheet-check.mjs`, gate G18 (`D-112`) |
 | 2026-10-16 | The sheet's note names are sized from the key and the chords go one to a row on a phone, so the names can be read; the scale's keyboard is exactly as long as the scale, and a key is the same size over one octave or two (`D-113`) |
 | 2026-10-24 | The scale's keyboard on the sheet starts on a C in every key, not on its own first note (`D-114`) |
+| 2026-11-07 | `core/harmony.keysForNotes`: the keys a few played notes could be in, ranked by what they hold and where the tonic is heard, and *ambiguous* when they are not enough to tell; for fm1-scales' AUTO key (`D-115`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
