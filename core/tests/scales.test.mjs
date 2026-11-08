@@ -7,9 +7,9 @@ import { pc } from "../notes.mjs";
 const set = (xs) => [...new Set(xs)].sort((a, b) => a - b);
 const midiOf = (...pcs) => pcs.map((p, i) => 48 + p + (i % 2) * 12);   // spread over two octaves
 
-test("CR-SCALES-01 the catalogue holds ten scales, each with ascending intervals from 0 inside one octave", () => {
-  assert.equal(SCALES.length, 10);
-  assert.equal(new Set(SCALES.map((s) => s.id)).size, 10, "ids are unique");
+test("CR-SCALES-01 the catalogue holds seventeen scales, each with ascending intervals from 0 inside one octave", () => {
+  assert.equal(SCALES.length, 17);
+  assert.equal(new Set(SCALES.map((s) => s.id)).size, 17, "ids are unique");
   for (const s of SCALES) {
     assert.equal(s.iv[0], 0, `${s.id} starts on the tonic`);
     assert.ok(s.iv.every((x, i) => Number.isInteger(x) && x >= 0 && x < 12 && (i === 0 || x > s.iv[i - 1])), `${s.id}: ${s.iv}`);
@@ -18,6 +18,10 @@ test("CR-SCALES-01 the catalogue holds ten scales, each with ascending intervals
   }
   assert.deepEqual(SCALES.find((s) => s.id === "major").iv, [0, 2, 4, 5, 7, 9, 11]);
   assert.deepEqual(SCALES.find((s) => s.id === "natural-minor").iv, [0, 2, 3, 5, 7, 8, 10]);
+  assert.deepEqual(SCALES.slice(0, 10).map((s) => s.id), ["natural-minor", "minor-pentatonic", "dorian", "harmonic-minor", "phrygian", "blues",
+    "major", "major-pentatonic", "mixolydian", "lydian"], "the first ten keep their order (D-116)");
+  assert.deepEqual(SCALES.find((s) => s.id === "hirajoshi").iv, [0, 2, 3, 7, 8]);
+  assert.deepEqual(SCALES.find((s) => s.id === "phrygian-dominant").iv, [0, 1, 4, 5, 7, 8, 10]);
 });
 
 test("CR-SCALES-02 scaleById finds a scale by its id and returns nothing for an unknown one", () => {
