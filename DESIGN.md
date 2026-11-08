@@ -1121,6 +1121,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-16 | The sheet's note names are sized from the key and the chords go one to a row on a phone, so the names can be read; the scale's keyboard is exactly as long as the scale, and a key is the same size over one octave or two (`D-113`) |
 | 2026-10-24 | The scale's keyboard on the sheet starts on a C in every key, not on its own first note (`D-114`) |
 | 2026-11-07 | `core/harmony.keysForNotes`: the keys a few played notes could be in, ranked by what they hold and where the tonic is heard, and *ambiguous* when they are not enough to tell; for fm1-scales' AUTO key (`D-115`) |
+| 2026-11-08 | `core/scales`: seven more scales (melodic minor, hirajoshi, locrian, major blues, lydian dominant, phrygian dominant, whole tone), appended; for fm1-scales' bass (`D-116`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
@@ -1159,3 +1160,13 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | `sketchpad/` | Modules that are Sketchpad's alone, with `MODULES.md` |
 | `tests/` | Automated checks and the traceability guard |
 | `tools/` | Mutation testing, the gate runner, the asset checks (`core-check.mjs`), the scripted headless run (`smoke.mjs`) |
+
+### D-116 — Seven more scales
+
+**Context.** fm1-scales (the FM-1 firmware, whose theory follows this core) adds a scale choice to its bass track, and
+its owner's styles (Ghibli, jazz and neo soul, blues, Latin and shatta, film) ask for colours the ten scales lack.
+**Decision.** Append melodic minor, hirajoshi and locrian (minor), major blues, lydian dominant, phrygian dominant and
+whole tone (major, by their third) to `SCALES`, each with a mood and tags. Appended, so the first ten keep their order
+and every existing reference by index or id is unchanged. **Consequence.** `fitScales` and `scalesContaining` consider
+them too; the picker shows them after the first ten.
+

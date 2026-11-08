@@ -27,6 +27,21 @@ const SCALES = [
     mood: "Major with a bluesy edge", tags: ["funk", "soul", "rock"] },
   { id: "lydian", name: "Lydian", iv: [0, 2, 4, 6, 7, 9, 11], mode: "major",
     mood: "Floating, filmic, dreamy", tags: ["cinematic", "neo-soul"] },
+  // D-116: seven more, for fm1-scales' bass and the owner's styles; appended, so the first ten keep their order
+  { id: "melodic-minor", name: "Melodic minor", iv: [0, 2, 3, 5, 7, 9, 11], mode: "minor",
+    mood: "Minor with a bright top, smooth", tags: ["jazz", "neo-soul"] },
+  { id: "hirajoshi", name: "Hirajoshi", iv: [0, 2, 3, 7, 8], mode: "minor",
+    mood: "Japanese, still, a little sad", tags: ["cinematic", "melody"] },
+  { id: "locrian", name: "Locrian", iv: [0, 1, 3, 5, 6, 8, 10], mode: "minor",
+    mood: "The darkest mode, unresolved", tags: ["dark", "cinematic"] },
+  { id: "major-blues", name: "Major blues", iv: [0, 2, 3, 4, 7, 9], mode: "major",
+    mood: "Sunny with a blue note", tags: ["blues", "country", "soul"] },
+  { id: "lydian-dominant", name: "Lydian dominant", iv: [0, 2, 4, 6, 7, 9, 10], mode: "major",
+    mood: "Wonder with a bluesy edge", tags: ["cinematic", "jazz", "funk"] },
+  { id: "phrygian-dominant", name: "Phrygian dominant", iv: [0, 1, 4, 5, 7, 8, 10], mode: "major",
+    mood: "Spanish, Middle Eastern, intense", tags: ["latin", "dark"] },
+  { id: "whole-tone", name: "Whole tone", iv: [0, 2, 4, 6, 8, 10], mode: "major",
+    mood: "Dreamy, floating, no home", tags: ["cinematic", "dream"] },
 ];
 
 const scaleById = (id) => SCALES.find((s) => s.id === id);

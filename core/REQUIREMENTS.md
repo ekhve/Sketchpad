@@ -23,7 +23,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 
 | ID | Requirement | Source | Mode | Verified by |
 |---|---|---|---|---|
-| CR-SCALES-01 | The catalogue holds ten scales, each with ascending intervals from 0 inside one octave. | D-049, UC-21 | A | `core/tests/scales.test.mjs` |
+| CR-SCALES-01 | The catalogue holds seventeen scales, each with ascending intervals from 0 inside one octave. | D-049, D-116, UC-21 | A | `core/tests/scales.test.mjs` |
 | CR-SCALES-02 | scaleById finds a scale by its id and returns nothing for an unknown one. | D-049, UC-21 | A | `core/tests/scales.test.mjs` |
 | CR-SCALES-03 | scalePcs is the scale's intervals from the tonic, as pitch classes, for every tonic. | D-049, UC-21 | A | `core/tests/scales.test.mjs` |
 | CR-SCALES-04 | fitScales ranks scales by the share of a progression's notes they hold, best first, at most five. | UC-21 | A | `core/tests/scales.test.mjs` |
