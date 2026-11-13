@@ -555,7 +555,7 @@ The second app in this repository (`D-079`–`D-085`, `UC-64`, `UC-65`).
 | R-375 | With Rec on, every tap joins the progression in order; with it off, none does. | D-089 | A | With Rec on, every key tapped joins the progression in order |
 | R-381 | Turning Rec off keeps the progression and its numbers on the pads; only Clear, Undo or × remove chords. | D-089 | A | Turning Rec off keeps what was recorded, numbered on the pads, until it is cleared |
 | R-382 | Every chord name fits on its pad: the root, then the type in lines of at most 7 characters, broken only before a bracket, slash, add or sus. | D-089, D-079 | A | Every chord name fits on its pad |
-| R-383 | The progression plays at a tempo of 60–160 BPM in steps of 5, starting at 90. | D-090 | A | Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5 |
+| R-383 | The progression plays at a tempo of 40–240 BPM in steps of 5, starting at 90. | D-090, D-117 | A | Tempo runs from 40 to 240 BPM, starting at 90, in steps of 5 |
 | R-384 | Every chord lasts ½, 1 or 2 bars (1 to start), sounding a little less than its length. | D-090 | A | Each chord lasts half a bar, one bar or two bars |
 | R-385 | With Loop on (to start) the progression repeats until stopped; with it off it plays once and stops. | D-090 | A | With Loop on the progression repeats, and with it off it plays once and stops |
 | R-386 | With the click on (off to start), one bar is counted in, then every beat clicks, the first of each bar stronger. | D-090 | A | The click counts in one bar, then marks every beat with the first of each bar stronger |
@@ -615,7 +615,7 @@ The music logic is a set of modules the products share. Their own requirements a
 | ID | Requirement | Source | Mode | Verified by |
 |---|---|---|---|---|
 | R-409 | Both apps start, tick and stop their loop through one driver, which is given its clock and timer and touches nothing else. | D-098, D-043 | A | *(`core/tests/transport.test.mjs`, and `check-done` G0)* |
-| R-410 | The J-6's playback behaviour is unchanged by the move: tempo, bars per chord, loop, click and count-in. | D-098, D-090 | A | Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5 |
+| R-410 | The J-6's playback behaviour is unchanged by the move: tempo, bars per chord, loop, click and count-in. | D-098, D-090 | A | Tempo runs from 40 to 240 BPM, starting at 90, in steps of 5 |
 
 ## 10zd. One chord-naming function
 

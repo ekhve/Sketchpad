@@ -674,7 +674,7 @@ The logic is a pure reducer in `j6/progression.mjs`, so it is tested without a b
 
 **Decision.** One row above the progression, four controls:
 
-1. **Tempo**, 60–160 BPM in steps of 5, starting at 90.
+1. **Tempo**, 40–240 BPM in steps of 5, starting at 90 (60–160 until `D-117`).
 2. **Each chord** lasts ½ bar, 1 bar or 2 bars, the same for every chord. Each sounds a little less than its length (92%), so chords breathe rather than smear.
 3. **Loop**, on by default. Off, the progression plays once and stops by itself.
 4. **Click**, off by default. On, it counts in one bar and then ticks every beat, the first of each bar stronger, so the J-6 can be played along with. The tick is a short triangle-wave blip, a second sound source beside the instrument (`D-009`); it is one note at a time and releases in 60 ms, so it cannot pile up (`D-017`).
@@ -1122,6 +1122,7 @@ Documents change in the same pass as the code. A behaviour changed by something 
 | 2026-10-24 | The scale's keyboard on the sheet starts on a C in every key, not on its own first note (`D-114`) |
 | 2026-11-07 | `core/harmony.keysForNotes`: the keys a few played notes could be in, ranked by what they hold and where the tonic is heard, and *ambiguous* when they are not enough to tell; for fm1-scales' AUTO key (`D-115`) |
 | 2026-11-08 | `core/scales`: seven more scales (melodic minor, hirajoshi, locrian, major blues, lydian dominant, phrygian dominant, whole tone), appended; for fm1-scales' bass (`D-116`) |
+| 2026-11-13 | `core/transport`: tempo 40 to 240 BPM (was 60 to 160), for fm1-scales' drum and bass, footwork and slow ballads (`D-117`) |
 | 2026-09-15 | Sample coverage: thirteen recordings C1–C7 replace seven C2–C5; `R-230` was false and its test did not check it; coverage and the octave clamp moved into pure functions; duplicate check now compares audio, not headers; credit records the licence URI and that the samples were modified (`D-071`) |
 | 2026-09-13 | Embedded recordings decoded in-app rather than fetched, because a data URI is still a request (`D-070`). 330 checks, 81/81 mutants |
 | 2026-09-13 | Piano recordings embedded in the app: no network, works offline, default instrument again (`D-069`). 331 checks, 80/80 mutants |
@@ -1170,3 +1171,10 @@ whole tone (major, by their third) to `SCALES`, each with a mood and tags. Appen
 and every existing reference by index or id is unchanged. **Consequence.** `fitScales` and `scalesContaining` consider
 them too; the picker shows them after the first ten.
 
+### D-117 — Tempo from 40 to 240 BPM
+
+**Context.** fm1-scales (the FM-1 firmware that follows Sketchpad's theory and transport) needs drum and bass (about
+172 BPM), footwork and slow ballads; its owner asked to raise the limit (2026-11-13: "i dont know why we have one").
+**Decision.** `TEMPO` is 40 to 240 BPM, still in steps of 5 and starting at 90; `setTempo` brings any value into that
+range. The J-6 and Sketchpad play at any of these. **Checked by** CR-TRANSPORT-01 and the J-6 tempo test, both moved
+to the new range; the mutant "the tempo has no ceiling" still dies.

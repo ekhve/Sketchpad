@@ -16,16 +16,16 @@ function fake() {
     advance: (s) => { t.time += s; for (const { fn } of [...t.timers.values()]) fn(); } };
 }
 
-test("CR-TRANSPORT-01 tempo runs from 60 to 160 BPM in steps of 5, starting at 90, and any value is brought into range", () => {
-  assert.deepEqual(TEMPO, { min: 60, max: 160, start: 90, step: 5 });
+test("CR-TRANSPORT-01 tempo runs from 40 to 240 BPM in steps of 5, starting at 90, and any value is brought into range", () => {
+  assert.deepEqual(TEMPO, { min: 40, max: 240, start: 90, step: 5 });
   assert.deepEqual(OPTIONS, { bpm: 90, bars: 1, loop: true, click: false });
-  assert.equal(setTempo(40), 60); assert.equal(setTempo(200), 160); assert.equal(setTempo(95), 95); assert.equal(setTempo(94.6), 95);
-  for (let b = -50; b < 400; b += 7) { const s = setTempo(b); assert.ok(s >= 60 && s <= 160 && Number.isInteger(s)); }
+  assert.equal(setTempo(20), 40); assert.equal(setTempo(300), 240); assert.equal(setTempo(200), 200); assert.equal(setTempo(95), 95); assert.equal(setTempo(94.6), 95);
+  for (let b = -50; b < 400; b += 7) { const s = setTempo(b); assert.ok(s >= 40 && s <= 240 && Number.isInteger(s)); }
 });
 
 test("CR-TRANSPORT-02 a beat lasts sixty over the tempo seconds", () => {
   assert.equal(beatSeconds(120), 0.5); assert.equal(beatSeconds(60), 1);
-  for (let b = 60; b <= 160; b += 5) assert.ok(Math.abs(beatSeconds(b) * b - 60) < 1e-9);
+  for (let b = 40; b <= 240; b += 5) assert.ok(Math.abs(beatSeconds(b) * b - 60) < 1e-9);
 });
 
 test("CR-TRANSPORT-03 each chord lasts half a bar, one bar or two, and each starts on its own beat", () => {
@@ -61,7 +61,7 @@ test("CR-TRANSPORT-05 the click counts in one bar, then marks every beat with th
 test("CR-TRANSPORT-06 a chord sounds for its length less a breath before the next", () => {
   const secs = chordSeconds({ bpm: 120, bars: 1 });
   assert.ok(secs < 2 && secs > 1.7, `${secs}`); assert.ok(Math.abs(secs - 2 * 0.92) < 1e-9);
-  for (const bars of LENGTHS) for (const bpm of [60, 90, 160]) { const s = chordSeconds({ bpm, bars }); assert.ok(s < bars * 4 * beatSeconds(bpm) && s > 0.9 * bars * 4 * beatSeconds(bpm)); }
+  for (const bars of LENGTHS) for (const bpm of [40, 60, 90, 160, 240]) { const s = chordSeconds({ bpm, bars }); assert.ok(s < bars * 4 * beatSeconds(bpm) && s > 0.9 * bars * 4 * beatSeconds(bpm)); }
 });
 
 test("CR-TRANSPORT-07 loopIndex says which chord a unit lands on, round and round, and nothing for an empty loop", () => {

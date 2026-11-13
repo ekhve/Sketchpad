@@ -271,11 +271,11 @@ import * as pb from "../core/transport.mjs";
 const starts = (count, opts, beats) => Array.from({ length: beats }, (_, n) => pb.beatAt(n, count, opts))
   .map((b, n) => (b.chord !== null ? `${n}:${b.chord}` : null)).filter(Boolean);
 
-test("Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5", () => {
+test("Tempo runs from 40 to 240 BPM, starting at 90, in steps of 5", () => {
   assert.deepEqual(pb.OPTIONS, { bpm: 90, bars: 1, loop: true, click: false });
   assert.equal(pb.TEMPO.step, 5);
-  assert.equal(pb.setTempo(40), 60);
-  assert.equal(pb.setTempo(200), 160);
+  assert.equal(pb.setTempo(20), 40);
+  assert.equal(pb.setTempo(300), 240);
   assert.equal(pb.setTempo(95), 95);
   assert.equal(pb.beatSeconds(120), 0.5);
 });

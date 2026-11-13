@@ -207,7 +207,7 @@ Not in the original plan. Each earned its place.
 | Explore: take the progression away as a sheet | **Done** | Sketchpad's sheet, suggested fingering, J-6 keys, print or copy (`D-091`) |
 | The key a set plays in, on the panel and the pads | **Done** | Follows KEY; I, IV, V, vi marked; Find's steps from the manual (`D-094`) |
 | A misprinted key named from its notes | **Done** | 54 of the 56 named (`D-093`) |
-| Explore: play the progression at a tempo | **Done** | 60–160 BPM, ½/1/2 bars a chord, Loop, click with count-in; not a sequencer (`D-090`) |
+| Explore: play the progression at a tempo | **Done** | 40–240 BPM, ½/1/2 bars a chord, Loop, click with count-in; not a sequencer (`D-090`) |
 | Explore: try chords, keep the ones you want | **Done** | A tap plays; + Add keeps; Rec keeps every tap; kept chords remember their set and KEY (`D-089`) |
 | Explore: what the J-6 is playing | **Done** | Virtual J-6 with every pad's chord, played order, chord, numeral, notes, voicing, piano, likely key, progression (`UC-64`) |
 | Find: how to play a progression on the J-6 | **Done** | Exact or musical matching, KEY transpose, keys to press, other sets with reasons (`UC-65`) |

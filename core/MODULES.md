@@ -257,7 +257,7 @@ The line under each heading is checked against the code by `tools/core-check.mjs
 |---|---|---|---|
 | `LENGTHS` | data | — | Half a bar, one bar, two bars per chord. |
 | `OPTIONS` | data | — | The default options: 90 BPM, one bar, loop on, click off. |
-| `TEMPO` | data | — | 60–160 BPM in steps of 5, starting at 90. |
+| `TEMPO` | data | — | 40–240 BPM in steps of 5, starting at 90 (D-117). |
 | `advance` | function | `(cursor, now, lookahead, unitSeconds)` | The units due inside the look-ahead window, and the cursor after them. |
 | `beatAt` | function | `(n, count, { bars, loop, click })` | What beat n of a play-through holds. |
 | `beatSeconds` | function | `(bpm)` | A beat's length in seconds. |
