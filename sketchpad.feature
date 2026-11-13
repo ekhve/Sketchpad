@@ -3333,7 +3333,7 @@ Feature: J-6 Explore — what am I playing?
     And they play Dm7 G7 Cmaj7 Am7
 
   @D-090 @UC-64 @auto
-  Scenario: Tempo runs from 60 to 160 BPM, starting at 90, in steps of 5
+  Scenario: Tempo runs from 40 to 240 BPM, starting at 90, in steps of 5
     Given the progression's playback options as the page opens
     Then the tempo is 90 BPM, a chord lasts one bar, Loop is on and the click is off
     And the tempo stops at 60 and at 160

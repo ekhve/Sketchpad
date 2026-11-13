@@ -175,7 +175,7 @@ To see the requirements of one module with the number of tests behind each: `nod
 
 | ID | Requirement | Source | Mode | Verified by |
 |---|---|---|---|---|
-| CR-TRANSPORT-01 | Tempo runs from 60 to 160 BPM in steps of 5, starting at 90, and any value is brought into range. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
+| CR-TRANSPORT-01 | Tempo runs from 40 to 240 BPM in steps of 5, starting at 90, and any value is brought into range. | D-090, D-043, D-098, D-117 | A | `core/tests/transport.test.mjs` |
 | CR-TRANSPORT-02 | A beat lasts sixty over the tempo seconds. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
 | CR-TRANSPORT-03 | Each chord lasts half a bar, one bar or two, and each starts on its own beat. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |
 | CR-TRANSPORT-04 | With Loop on the progression repeats for ever, and with it off it plays once and ends. | D-090, D-043, D-098 | A | `core/tests/transport.test.mjs` |

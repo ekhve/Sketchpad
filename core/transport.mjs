@@ -14,7 +14,7 @@ import { barSecondsAt, barsToSchedule } from "./playback.mjs";
    beat holds; the app schedules the beats and makes the sound.
    ========================================================================== */
 
-const TEMPO = { min: 60, max: 160, start: 90, step: 5 };
+const TEMPO = { min: 40, max: 240, start: 90, step: 5 };   /* D-117: 40 to 240 (was 60 to 160) */
 /** Bars per chord: half a bar, one bar, two bars. */
 const LENGTHS = [0.5, 1, 2];
 const OPTIONS = { bpm: TEMPO.start, bars: 1, loop: true, click: false };
